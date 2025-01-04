@@ -2318,11 +2318,10 @@ main() {
     echo "================================="
     info " $(text 83) "
     echo "================================="
-    info " $(text 83) "
     info " $(text 84) "
     info " $(text 85) "
     echo "================================="
-    reading " $(text 3) " choice_menu
+    reading " $(text 1) " choice_menu
 
     case $choice_menu in
       1)
