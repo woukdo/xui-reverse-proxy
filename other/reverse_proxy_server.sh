@@ -2321,9 +2321,9 @@ main() {
     info " $(text 82) "
     echo "================================="
     reading " $(text 1) " choice_menu
+    echo
     case $choice_menu in
       1)
-        echo
         warning_banner
         data_entry
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
