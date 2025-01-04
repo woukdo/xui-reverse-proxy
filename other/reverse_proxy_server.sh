@@ -2328,7 +2328,9 @@ main() {
       1)
         echo "2"
         warning
+        echo "3"
         data_entry
+        echo "4"
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
         [[ ${args[dns]} == "true" ]] && dns_encryption
         [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
