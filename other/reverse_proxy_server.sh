@@ -824,8 +824,6 @@ data_entry() {
   tilda "$(text 10)"
 #  reading " $(text 70) " SECRET_PASSWORD
 
-  tilda "$(text 10)"
-
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
@@ -2323,14 +2321,11 @@ main() {
     info " $(text 82) "
     echo "================================="
     reading " $(text 1) " choice_menu
-    echo "1"
     case $choice_menu in
       1)
-        echo "2"
+        echo
         warning_banner
-        echo "3"
         data_entry
-        echo "4"
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
         [[ ${args[dns]} == "true" ]] && dns_encryption
         [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
