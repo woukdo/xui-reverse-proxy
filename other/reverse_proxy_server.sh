@@ -2320,6 +2320,7 @@ main() {
     echo "================================="
     info " $(text 84) "
     info " $(text 85) "
+    info " $(text 82) "
     echo "================================="
     reading " $(text 1) " choice_menu
 
