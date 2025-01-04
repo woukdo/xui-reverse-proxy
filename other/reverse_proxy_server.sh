@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 # wget -N https://git && bash .sh d
+
+###################################
+### standard values
+###################################
+SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
 defaults_file="/usr/local/reverse_proxy/reinstall_defaults.conf"
 
@@ -70,7 +75,7 @@ R[11]="Введите имя пользователя:"
 E[12]="Enter user password:"
 R[12]="Введите пароль пользователя:"
 E[13]="Enter the domain (with or without a subdomain):"
-R[13]="Введите домен (с поддоменом или без):"
+R[13]="Введите основное доменное имя:"
 E[14]="Error: the entered address '$temp_value' is incorrectly formatted."
 R[14]="Ошибка: введённый адрес '$temp_value' имеет неверный формат."
 E[15]="Enter your email registered with Cloudflare:"
@@ -205,8 +210,8 @@ E[79]="Configuring site template."
 R[79]="Настройка шаблона сайта."
 E[80]="Random template name:"
 R[80]="Случайное имя шаблона:"
-E[81]=""
-R[81]=""
+E[81]="Enter the second domain name:"
+R[81]="Введите второе доменное имя:"
 E[82]=""
 R[82]=""
 E[83]=""
@@ -225,7 +230,7 @@ show_help() {
   echo "       [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]"
   echo "       [-c|--cert <true|false>] [-m|--mon <true|false>] [-n|--nginx <true|false>] [-p|--panel <true|false>]"
   echo "       [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>] [-g|--generate <true|false>]"
-  echo "       [-x|--skip-check <true|false>] [-h|--help]"
+  echo "       [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [-h|--help]"
   echo
   echo "  -u, --utils <true|false>       Additional utilities                             (default: ${defaults[utils]})"
   echo "                                 Дополнительные утилиты"
@@ -261,6 +266,8 @@ show_help() {
   echo "                                 Генерация случайных путей для конфигурации"
   echo "  -x, --skip-check <true|false>  Disable the check functionality                  (default: ${defaults[skip-check]})"
   echo "                                 Отключение проверки"
+  echo "  -o, --subdomain <true|false>   Support for subdomains                           (default: ${defaults[subdomain]})"
+  echo "                                 Поддержка субдоменов"
   echo "  -h, --help                     Display this help message"
   echo "                                 Показать это сообщение помощи"
   echo
@@ -297,6 +304,7 @@ read_defaults_from_file() {
     defaults[tgbot]=false
     defaults[generate]=true
     defaults[skip-check]=false
+    defaults[subdomain]=true
   fi
 }
 
@@ -322,6 +330,7 @@ defaults[ssh]=false
 defaults[tgbot]=false
 defaults[generate]=true
 defaults[skip-check]=false
+defaults[subdomain]=true
 EOF
 }
 
@@ -358,7 +367,7 @@ validate_true_false() {
 ###################################
 parse_args() {
   local opts
-  opts=$(getopt -o i:w:m:u:s:t:f:a:r:b:hl:d:p:c:n:g:x --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,help -- "$@")
+  opts=$(getopt -o i:w:m:u:s:t:f:a:r:b:hl:d:p:c:n:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,help -- "$@")
   if [[ $? -ne 0 ]]; then
     return 1
   fi
@@ -461,6 +470,12 @@ parse_args() {
         validate_true_false skip-check "$2" || return 1
         shift 2
         ;;
+      -o|--subdomain)
+        args[subdomain]="$2"
+        normalize_case subdomain
+        validate_true_false subdomain "$2" || return 1
+        shift 2
+        ;;        
       -h|--help)
         return 1
         ;;
@@ -653,19 +668,25 @@ check_cf_token() {
     DOMAIN=""
     SUBDOMAIN=""
 
-    while [[ -z "$temp_domain" ]]; do
-      reading " $(text 13) " temp_domain
+    if [[ ${args[subdomain]} == "false" ]]; then
+      reading " $(text 13) " DOMAIN
       echo
-    done
-
-    temp_domain=$(echo "$temp_domain" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
-
-    if [[ "$temp_domain" =~ ${regex[domain]} ]]; then
-      SUBDOMAIN="$temp_domain"           # Весь домен сохраняем в SUBDOMAIN
-      DOMAIN="${BASH_REMATCH[2]}"        # Извлекаем домен второго уровня
+      reading " $(text 81) " SUBDOMAIN
     else
-      DOMAIN="$temp_domain"              # Если это домен второго уровня, то просто сохраняем
-      SUBDOMAIN="www.$temp_domain"       # Для домена второго уровня подставляем www в SUBDOMAIN
+      while [[ -z "$temp_domain" ]]; do
+        reading " $(text 13) " temp_domain
+        echo
+      done
+
+      temp_domain=$(echo "$temp_domain" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
+
+      if [[ "$temp_domain" =~ ${regex[domain]} ]]; then
+        SUBDOMAIN="$temp_domain"           # Весь домен сохраняем в SUBDOMAIN
+        DOMAIN="${BASH_REMATCH[2]}"        # Извлекаем домен второго уровня
+      else
+        DOMAIN="$temp_domain"              # Если это домен второго уровня, то просто сохраняем
+        SUBDOMAIN="www.$temp_domain"       # Для домена второго уровня подставляем www в SUBDOMAIN
+      fi
     fi
 
     while [[ -z $EMAIL ]]; do
@@ -808,7 +829,7 @@ choise_dns () {
 ###################################
 data_entry() {
   tilda "$(text 10)"
-  reading " $(text 70) " SECRET_PASSWORD
+#  reading " $(text 70) " SECRET_PASSWORD
 
   tilda "$(text 10)"
 
