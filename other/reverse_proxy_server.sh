@@ -1259,36 +1259,40 @@ EOF
 ###################################
 warp() {
   info " $(text 43) "
-  
-  mkdir -p /usr/local/reverse_proxy/
-  mkdir -p /etc/systemd/system/warp-svc.service.d
-  cd /usr/local/reverse_proxy/
 
-  case "$SYSTEM" in
-    Debian|Ubuntu)
-      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/pool/$(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2)/main/c/cloudflare-warp/cloudflare-warp_2024.6.497-1_amd64.deb"; do
-        warning " $(text 38) "
-        sleep 3
-      done
-      apt install -y ./cloudflare-warp_2024.6.497-1_amd64.deb
-      ;;
+  curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+  echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
+  ${PACKAGE_INSTALL[int]} cloudflare-warp
+  warp-cli debug qlog disable
 
-    CentOS|Fedora)
-      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/rpm/x86_64/cloudflare-warp-2024.6.497-1.x86_64.rpm"; do
-        warning " $(text 38) "
-        sleep 3
-      done
-      sudo yum localinstall -y cloudflare-warp-2024.6.497-1.x86_64.rpm
-      ;;
-  esac
+#  mkdir -p /etc/systemd/system/warp-svc.service.d
+#  cd /usr/local/reverse_proxy/
 
-  rm -rf cloudflare-warp_*
-  cd ~
+#  case "$SYSTEM" in
+#    Debian|Ubuntu)
+#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/pool/$(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2)/main/c/cloudflare-warp/cloudflare-warp_2024.6.497-1_amd64.deb"; do
+#        warning " $(text 38) "
+#        sleep 3
+#      done
+#      apt install -y ./cloudflare-warp_2024.6.497-1_amd64.deb
+#      ;;
+#
+#    CentOS|Fedora)
+#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/rpm/x86_64/cloudflare-warp-2024.6.497-1.x86_64.rpm"; do
+#        warning " $(text 38) "
+#        sleep 3
+#      done
+#      sudo yum localinstall -y cloudflare-warp-2024.6.497-1.x86_64.rpm
+#      ;;
+#  esac
 
-  cat > /etc/systemd/system/warp-svc.service.d/override.conf <<EOF
-[Service]
-LogLevelMax=3
-EOF
+#  rm -rf cloudflare-warp_*
+#  cd ~
+
+#  cat > /etc/systemd/system/warp-svc.service.d/override.conf <<EOF
+#[Service]
+#LogLevelMax=3
+#EOF
 
   echo
   systemctl daemon-reload
