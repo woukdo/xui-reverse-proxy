@@ -603,7 +603,7 @@ check_root() {
 ###################################
 ### Banner
 ###################################
-banner_1() {
+banner_xray() {
   echo
   echo " █░█ █░░█ ░▀░ ░░ █▀▀█ █▀▀ ▀█░█▀ █▀▀ █▀▀█ █▀▀ █▀▀ ░░ █▀▀█ █▀▀█ █▀▀█ █░█ █░░█  "
   echo " ▄▀▄ █░░█ ▀█▀ ▀▀ █▄▄▀ █▀▀ ░█▄█░ █▀▀ █▄▄▀ ▀▀█ █▀▀ ▀▀ █░░█ █▄▄▀ █░░█ ▄▀▄ █▄▄█  "
@@ -615,7 +615,7 @@ banner_1() {
 ###################################
 ### Installation request
 ###################################
-warning() {
+warning_banner() {
   warning " $(text 5) "
   echo
   info " $(text 6) "
@@ -2312,7 +2312,7 @@ main() {
   fi
   sleep 2
   clear
-  banner_1
+  banner_xray
 
   while true; do
     echo "================================="
@@ -2327,7 +2327,7 @@ main() {
     case $choice_menu in
       1)
         echo "2"
-        warning
+        warning_banner
         echo "3"
         data_entry
         echo "4"
@@ -2347,7 +2347,7 @@ main() {
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
-        banner_1
+        banner_xray
         log_clear
         ;;
       2)
