@@ -50,8 +50,8 @@ text_eval()  { eval echo "\$(eval echo "\${${L}[$*]}")"; }
 ###################################
 E[0]="Language:\n  1. English (default) \n  2. Русский"
 R[0]="Язык:\n  1. English (по умолчанию) \n  2. Русский"
-E[1]="Choose:"
-R[1]="Выбери:"
+E[1]="Choose an action:"
+R[1]="Выбери действие:"
 E[2]="Error: this script requires superuser (root) privileges to run."
 R[2]="Ошибка: для выполнения этого скрипта необходимы права суперпользователя (root)."
 E[3]="Unable to determine IP address."
@@ -74,7 +74,7 @@ E[11]="Enter username:"
 R[11]="Введите имя пользователя:"
 E[12]="Enter user password:"
 R[12]="Введите пароль пользователя:"
-E[13]="Enter the domain (with or without a subdomain):"
+E[13]="Enter the primary domain name:"
 R[13]="Введите основное доменное имя:"
 E[14]="Error: the entered address '$temp_value' is incorrectly formatted."
 R[14]="Ошибка: введённый адрес '$temp_value' имеет неверный формат."
@@ -212,14 +212,16 @@ E[80]="Random template name:"
 R[80]="Случайное имя шаблона:"
 E[81]="Enter the second domain name:"
 R[81]="Введите второе доменное имя:"
-E[82]=""
-R[82]=""
-E[83]=""
-R[83]=""
-E[84]=""
-R[84]=""
-E[85]=""
-R[85]=""
+E[82]="-1. Exit script"
+R[82]="-1. Выход из скрипта"
+E[83]="MENU"
+R[83]="МЕНЮ"
+E[84]="1. Standard installation"
+R[84]="1. Стандартная установка"
+E[85]="2. Copy someone else's website to your server, experimental option"
+R[85]="2. Скопировать чей-то сайт на ваш сервер, экспериментальная опция"
+E[86]=""
+R[86]=""
 
 ###################################
 ### Help output
@@ -613,20 +615,11 @@ banner_1() {
 ###################################
 ### Installation request
 ###################################
-start_installation() {
+warning() {
   warning " $(text 5) "
   echo
   info " $(text 6) "
   warning " apt-get update && apt-get full-upgrade -y && reboot "
-  echo
-  reading " $(text 8) " ANSWER_START
-  case "${ANSWER_START,,}" in
-    y|"")
-	  ;;
-    *)
-      error " $(text 9) "
-      ;;
-  esac
 }
 
 ###################################
@@ -1613,6 +1606,7 @@ server {
   # Diffie-Hellman parameter for DHE ciphersuites
   ssl_dhparam                          /etc/nginx/dhparam.pem;
 
+  # Site
   index index.html index.htm index.php index.nginx-debian.html;
   root /var/www/html/;
 
@@ -1627,6 +1621,7 @@ server {
   if (\$host = ${IP4}) {
     return 444;
   }
+
   # PANEL
   location /${WEB_BASE_PATH} {
     if (\$hack = 1) {return 404;}
@@ -2263,6 +2258,45 @@ log_clear() {
 }
 
 ###################################
+### Downloadr webiste
+###################################
+download_website() {
+  reading " $(text 13) " sitelink
+  wget -P /var/www --mirror --convert-links --adjust-extension --page-requisites --no-parent https://${sitelink}
+
+  mkdir ./testdir
+  wget -q -P ./testdir https://${sitelink}
+  index=$(ls ./testdir)
+  rm -rf ./testdir
+
+  if [[ "$sitelink" =~ "/" ]]
+  then
+      sitedir=$(echo "${sitelink}" | cut -d "/" -f 1)
+  else
+      sitedir="${sitelink}"
+  fi
+
+  rm -rf /var/www/*
+  chmod -R 755 /var/www/${sitedir}
+  filelist=$(find /var/www/${sitedir} -name ${index})
+  slashnum=1000
+
+  for k in $(seq 1 $(echo "$filelist" | wc -l))
+  do
+      testfile=$(echo "$filelist" | sed -n "${k}p")
+      if [ $(echo "${testfile}" | tr -cd '/' | wc -c) -lt ${slashnum} ]
+      then
+          resultfile="${testfile}"
+          slashnum=$(echo "${testfile}" | tr -cd '/' | wc -c)
+      fi
+  done
+
+  sitedir=${resultfile#"/var/www/"}
+  sitedir=${sitedir%"/${index}"}
+  echo ""
+}
+
+###################################
 ### Main function
 ###################################
 main() {
@@ -2279,26 +2313,52 @@ main() {
   sleep 2
   clear
   banner_1
-  [[ ${args[skip-check]} == "false" ]] && start_installation
-  data_entry
-  [[ ${args[utils]} == "true" ]] && installation_of_utilities
-  [[ ${args[dns]} == "true" ]] && dns_encryption
-  [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
-  [[ ${args[bbr]} == "true" ]] && enable_bbr
-  [[ ${args[ipv6]} == "true" ]] && disable_ipv6
-  [[ ${args[warp]} == "true" ]] && warp
-  [[ ${args[cert]} == "true" ]] && issuance_of_certificates
-  [[ ${args[mon]} == "true" ]] && monitoring
-  [[ ${args[shell]} == "true" ]] && shellinabox
-  write_defaults_to_file
-  [[ ${args[nginx]} == "true" ]] && nginx_setup
-  [[ ${args[panel]} == "true" ]] && install_panel
-  [[ ${args[firewall]} == "true" ]] && enabling_security
-  [[ ${args[ssh]} == "true" ]] && ssh_setup
-  [[ ${args[tgbot]} == "true" ]] && install_bot
-  data_output
-  banner_1
-  log_clear
+
+  while true; do
+    echo "================================="
+    info " $(text 83) "
+    echo "================================="
+    info " $(text 83) "
+    info " $(text 84) "
+    info " $(text 85) "
+    echo "================================="
+    reading " $(text 3) " choice_menu
+
+    case $choice_menu in
+      1)
+        [[ ${args[skip-check]} == "false" ]] && warning
+        data_entry
+        [[ ${args[utils]} == "true" ]] && installation_of_utilities
+        [[ ${args[dns]} == "true" ]] && dns_encryption
+        [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
+        [[ ${args[bbr]} == "true" ]] && enable_bbr
+        [[ ${args[ipv6]} == "true" ]] && disable_ipv6
+        [[ ${args[warp]} == "true" ]] && warp
+        [[ ${args[cert]} == "true" ]] && issuance_of_certificates
+        [[ ${args[mon]} == "true" ]] && monitoring
+        [[ ${args[shell]} == "true" ]] && shellinabox
+        write_defaults_to_file
+        [[ ${args[nginx]} == "true" ]] && nginx_setup
+        [[ ${args[panel]} == "true" ]] && install_panel
+        [[ ${args[firewall]} == "true" ]] && enabling_security
+        [[ ${args[ssh]} == "true" ]] && ssh_setup
+        [[ ${args[tgbot]} == "true" ]] && install_bot
+        data_output
+        banner_1
+        log_clear
+        ;;
+      2)
+        download_website
+        ;;
+      -1)
+        break
+        ;;
+      *)
+        warning " $(text 76) "
+        ;;
+    esac
+    read -rp "Нажмите Enter, чтобы вернуться в меню..." dummy
+  done
 }
 
 main "$@"
