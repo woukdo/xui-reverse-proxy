@@ -2281,12 +2281,12 @@ download_website() {
 
   for k in $(seq 1 $(echo "$filelist" | wc -l))
   do
-      testfile=$(echo "$filelist" | sed -n "${k}p")
-      if [ $(echo "${testfile}" | tr -cd '/' | wc -c) -lt ${slashnum} ]
-      then
-          resultfile="${testfile}"
-          slashnum=$(echo "${testfile}" | tr -cd '/' | wc -c)
-      fi
+    testfile=$(echo "$filelist" | sed -n "${k}p")
+    if [ $(echo "${testfile}" | tr -cd '/' | wc -c) -lt ${slashnum} ]
+    then
+      resultfile="${testfile}"
+      slashnum=$(echo "${testfile}" | tr -cd '/' | wc -c)
+    fi
   done
 
   sitedir=${resultfile#"/var/www/"}
