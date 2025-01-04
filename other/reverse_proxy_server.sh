@@ -2326,7 +2326,7 @@ main() {
 
     case $choice_menu in
       1)
-        [[ ${args[skip-check]} == "false" ]] && warning
+        warning
         data_entry
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
         [[ ${args[dns]} == "true" ]] && dns_encryption
