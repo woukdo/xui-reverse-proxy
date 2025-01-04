@@ -2262,6 +2262,7 @@ download_website() {
   reading " $(text 13) " sitelink
   wget -P /var/www --mirror --convert-links --adjust-extension --page-requisites --no-parent https://${sitelink}
 
+  rm -rf /var/www/*
   mkdir ./testdir
   wget -q -P ./testdir https://${sitelink}
   index=$(ls ./testdir)
@@ -2269,12 +2270,11 @@ download_website() {
 
   if [[ "$sitelink" =~ "/" ]]
   then
-      sitedir=$(echo "${sitelink}" | cut -d "/" -f 1)
+    sitedir=$(echo "${sitelink}" | cut -d "/" -f 1)
   else
-      sitedir="${sitelink}"
+    sitedir="${sitelink}"
   fi
 
-  rm -rf /var/www/*
   chmod -R 755 /var/www/${sitedir}
   filelist=$(find /var/www/${sitedir} -name ${index})
   slashnum=1000
