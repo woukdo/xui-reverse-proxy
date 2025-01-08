@@ -306,7 +306,7 @@ read_defaults_from_file() {
     defaults[tgbot]=false
     defaults[generate]=true
     defaults[skip-check]=false
-    defaults[subdomain]=true
+    defaults[subdomain]=false
   fi
 }
 
@@ -332,7 +332,7 @@ defaults[ssh]=false
 defaults[tgbot]=false
 defaults[generate]=true
 defaults[skip-check]=false
-defaults[subdomain]=true
+defaults[subdomain]=false
 EOF
 }
 
@@ -661,7 +661,7 @@ check_cf_token() {
     DOMAIN=""
     SUBDOMAIN=""
 
-    if [[ ${args[subdomain]} == "false" ]]; then
+    if [[ ${args[subdomain]} == "true" ]]; then
       reading " $(text 13) " DOMAIN
       echo
       reading " $(text 81) " SUBDOMAIN
