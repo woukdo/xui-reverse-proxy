@@ -2141,7 +2141,7 @@ enabling_security() {
   case "$SYSTEM" in
     Debian|Ubuntu )  
       ufw --force reset
-      ufw allow 36079/tcp
+      ufw allow 22/tcp
       ufw allow 443/tcp
       ufw insert 1 deny from "$BLOCK_ZONE_IP"
       ufw --force enable
@@ -2149,7 +2149,7 @@ enabling_security() {
 
     CentOS|Fedora )
       systemctl enable --now firewalld
-      firewall-cmd --permanent --zone=public --add-port=36079/tcp
+      firewall-cmd --permanent --zone=public --add-port=22/tcp
       firewall-cmd --permanent --zone=public --add-port=443/tcp
       firewall-cmd --permanent --zone=public --add-rich-rule="rule family='ipv4' source address='$BLOCK_ZONE_IP' reject"
       firewall-cmd --reload
@@ -2167,7 +2167,7 @@ ssh_setup() {
     info " $(text 48) "
     sed -i -e "
       s/#Port/Port/g;
-      s/Port 22/Port 36079/g;
+      s/Port 22/Port 22/g;
       s/#PermitRootLogin/PermitRootLogin/g;
       s/PermitRootLogin yes/PermitRootLogin prohibit-password/g;
       s/#PubkeyAuthentication/PubkeyAuthentication/g;
@@ -2243,7 +2243,7 @@ data_output() {
     
   fi
   echo
-  out_data " $(text 62) " "ssh -p 36079 ${USERNAME}@${IP4}"
+  out_data " $(text 62) " "ssh -p 22 ${USERNAME}@${IP4}"
   echo
   out_data " $(text 63) " "$USERNAME"
   out_data " $(text 64) " "$PASSWORD"
