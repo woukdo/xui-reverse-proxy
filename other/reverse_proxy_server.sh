@@ -63,7 +63,7 @@ R[5]="ВНИМАНИЕ!"
 E[6]="It is recommended to perform the following actions before running the script"
 R[6]="Перед запуском скрипта рекомендуется выполнить следующие действия"
 E[7]="Annihilation of the system!"
-R[7]="Анигиляция системы!"
+R[7]="Аннигиляция системы!"
 E[8]="Start the XRAY installation? Choose option [y/N]:"
 R[8]="Начать установку XRAY? Выберите опцию [y/N]:"
 E[9]="CANCEL"
@@ -86,14 +86,14 @@ E[17]="Verifying domain, API token/key, and email..."
 R[17]="Проверка домена, API токена/ключа и почты..."
 E[18]="Error: invalid domain, API token/key, or email. Please try again."
 R[18]="Ошибка: неправильно введён домен, API токен/ключ или почта. Попробуйте снова."
-E[19]="Enter SNI for Reality:"
-R[19]="Введите sni для Reality:"
-E[20]="Enter Grpc path:"
-R[20]="Введите путь к Grpc:"
-E[21]="Enter Split path:"
-R[21]="Введите путь к Split:"
-E[22]="Enter HttpUpgrade path:"
-R[22]="Введите путь к HttpUpgrade:"
+E[19]="Enter SNI for Reality (do not enter your domain):"
+R[19]="Введите SNI для Reality (не вводите ваш домен):"
+E[20]="Enter gRPC path:"
+R[20]="Введите путь к gRPC:"
+E[21]="Enter SplitHTTP path:"
+R[21]="Введите путь к SplitHTTP:"
+E[22]="Enter HTTPUpgrade path:"
+R[22]="Введите путь к HTTPUpgrade:"
 E[23]="Enter Websocket path:"
 R[23]="Введите путь к Websocket:"
 E[24]="Enter Node Exporter path:"
@@ -140,7 +140,7 @@ E[44]="Issuing certificates."
 R[44]="Выдача сертификатов."
 E[45]="Configuring NGINX."
 R[45]="Настройка NGINX."
-E[46]="Setting up a panel for Xray."
+E[46]="Setting up the panel for Xray."
 R[46]="Настройка панели для Xray."
 E[47]="Configuring UFW."
 R[47]="Настройка UFW."
@@ -190,7 +190,7 @@ E[69]="Enter the Telegram bot token for IP limit, Torrent ban:"
 R[69]="Введите токен Telegram бота для IP limit, Torrent ban:"
 E[70]="Secret key:"
 R[70]="Секретный ключ:"
-E[71]="Curren operating system is \$SYS.\\\n The system lower than \$SYSTEM \${MAJOR[int]} is not supported. Feedback: [https://github.com/cortez24rus/xui-reverse-proxy/issues]"
+E[71]="Current operating system is \$SYS.\\\n The system lower than \$SYSTEM \${MAJOR[int]} is not supported. Feedback: [https://github.com/cortez24rus/xui-reverse-proxy/issues]"
 R[71]="Текущая операционная система: \$SYS.\\\n Система с версией ниже, чем \$SYSTEM \${MAJOR[int]}, не поддерживается. Обратная связь: [https://github.com/cortez24rus/xui-reverse-proxy/issues]"
 E[72]="Install dependence-list:"
 R[72]="Список зависимостей для установки:"
@@ -230,9 +230,9 @@ show_help() {
   echo
   echo "Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]"
   echo "       [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]"
-  echo "       [-c|--cert <true|false>] [-m|--mon <true|false>] [-n|--nginx <true|false>] [-p|--panel <true|false>]"
-  echo "       [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>] [-g|--generate <true|false>]"
-  echo "       [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [-h|--help]"
+  echo "       [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]"
+  echo "       [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]"
+  echo "       [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [-h|--help]"
   echo
   echo "  -u, --utils <true|false>       Additional utilities                             (default: ${defaults[utils]})"
   echo "                                 Дополнительные утилиты"
@@ -246,13 +246,13 @@ show_help() {
   echo "                                 BBR (управление перегрузкой TCP)"
   echo "  -i, --ipv6 <true|false>        Disable IPv6 support                             (default: ${defaults[ipv6]})"
   echo "                                 Отключить поддержку IPv6 "
-  echo "  -w, --warp <true|false>        Warp                                             (default: ${defaults[warp]})"
-  echo "                                 Warp"
+  echo "  -w, --warp <true|false>        WARP setting                                     (default: ${defaults[warp]})"
+  echo "                                 Настройка WARP"
   echo "  -c, --cert <true|false>        Certificate issuance for domain                  (default: ${defaults[cert]})"
   echo "                                 Выпуск сертификатов для домена"
   echo "  -m, --mon <true|false>         Monitoring services (node_exporter)              (default: ${defaults[mon]})"
   echo "                                 Сервисы мониторинга (node_exporter)"
-  echo "  -x, --shell <true|false>       Shell In A Box installation                      (default: ${defaults[shell]})"
+  echo "  -l, --shell <true|false>       Shell In A Box installation                      (default: ${defaults[shell]})"
   echo "                                 Установка Shell In A Box"
   echo "  -n, --nginx <true|false>       NGINX installation                               (default: ${defaults[nginx]})"
   echo "                                 Установка NGINX"
@@ -369,14 +369,14 @@ validate_true_false() {
 ###################################
 parse_args() {
   local opts
-  opts=$(getopt -o i:w:m:u:s:t:f:a:r:b:hl:d:p:c:n:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,help -- "$@")
+  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,help -- "$@")
   if [[ $? -ne 0 ]]; then
     return 1
   fi
   eval set -- "$opts"
   while true; do
     case $1 in
-      -f|--utils)
+      -u|--utils)
         args[utils]="$2"
         normalize_case utils
         validate_true_false utils "$2" || return 1
@@ -430,6 +430,12 @@ parse_args() {
         validate_true_false mon "$2" || return 1
         shift 2
         ;;
+      -l|--shell)
+        args[shell]="$2"
+        normalize_case shell
+        validate_true_false shell "$2" || return 1
+        shift 2
+        ;;        
       -n|--nginx)
         args[nginx]="$2"
         normalize_case nginx
@@ -442,7 +448,7 @@ parse_args() {
         validate_true_false panel "$2" || return 1
         shift 2
         ;;
-      -u|--firewall)
+      -f|--firewall)
         args[firewall]="$2"
         normalize_case firewall
         validate_true_false firewall "$2" || return 1
@@ -653,44 +659,82 @@ get_test_response() {
 }
 
 ###################################
+### Function to clean the URL (removes the protocol, port, and path)
+###################################
+clean_url() {
+    local INPUT_URL_L="$1"  # Входной URL, который нужно очистить от префикса, порта и пути.
+    # Убираем префикс https:// или http:// и порт/путь
+    local CLEANED_URL_L=$(echo "$INPUT_URL_L" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
+    echo "$CLEANED_URL_L"  # Возвращаем очищенный URL (без префикса, порта и пути).
+}
+
+###################################
+### Function to crop the domain to the last two parts
+###################################
+crop_domain() {
+    local DOMAIN_L=$1  # Получаем домен как аргумент
+    IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
+    
+    # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
+    if [ ${#parts[@]} -gt 2 ]; then
+      DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
+    else
+      DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
+    fi
+    
+    echo "$DOMAIN_L"  # Возвращаем результат через echo.
+}
+
+###################################
 ### Domain validation in cloudflare
 ###################################
 check_cf_token() {
+  # Пока не получим правильный ответ, продолжаем выполнение.
   while ! echo "$test_response" | grep -qE "\"${testdomain}\"|\"#dns_records:edit\"|\"#dns_records:read\"|\"#zone:read\""; do
-    local temp_domain
-    DOMAIN=""
-    SUBDOMAIN=""
+    local TEMP_DOMAIN_L_L  # Переменная для временного домена
+    DOMAIN=""  # Обнуляем переменную домена
+    SUBDOMAIN=""  # Обнуляем переменную субдомена
 
+    # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
-      reading " $(text 13) " DOMAIN
+      reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем субдомен
+      DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
       echo
-      reading " $(text 81) " SUBDOMAIN
+      reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем основной домен
+      SUBDOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
     else
-      while [[ -z "$temp_domain" ]]; do
-        reading " $(text 13) " temp_domain
+      # Если subdomain не задан, продолжаем работать с доменом.
+      while [[ -z "$TEMP_DOMAIN_L" ]]; do
+        reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
+        TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
         echo
       done
 
-      temp_domain=$(echo "$temp_domain" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
-
-      if [[ "$temp_domain" =~ ${regex[domain]} ]]; then
-        SUBDOMAIN="$temp_domain"           # Весь домен сохраняем в SUBDOMAIN
-        DOMAIN="${BASH_REMATCH[2]}"        # Извлекаем домен второго уровня
+      # Проверяем, если домен соответствует регулярному выражению
+      if [[ "$TEMP_DOMAIN_L" =~ ${regex[domain]} ]]; then
+        DOMAIN=$(crop_domain "$TEMP_DOMAIN_L")  # Обрезаем домен до последних двух частей
+        SUBDOMAIN="$TEMP_DOMAIN_L"  # Весь домен сохраняем в SUBDOMAIN
       else
-        DOMAIN="$temp_domain"              # Если это домен второго уровня, то просто сохраняем
-        SUBDOMAIN="www.$temp_domain"       # Для домена второго уровня подставляем www в SUBDOMAIN
+        DOMAIN="$TEMP_DOMAIN_L"  # Если домен второго уровня, сохраняем его без изменений
+        SUBDOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUBDOMAIN
       fi
     fi
+ 
+    # Получаем домен для сертификатов, обрезаем до последних двух частей.
+    CERT_DOMAIN=$(crop_domain "$DOMAIN")
 
+    # Запрашиваем email пользователя
     while [[ -z $EMAIL ]]; do
       reading " $(text 15) " EMAIL
       echo
     done
 
+    # Запрашиваем Cloudflare токен
     while [[ -z $CFTOKEN ]]; do
       reading " $(text 16) " CFTOKEN
     done
 
+    # Если флаг skip-check не задан как true, выполняем запрос на тестовый ответ
     [[ ${args[skip-check]} == "false" ]] && get_test_response
     info " $(text 17) "
   done
@@ -1204,7 +1248,7 @@ enable_bbr() {
 }
 
 ###################################
-### Disabling IPv6
+### Disable IPv6
 ###################################
 disable_ipv6() {
   info " $(text 42) "
@@ -1212,17 +1256,28 @@ disable_ipv6() {
   if [[ ! "$(sysctl net.ipv6.conf.all.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
-  
   if [[ ! "$(sysctl net.ipv6.conf.default.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
   if [[ ! "$(sysctl net.ipv6.conf.lo.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
-
   if [[ ! "$(sysctl net.ipv6.conf.$interface_name.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
+  sysctl -p
+  tilda "$(text 10)"
+}
+
+###################################
+### Enable IPv6
+###################################
+enable_ipv6() {
+  info " $(text 42) "
+  sed -i "/net.ipv6.conf.all.disable_ipv6 = 1/d" /etc/sysctl.conf
+  sed -i "/net.ipv6.conf.default.disable_ipv6 = 1/d" /etc/sysctl.conf
+  sed -i "/net.ipv6.conf.lo.disable_ipv6 = 1/d" /etc/sysctl.conf
+  echo -e "IPv6 включен"
   sysctl -p
   tilda "$(text 10)"
 }
@@ -1346,7 +1401,7 @@ EOF
   attempt=0
   max_attempts=2
   while [ $attempt -lt $max_attempts ]; do
-    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${DOMAIN},*.${DOMAIN} --agree-tos -m ${EMAIL} --no-eff-email --non-interactive
+    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${CERT_DOMAIN},*.${CERT_DOMAIN} --agree-tos -m ${EMAIL} --no-eff-email --non-interactive
 	  if [ $? -eq 0 ]; then
       break
     else
@@ -1357,15 +1412,6 @@ EOF
 
   { crontab -l; echo "0 5 1 */2 * certbot -q renew"; } | crontab -
   tilda "$(text 10)"
-#  if [[ "${nginx_or_haproxy}" == "1" ]]; then
-#    echo "renew_hook = systemctl reload nginx" >> /etc/letsencrypt/renewal/${DOMAIN}.conf
-#    echo ""
-#    openssl dhparam -out /etc/nginx/dhparam.pem 2048
-#  else
-#    echo "renew_hook = cat /etc/letsencrypt/live/${DOMAIN}/fullchain.pem /etc/letsencrypt/live/${DOMAIN}/privkey.pem > /etc/haproxy/certs/${DOMAIN}.pem && systemctl restart haproxy" >> /etc/letsencrypt/renewal/${DOMAIN}.conf
-#    echo ""
-#    openssl dhparam -out /etc/haproxy/dhparam.pem 2048
-#  fi
 }
 
 ###################################
@@ -1577,18 +1623,11 @@ EOF
 ###################################
 local_conf() {
   cat > /etc/nginx/conf.d/local.conf <<EOF
-#server {
-#  listen                               80;
-#  server_name                          ${DOMAIN} *.${DOMAIN};
-#  location / {
-#    return 301                         https://${DOMAIN}\$request_uri;
-#  }
-#}
 server {
   listen                               9090 default_server;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
-    return 301                         https://${DOMAIN}\$request_uri;
+    return 301                         https://\$host\$request_uri;
   }
 }
 server {
@@ -1598,7 +1637,7 @@ server {
 server {
   listen                               36077 ssl proxy_protocol;
   http2                                on;
-  server_name                          ${DOMAIN} *.${DOMAIN};
+  server_name                          ${CERT_DOMAIN} *.${CERT_DOMAIN};
 
   # SSL
   ssl_certificate                      /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
@@ -1612,21 +1651,8 @@ server {
   index index.html index.htm index.php index.nginx-debian.html;
   root /var/www/html/;
 
-  if (\$host !~* ^(.+\.)?${DOMAIN}\$ ){return 444;}
-  if (\$scheme ~* https) {set \$safe 1;}
-  if (\$ssl_server_name !~* ^(.+\.)?${DOMAIN}\$ ) {set \$safe "\${safe}0"; }
-  if (\$safe = 10){return 444;}
-  if (\$request_uri ~ "(\"|'|\`|~|,|:|--|;|%|\\$|&&|\?\?|0x00|0X00|\||\\|\{|\}|\[|\]|<|>|\.\.\.|\.\.\/|\/\/\/)"){set \$hack 1;}
-  error_page 400 402 403 500 501 502 503 504 =404 /404;
-  proxy_intercept_errors on;
-
-  if (\$host = ${IP4}) {
-    return 444;
-  }
-
   # PANEL
   location /${WEB_BASE_PATH} {
-    if (\$hack = 1) {return 404;}
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -1639,7 +1665,6 @@ server {
   }
   # SUB
   location /${SUB_PATH} {
-    if (\$hack = 1) {return 404;}
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -1649,7 +1674,6 @@ server {
   }
   # SUB JSON
   location /${SUB_JSON_PATH} {
-    if (\$hack = 1) {return 404;}
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -1659,14 +1683,12 @@ server {
   }
   # SPLIT
   location /${CDNSPLIT} {
-    if (\$hack = 1) {return 404;}
     proxy_pass http://127.0.0.1:2063;
     proxy_http_version 1.1;
     proxy_redirect off;
   }
   # GRPC WEBSOCKET HTTPUpgrade
   location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
-    if (\$hack = 1) {return 404;}
     client_max_body_size 0;
     client_body_timeout 1d;
     grpc_read_timeout 1d;
@@ -2253,6 +2275,15 @@ data_output() {
 }
 
 ###################################
+### Change domain name
+###################################
+change_domain() {
+  CHANGE_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
+  CHANGE_DOMAIN=${CHANGE_DOMAIN#*"/live/"}
+  CHANGE_DOMAIN=${CHANGE_DOMAIN%"/"*}
+}
+
+###################################
 ### Removing all escape sequences
 ###################################
 log_clear() {
@@ -2318,14 +2349,17 @@ main() {
 
   while true; do
     echo "================================="
-    info " $(text 83) "
+    info " $(text 83) "                      # MENU
     echo "================================="
-    info " $(text 84) "
-    info " $(text 85) "
-    info " $(text 82) "
+    info " $(text 84) "                      # Install
+    info " $(text 85) "                      # Steam web site
+    echo "Изменить доменное имя"             # Change domain
+    echo "Отключение IPv6"                   # Disable IPv6
+    echo "Включение IPv6"                    # Enable IPv6
+    info " $(text 82) "                      # Exit
     echo "================================="
-    reading " $(text 1) " choice_menu
-    echo
+    reading " $(text 1) " choice_menu        # Choise
+    tilda "$(text 10)"
     case $choice_menu in
       1)
         warning_banner
@@ -2346,12 +2380,20 @@ main() {
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
-        banner_xray
-        log_clear
+        tilda "$(text 10)"
         ;;
       2)
         download_website
         ;;
+      3)
+        change_domain
+        ;;
+      4)
+        disable_ipv6
+        ;;
+      5)
+        enable_ipv6
+        ;;        
       -1)
         break
         ;;
@@ -2361,6 +2403,7 @@ main() {
     esac
     read -rp "Нажмите Enter, чтобы вернуться в меню..." dummy
   done
+  log_clear
 }
 
 main "$@"
