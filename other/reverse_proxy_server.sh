@@ -1264,17 +1264,17 @@ disable_ipv6() {
   info " $(text 42) "
   interface_name=$(ifconfig -s | awk 'NR==2 {print $1}')
 
-  if [[ ! "$(sysctl net.ipv6.conf.all.disable_ipv6)" == *"= 1" ]]; then
-    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+  if ! grep -q "net.ipv6.conf.all.disable_ipv6 = 1" /etc/sysctl.conf; then
+      echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
-  if [[ ! "$(sysctl net.ipv6.conf.default.disable_ipv6)" == *"= 1" ]]; then
-    echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+  if ! grep -q "net.ipv6.conf.default.disable_ipv6 = 1" /etc/sysctl.conf; then
+      echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
-  if [[ ! "$(sysctl net.ipv6.conf.lo.disable_ipv6)" == *"= 1" ]]; then
-    echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
+  if ! grep -q "net.ipv6.conf.lo.disable_ipv6 = 1" /etc/sysctl.conf; then
+      echo "net.ipv6.conf.lo.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
-  if [[ ! "$(sysctl net.ipv6.conf.$interface_name.disable_ipv6)" == *"= 1" ]]; then
-    echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
+  if ! grep -q "net.ipv6.conf.$interface_name.disable_ipv6 = 1" /etc/sysctl.conf; then
+      echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
   
   sysctl -p
@@ -2367,14 +2367,14 @@ main() {
     clear
     banner_xray
     echo "================================="
-    info " $(text 83) "                      # MENU
+    info " $(text 85) "                      # MENU
     echo "================================="
-    info " $(text 84) "                      # Install
-    info " $(text 85) "                      # Steam web site
+    info " $(text 86) "                      # Install
+    info " $(text 87) "                      # Steam web site
     echo " 3. Изменить доменное имя"             # Change domain
     echo " 4. Отключение IPv6"                   # Disable IPv6
     echo " 5. Включение IPv6"                    # Enable IPv6
-    info " $(text 82) "                      # Exit
+    info " $(text 84) "                      # Exit
     echo "================================="
     reading " $(text 1) " choice_menu        # Choise
     tilda "$(text 10)"
@@ -2413,7 +2413,7 @@ main() {
         ;;
       5)
         enable_ipv6
-        ;;        
+        ;;
       -1)
         clear
         break
