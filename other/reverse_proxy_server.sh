@@ -703,6 +703,8 @@ check_cf_token() {
       echo
       reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем субдомен
       SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+      echo "DOMAIN > $DOMAIN"
+      echo "SUB_DOMAIN > $SUB_DOMAIN"
     else
       # Если subdomain не задан, продолжаем работать с доменом.
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
@@ -723,7 +725,7 @@ check_cf_token() {
  
     # Получаем домен для сертификатов, обрезаем до последних двух частей.
     CERT_DOMAIN=$(crop_domain "$DOMAIN")
-
+    echo "CERT_DOMAIN > $CERT_DOMAIN"
     # Запрашиваем email пользователя
     while [[ -z $EMAIL ]]; do
       reading " $(text 15) " EMAIL
