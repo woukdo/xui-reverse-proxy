@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# version=1.4.0
+
 # wget -N https://git && bash .sh d
 
 ###################################
@@ -1649,6 +1651,7 @@ server {
   location / {
     return 301                         https://${DOMAIN}\$request_uri;
   }
+}
 server {
   listen                               36076 ssl proxy_protocol;
   ssl_reject_handshake                 on;
@@ -2356,6 +2359,12 @@ download_website() {
   echo ""
 }
 
+add_reverse_proxy() {
+  wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
+  ln -s /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
+  chmod +x /usr/local/reverse_proxy/reverse_proxy
+}
+
 ###################################
 ### Main function
 ###################################
@@ -2408,6 +2417,7 @@ main() {
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
+        add_reverse_proxy
         data_output
         ;;
       2)
