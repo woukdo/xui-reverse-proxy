@@ -1263,6 +1263,7 @@ enable_bbr() {
 disable_ipv6() {
   info " $(text 42) "
   interface_name=$(ifconfig -s | awk 'NR==2 {print $1}')
+
   if [[ ! "$(sysctl net.ipv6.conf.all.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
@@ -1274,7 +1275,9 @@ disable_ipv6() {
   fi
   if [[ ! "$(sysctl net.ipv6.conf.$interface_name.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
-  fi  sysctl -p
+  fi
+  
+  sysctl -p
   tilda "$(text 10)"
 }
 
@@ -1284,10 +1287,12 @@ disable_ipv6() {
 enable_ipv6() {
   info " $(text 42) "
   interface_name=$(ifconfig -s | awk 'NR==2 {print $1}')
+
   sed -i "/net.ipv6.conf.all.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.default.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.lo.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.$interface_name.disable_ipv6 = 1/d /etc/sysctl.conf
+  
   echo -e "IPv6 включен"
   sysctl -p
   tilda "$(text 10)"
