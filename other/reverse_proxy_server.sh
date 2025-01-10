@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# version=1.4.0
-
 # wget -N https://git && bash .sh d
 
 ###################################
 ### standard values
 ###################################
+VERSION=1.4.0
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
 defaults_file="/usr/local/reverse_proxy/reinstall_defaults.conf"
@@ -220,8 +219,8 @@ E[83]="Terminal emulator Shell in a box."
 R[83]="Эмулятор терминала Shell in a box."
 E[84]="-1. Exit script"
 R[84]="-1. Выход из скрипта"
-E[85]="MENU"
-R[85]="МЕНЮ"
+E[85]="MENU $VERSION"
+R[85]="МЕНЮ $VERSION"
 E[86]="1. Standard installation"
 R[86]="1. Стандартная установка"
 E[87]="2. Copy someone else's website to your server, experimental option"
