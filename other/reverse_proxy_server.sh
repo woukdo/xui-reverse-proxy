@@ -1396,10 +1396,10 @@ warp() {
 ###################################
 issuance_of_certificates() {
   info " $(text 44) "
-  touch cloudflare.credentials
   CF_CREDENTIALS_PATH="/root/cloudflare.credentials"
-  chown root:root cloudflare.credentials
-  chmod 600 cloudflare.credentials
+  touch ${CF_CREDENTIALS_PATH}
+  chown root:root ${CF_CREDENTIALS_PATH}
+  chmod 600 ${CF_CREDENTIALS_PATH}
 
   if [[ "$CFTOKEN" =~ [A-Z] ]]; then
     cat > ${CF_CREDENTIALS_PATH} <<EOF
@@ -1424,7 +1424,8 @@ EOF
     fi
   done
 
-  { crontab -l; echo "0 5 1 */2 * certbot -q renew"; } | crontab -
+  CRON_RULE1="0 5 1 */2 * certbot -q renew"
+  ( crontab -l | grep -Fxq "$CRON_RULE1" ) || ( crontab -l; echo "$CRON_RULE1" ) | crontab -
   tilda "$(text 10)"
 }
 
@@ -2299,41 +2300,28 @@ data_output() {
 }
 
 ###################################
-### Database change in domain
+### Reverse_proxy manager
 ###################################
-database_change_domain() {
-  sqlite3 $DB_PATH <<EOF
-UPDATE settings 
-SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
-WHERE value LIKE '%$OLD_DOMAIN%';
+add_reverse_proxy() {
+  # Путь к файлу обновления
+  UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
 
-UPDATE inbounds 
-SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN', '$SUB_DOMAIN') 
-WHERE stream_settings LIKE '%$OLD_SUB_DOMAIN%';
-
-UPDATE inbounds 
-SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN') 
-WHERE stream_settings LIKE '%$OLD_DOMAIN%';
+  # Создание скрипта обновления с использованием cat и EOF
+  cat <<EOF > "$UPDATE_SCRIPT"
+  #!/bin/bash
+wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
+ln -sf /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
+chmod +x /usr/local/reverse_proxy/reverse_proxy
 EOF
+
+  # Сделать файл исполнимым
+  chmod +x "$UPDATE_SCRIPT"
+  # Добавление задачи в crontab для выполнения каждый день в полночь
+  CRON_RULE2="0 0 * * * $UPDATE_SCRIPT"
+  ( crontab -l | grep -Fxq "$CRON_RULE2" ) || ( crontab -l; echo "$CRON_RULE2" ) | crontab -
+  # Немедленный запуск скрипта
+  $UPDATE_SCRIPT
 }
-
-###################################
-### Change domain name
-###################################
-change_domain() {
-  DB_PATH="/etc/x-ui/x-ui.db"
-  SQL_QUERY="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
-  OLD_SUB_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.externalProxy[].dest' | sort -u)
-  OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
-
-  database_change_domain
-  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
-  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/conf.d/local.conf
-
-  echo "$OLD_DOMAIN > $DOMAIN"
-  echo "$OLD_SUB_DOMAIN > $SUB_DOMAIN"
-}
-
 
 ###################################
 ### Downloadr webiste
@@ -2375,26 +2363,66 @@ download_website() {
 }
 
 ###################################
-### Reverse_proxy manager
+### Database change in domain
 ###################################
-add_reverse_proxy() {
-  # Путь к файлу обновления
-  UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
+database_change_domain() {
+  sqlite3 $DB_PATH <<EOF
+UPDATE settings 
+SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
+WHERE value LIKE '%$OLD_DOMAIN%';
 
-  # Создание скрипта обновления с использованием cat и EOF
-  cat <<EOF > "$UPDATE_SCRIPT"
-  #!/bin/bash
-wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
-ln -sf /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
-chmod +x /usr/local/reverse_proxy/reverse_proxy
+UPDATE inbounds 
+SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN', '$SUB_DOMAIN') 
+WHERE stream_settings LIKE '%$OLD_SUB_DOMAIN%';
+
+UPDATE inbounds 
+SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN') 
+WHERE stream_settings LIKE '%$OLD_DOMAIN%';
 EOF
+}
 
-  # Сделать файл исполнимым
-  chmod +x "$UPDATE_SCRIPT"
-  # Добавление задачи в crontab для выполнения каждый день в полночь
-  (crontab -l 2>/dev/null; echo "0 0 * * * $UPDATE_SCRIPT") | crontab -
-  # Немедленный запуск скрипта
-  $UPDATE_SCRIPT
+###################################
+### Change domain name
+###################################
+change_domain() {
+  DB_PATH="/etc/x-ui/x-ui.db"
+  SQL_QUERY="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
+  OLD_SUB_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.externalProxy[].dest' | sort -u)
+  OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
+  
+  check_cf_token
+  mv /etc/letsencrypt/live/$OLD_DOMAIN/ /etc/letsencrypt/live/backup_$OLD_DOMAIN
+  issuance_of_certificates  
+
+  database_change_domain
+  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
+  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/conf.d/local.conf
+  
+  echo "$OLD_DOMAIN > $DOMAIN"
+  echo "$OLD_SUB_DOMAIN > $SUB_DOMAIN"
+
+  systemctl restart nginx
+  tilda "$(text 10)"
+}
+
+###################################
+### Reissue of certificates
+###################################
+renew_cert() {
+  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/nginx.conf | head -n 1)
+  NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
+  NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
+
+  if [ ! -f /etc/letsencrypt/live/${NGINX_DOMAIN}/fullchain.pem ]; then
+    check_cf_token
+    mv /etc/letsencrypt/live/$NGINX_DOMAIN/ /etc/letsencrypt/live/backup_$NGINX_DOMAIN
+    issuance_of_certificates
+  else
+    certbot renew --force-renewal
+  fi
+
+  systemctl restart nginx
+  tilda "$(text 10)"
 }
 
 ###################################
@@ -2428,9 +2456,10 @@ main() {
     echo "================================="
     info " $(text 86) "                      # Install
     info " $(text 87) "                      # Steam web site
-    echo " 3. Изменить доменное имя"             # Change domain
-    echo " 4. Отключение IPv6"                   # Disable IPv6
-    echo " 5. Включение IPv6"                    # Enable IPv6
+    echo " 3. Изменить доменное имя"         # Change domain
+    echo " 4. Перевыпуск сертификатов"       # Renew cert
+    echo " 5. Отключение IPv6"               # Disable IPv6
+    echo " 6. Включение IPv6"                # Enable IPv6
     info " $(text 84) "                      # Exit
     echo "================================="
     reading " $(text 1) " choice_menu        # Choise
@@ -2466,9 +2495,12 @@ main() {
         change_domain
         ;;
       4)
-        disable_ipv6
+        renew_cert
         ;;
       5)
+        disable_ipv6
+        ;;
+      6)
         enable_ipv6
         ;;
       0)
