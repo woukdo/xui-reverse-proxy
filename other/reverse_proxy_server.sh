@@ -2339,7 +2339,7 @@ download_website() {
 ###################################
 main() {
   clear
-  echo
+  banner_xray
   log_entry
   read_defaults_from_file
   parse_args "$@" || show_help
