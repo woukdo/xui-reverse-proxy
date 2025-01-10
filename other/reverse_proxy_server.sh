@@ -622,8 +622,6 @@ banner_xray() {
 ### Installation request
 ###################################
 warning_banner() {
-  banner_xray
-  echo
   warning " $(text 5) "
   echo
   info " $(text 6) "
@@ -2369,6 +2367,8 @@ main() {
     tilda "$(text 10)"
     case $choice_menu in
       1)
+        clear
+        banner_xray
         warning_banner
         data_entry
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
