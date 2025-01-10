@@ -1291,7 +1291,7 @@ enable_ipv6() {
   sed -i "/net.ipv6.conf.all.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.default.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.lo.disable_ipv6 = 1/d" /etc/sysctl.conf
-  sed -i "/net.ipv6.conf.$interface_name.disable_ipv6 = 1/d /etc/sysctl.conf
+  sed -i "/net.ipv6.conf.$interface_name.disable_ipv6 = 1/d" /etc/sysctl.conf
   
   echo -e "IPv6 включен"
   sysctl -p
