@@ -693,7 +693,7 @@ check_cf_token() {
   while ! echo "$test_response" | grep -qE "\"${testdomain}\"|\"#dns_records:edit\"|\"#dns_records:read\"|\"#zone:read\""; do
     local TEMP_DOMAIN_L_L  # Переменная для временного домена
     DOMAIN=""  # Обнуляем переменную домена
-    SUBDOMAIN=""  # Обнуляем переменную субдомена
+    SUB_DOMAIN=""  # Обнуляем переменную субдомена
 
     # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
@@ -701,7 +701,7 @@ check_cf_token() {
       DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
       echo
       reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем субдомен
-      SUBDOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+      SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
     else
       # Если subdomain не задан, продолжаем работать с доменом.
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
@@ -713,10 +713,10 @@ check_cf_token() {
       # Проверяем, если домен соответствует регулярному выражению
       if [[ "$TEMP_DOMAIN_L" =~ ${regex[domain]} ]]; then
         DOMAIN=$(crop_domain "$TEMP_DOMAIN_L")  # Обрезаем домен до последних двух частей
-        SUBDOMAIN="$TEMP_DOMAIN_L"  # Весь домен сохраняем в SUBDOMAIN
+        SUB_DOMAIN="$TEMP_DOMAIN_L"  # Весь домен сохраняем в SUB_DOMAIN
       else
         DOMAIN="$TEMP_DOMAIN_L"  # Если домен второго уровня, сохраняем его без изменений
-        SUBDOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUBDOMAIN
+        SUB_DOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUB_DOMAIN
       fi
     fi
  
@@ -1593,7 +1593,7 @@ stream_conf() {
   cat > /etc/nginx/stream-enabled/stream.conf <<EOF
 map \$ssl_preread_server_name \$backend {
   ${DOMAIN}                            web;
-  ${SUBDOMAIN}                         xtls;
+  ${SUB_DOMAIN}                         xtls;
   ${REALITY}                           reality;
   default                              block;
 }
@@ -1900,7 +1900,7 @@ settings_steal() {
   "externalProxy": [
   {
     "forceTls": "same",
-    "dest": "${SUBDOMAIN}",
+    "dest": "${SUB_DOMAIN}",
     "port": 443,
     "remark": ""
   }
@@ -1956,7 +1956,7 @@ settings_reality() {
   "externalProxy": [
   {
     "forceTls": "same",
-    "dest": "${SUBDOMAIN}",
+    "dest": "${SUB_DOMAIN}",
     "port": 443,
     "remark": ""
   }
@@ -2011,13 +2011,13 @@ settings_xtls() {
   "externalProxy": [
   {
     "forceTls": "same",
-    "dest": "${SUBDOMAIN}",
+    "dest": "${SUB_DOMAIN}",
     "port": 443,
     "remark": ""
   }
   ],
   "tlsSettings": {
-  "serverName": "${SUBDOMAIN}",
+  "serverName": "${SUB_DOMAIN}",
   "minVersion": "1.3",
   "maxVersion": "1.3",
   "cipherSuites": "",
