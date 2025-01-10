@@ -697,6 +697,7 @@ check_cf_token() {
 
     # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
+      echo "SUBDOMAIN"
       reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем основной домен
       DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
       echo
