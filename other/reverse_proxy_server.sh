@@ -212,16 +212,20 @@ E[80]="Random template name:"
 R[80]="Случайное имя шаблона:"
 E[81]="Enter the second domain name:"
 R[81]="Введите второе доменное имя:"
-E[82]="-1. Exit script"
-R[82]="-1. Выход из скрипта"
-E[83]="MENU"
-R[83]="МЕНЮ"
-E[84]="1. Standard installation"
-R[84]="1. Стандартная установка"
-E[85]="2. Copy someone else's website to your server, experimental option"
-R[85]="2. Скопировать чей-то сайт на ваш сервер, экспериментальная опция"
-E[86]=""
-R[86]=""
+E[82]="Enter Shell in a box path:"
+R[82]="Введите путь к Shell in a box:"
+E[83]="Terminal emulator Shell in a box."
+R[83]="Эмулятор терминала Shell in a box."
+E[84]="-1. Exit script"
+R[84]="-1. Выход из скрипта"
+E[85]="MENU"
+R[85]="МЕНЮ"
+E[86]="1. Standard installation"
+R[86]="1. Стандартная установка"
+E[87]="2. Copy someone else's website to your server, experimental option"
+R[87]="2. Скопировать чей-то сайт на ваш сервер, экспериментальная опция"
+E[88]=""
+R[88]=""
 
 ###################################
 ### Help output
@@ -882,6 +886,8 @@ data_entry() {
 
   choise_dns
 
+  tilda "$(text 10)"
+
   reading " $(text 19) " REALITY
 
   if [[ ${args[generate]} == "true" ]]; then
@@ -894,6 +900,7 @@ data_entry() {
     SUB_PATH=$(eval ${generate[path]})
     SUB_JSON_PATH=$(eval ${generate[path]})
   else
+    echo
     validate_path CDNGRPC
     echo
     validate_path CDNSPLIT
@@ -1289,6 +1296,8 @@ enable_ipv6() {
 ### Swapfile
 ###################################
 swapfile() {
+  echo
+  echo "Setting up swapfile and restarting the WARP service if necessary"
   swapoff /swapfile*
   dd if=/dev/zero of=/swapfile bs=1M count=512
   chmod 600 /swapfile
@@ -1320,8 +1329,8 @@ warp() {
 
   curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
   echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
+  ${PACKAGE_UPDATE[int]}
   ${PACKAGE_INSTALL[int]} cloudflare-warp
-  warp-cli debug qlog disable
 
 #  mkdir -p /etc/systemd/system/warp-svc.service.d
 #  cd /usr/local/reverse_proxy/
@@ -1352,12 +1361,11 @@ warp() {
 #LogLevelMax=3
 #EOF
 
-  echo
-  systemctl daemon-reload
-  systemctl restart warp-svc.service
-  sleep 3
+#  systemctl daemon-reload
+#  systemctl restart warp-svc.service
+#  sleep 3
 
-  systemctl status warp-svc || echo "Служба warp-svc не найдена или не запустилась."
+#  systemctl status warp-svc || echo "Служба warp-svc не найдена или не запустилась."
 
   warp-cli --accept-tos disconnect || true
   warp-cli --accept-tos registration delete || true
@@ -1365,9 +1373,7 @@ warp() {
   warp-cli --accept-tos mode proxy
   warp-cli --accept-tos proxy port 40000
   warp-cli --accept-tos connect
-
-  echo
-  sleep 3
+  warp-cli debug qlog disable
   warp-cli tunnel stats
 
   if curl -x socks5h://localhost:40000 https://2ip.io; then
@@ -1596,7 +1602,7 @@ stream_conf() {
   cat > /etc/nginx/stream-enabled/stream.conf <<EOF
 map \$ssl_preread_server_name \$backend {
   ${DOMAIN}                            web;
-  ${SUB_DOMAIN}                         xtls;
+  ${SUB_DOMAIN}                        xtls;
   ${REALITY}                           reality;
   default                              block;
 }
@@ -1628,7 +1634,7 @@ local_conf() {
   cat > /etc/nginx/conf.d/local.conf <<EOF
 server {
   listen                               9090 default_server;
-  server_name                          ${DOMAIN} *.${DOMAIN};
+  server_name                          ${CERT_DOMAIN} *.${CERT_DOMAIN};
   location / {
     return 301                         https://\$host\$request_uri;
   }
@@ -1643,9 +1649,9 @@ server {
   server_name                          ${CERT_DOMAIN} *.${CERT_DOMAIN};
 
   # SSL
-  ssl_certificate                      /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-  ssl_certificate_key                  /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
-  ssl_trusted_certificate              /etc/letsencrypt/live/${DOMAIN}/chain.pem;
+  ssl_certificate                      /etc/letsencrypt/live/${CERT_DOMAIN}/fullchain.pem;
+  ssl_certificate_key                  /etc/letsencrypt/live/${CERT_DOMAIN}/privkey.pem;
+  ssl_trusted_certificate              /etc/letsencrypt/live/${CERT_DOMAIN}/chain.pem;
 
   # Diffie-Hellman parameter for DHE ciphersuites
   ssl_dhparam                          /etc/nginx/dhparam.pem;
@@ -1931,7 +1937,7 @@ settings_steal() {
   ],
   "settings": {
     "publicKey": "${PUBLIC_KEY0}",
-    "fingerprint": "random",
+    "fingerprint": "chrome",
     "serverName": "",
     "spiderX": "/"
   }
@@ -1987,7 +1993,7 @@ settings_reality() {
   ],
   "settings": {
     "publicKey": "${PUBLIC_KEY1}",
-    "fingerprint": "random",
+    "fingerprint": "chrome",
     "serverName": "",
     "spiderX": "/"
   }
@@ -2029,8 +2035,8 @@ settings_xtls() {
   "enableSessionResumption": false,
   "certificates": [
     {
-    "certificateFile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem",
-    "keyFile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem",
+    "certificateFile": "/etc/letsencrypt/live/${CERT_DOMAIN}/fullchain.pem",
+    "keyFile": "/etc/letsencrypt/live/${CERT_DOMAIN}/privkey.pem",
     "ocspStapling": 3600,
     "oneTimeLoading": false,
     "usage": "encipherment",
@@ -2042,7 +2048,7 @@ settings_xtls() {
   ],
   "settings": {
     "allowInsecure": false,
-    "fingerprint": "random"
+    "fingerprint": "chrome"
   }
   },
   "tcpSettings": {
