@@ -2338,6 +2338,7 @@ download_website() {
 ### Main function
 ###################################
 main() {
+  clear
   log_entry
   read_defaults_from_file
   parse_args "$@" || show_help
@@ -2348,11 +2349,9 @@ main() {
   if [ -f ${defaults_file} ]; then
     tilda "$(text 4)"
   fi
-  sleep 2
-  clear
-  banner_xray
-
   while true; do
+    clear
+    banner_xray
     echo "================================="
     info " $(text 83) "                      # MENU
     echo "================================="
