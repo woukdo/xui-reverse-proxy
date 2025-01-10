@@ -622,6 +622,8 @@ banner_xray() {
 ### Installation request
 ###################################
 warning_banner() {
+  banner_xray
+  echo
   warning " $(text 5) "
   echo
   info " $(text 6) "
