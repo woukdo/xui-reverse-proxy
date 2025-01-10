@@ -2299,24 +2299,41 @@ data_output() {
 }
 
 ###################################
+### Database change in domain
+###################################
+database_change_domain() {
+  sqlite3 $DB_PATH <<EOF
+UPDATE settings 
+SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
+WHERE value LIKE '%$OLD_DOMAIN%';
+
+UPDATE inbounds 
+SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN', '$SUB_DOMAIN') 
+WHERE stream_settings LIKE '%$OLD_SUB_DOMAIN%';
+
+UPDATE inbounds 
+SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN') 
+WHERE stream_settings LIKE '%$OLD_DOMAIN%';
+EOF
+}
+
+###################################
 ### Change domain name
 ###################################
 change_domain() {
-  OLD_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
-  OLD_DOMAIN=${OLD_DOMAIN#*"/live/"}
-  OLD_DOMAIN=${OLD_DOMAIN%"/"*}
-  echo "$OLD_DOMAIN"
+  DB_PATH="/etc/x-ui/x-ui.db"
+  SQL_QUERY="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
+  OLD_SUB_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.externalProxy[].dest' | sort -u)
+  OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
 
-  check_cf_token
-
+  database_change_domain
   sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
   sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/conf.d/local.conf
 
-
-# UPDATE inbounds
-# SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$NEW_DOMAIN')
-# WHERE LOWER(stream_settings) LIKE '%$OLD_DOMAIN%';
+  echo "$OLD_DOMAIN > $DOMAIN"
+  echo "$OLD_SUB_DOMAIN > $SUB_DOMAIN"
 }
+
 
 ###################################
 ### Downloadr webiste
