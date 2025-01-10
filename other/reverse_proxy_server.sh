@@ -217,14 +217,14 @@ E[82]="Enter Shell in a box path:"
 R[82]="Введите путь к Shell in a box:"
 E[83]="Terminal emulator Shell in a box."
 R[83]="Эмулятор терминала Shell in a box."
-E[84]="-1. Exit script"
-R[84]="-1. Выход из скрипта"
+E[84]="0. Exit script"
+R[84]="0. Выход из скрипта"
 E[85]="MENU $VERSION"
 R[85]="МЕНЮ $VERSION"
 E[86]="1. Standard installation"
 R[86]="1. Стандартная установка"
 E[87]="2. Copy someone else's website to your server, experimental option"
-R[87]="2. Скопировать чей-то сайт на ваш сервер, экспериментальная опция"
+R[87]="2. Скопировать чужой сайт на ваш сервер, экспериментальная опция"
 E[88]=""
 R[88]=""
 
@@ -1454,7 +1454,7 @@ monitoring() {
 ### Shell In A Box
 ###################################
 shellinabox() {
-  info " $(text 66) "
+  info " $(text 83) "
   apt-get install shellinabox
 
   cat > /etc/default/shellinabox <<EOF
@@ -2302,21 +2302,20 @@ data_output() {
 ### Change domain name
 ###################################
 change_domain() {
-  CHANGE_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
-  CHANGE_DOMAIN=${CHANGE_DOMAIN#*"/live/"}
-  CHANGE_DOMAIN=${CHANGE_DOMAIN%"/"*}
-  echo "$CHANGE_DOMAIN"
+  OLD_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
+  OLD_DOMAIN=${OLD_DOMAIN#*"/live/"}
+  OLD_DOMAIN=${OLD_DOMAIN%"/"*}
+  echo "$OLD_DOMAIN"
+
+  check_cf_token
+
+  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
+  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/conf.d/local.conf
+
 
 # UPDATE inbounds
 # SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$NEW_DOMAIN')
 # WHERE LOWER(stream_settings) LIKE '%$OLD_DOMAIN%';
-}
-
-###################################
-### Removing all escape sequences
-###################################
-log_clear() {
-  sed -i -e 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$LOGFILE"
 }
 
 ###################################
@@ -2358,6 +2357,9 @@ download_website() {
   echo ""
 }
 
+###################################
+### Reverse_proxy manager
+###################################
 add_reverse_proxy() {
   # Путь к файлу обновления
   UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
@@ -2376,6 +2378,13 @@ EOF
   (crontab -l 2>/dev/null; echo "0 0 * * * $UPDATE_SCRIPT") | crontab -
   # Немедленный запуск скрипта
   $UPDATE_SCRIPT
+}
+
+###################################
+### Removing all escape sequences
+###################################
+log_clear() {
+  sed -i -e 's/\x1b\[[0-9;]*[a-zA-Z]//g' "$LOGFILE"
 }
 
 ###################################
@@ -2445,7 +2454,7 @@ main() {
       5)
         enable_ipv6
         ;;
-      -1)
+      0)
         clear
         break
         ;;
