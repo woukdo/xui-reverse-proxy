@@ -2404,6 +2404,7 @@ main() {
         enable_ipv6
         ;;        
       -1)
+        clear
         break
         ;;
       *)
