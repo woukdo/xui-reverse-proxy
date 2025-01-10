@@ -2358,9 +2358,9 @@ main() {
     echo "================================="
     info " $(text 84) "                      # Install
     info " $(text 85) "                      # Steam web site
-    echo "Изменить доменное имя"             # Change domain
-    echo "Отключение IPv6"                   # Disable IPv6
-    echo "Включение IPv6"                    # Enable IPv6
+    echo " 3. Изменить доменное имя"             # Change domain
+    echo " 4. Отключение IPv6"                   # Disable IPv6
+    echo " 5. Включение IPv6"                    # Enable IPv6
     info " $(text 82) "                      # Exit
     echo "================================="
     reading " $(text 1) " choice_menu        # Choise
