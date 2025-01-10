@@ -439,7 +439,7 @@ parse_args() {
         normalize_case shell
         validate_true_false shell "$2" || return 1
         shift 2
-        ;;        
+        ;;
       -n|--nginx)
         args[nginx]="$2"
         normalize_case nginx
@@ -487,7 +487,7 @@ parse_args() {
         normalize_case subdomain
         validate_true_false subdomain "$2" || return 1
         shift 2
-        ;;        
+        ;;
       -h|--help)
         return 1
         ;;
@@ -501,7 +501,7 @@ parse_args() {
         ;;
     esac
   done
-  
+
   for key in "${!defaults[@]}"; do
     if [[ -z "${args[$key]}" ]]; then
       args[$key]=${defaults[$key]}
@@ -678,14 +678,14 @@ clean_url() {
 crop_domain() {
     local DOMAIN_L=$1  # Получаем домен как аргумент
     IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
-    
+
     # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
     if [ ${#parts[@]} -gt 2 ]; then
       DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
     else
       DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
     fi
-    
+
     echo "$DOMAIN_L"  # Возвращаем результат через echo.
 }
 
@@ -726,7 +726,7 @@ check_cf_token() {
         SUB_DOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUB_DOMAIN
       fi
     fi
- 
+
     # Получаем домен для сертификатов, обрезаем до последних двух частей.
     CERT_DOMAIN=$(crop_domain "$DOMAIN")
     echo "CERT_DOMAIN > $CERT_DOMAIN"
@@ -774,7 +774,7 @@ validate_path() {
         ;;
       SHELLBOX)
         reading " $(text 24) " PATH_VALUE
-        ;;	
+        ;;
       ADGUARDPATH)
         reading " $(text 25) " PATH_VALUE
         ;;
@@ -783,10 +783,10 @@ validate_path() {
         ;;
       SUB_PATH)
         reading " $(text 27) " PATH_VALUE
-        ;;                
+        ;;
       SUB_JSON_PATH)
         reading " $(text 28) " PATH_VALUE
-        ;;        
+        ;;
     esac
 
     if [[ -z "$PATH_VALUE" ]]; then
@@ -822,7 +822,7 @@ validate_path() {
       ;;
     SHELLBOX)
       export SHELLBOX="$ESCAPED_PATH"
-      ;;      
+      ;;
     ADGUARDPATH)
       export ADGUARDPATH="$ESCAPED_PATH"
       ;;
@@ -844,7 +844,7 @@ validate_path() {
 choise_dns () {
   while true; do
     hint " $(text 31) \n" && reading " $(text 1) " CHOISE_DNS
-    case $CHOISE_DNS in 
+    case $CHOISE_DNS in
       1)
         info " $(text 32) "
         break
@@ -857,7 +857,7 @@ choise_dns () {
           echo
           tilda "$(text 10)"
           validate_path ADGUARDPATH
-        fi        
+        fi
         echo
         break
         ;;
@@ -881,7 +881,7 @@ data_entry() {
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
-  
+
   tilda "$(text 10)"
 
   choise_dns
@@ -1247,13 +1247,14 @@ EOF
 ###################################
 enable_bbr() {
   info " $(text 41) "
-  if [[ ! "$(sysctl net.core.default_qdisc)" == *"= fq" ]]; then
-    echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+
+  if ! grep -q "net.core.default_qdisc = fq" /etc/sysctl.conf; then
+      echo "net.core.default_qdisc = fq" >> /etc/sysctl.conf
+  fi
+  if ! grep -q "net.ipv4.tcp_congestion_control = bbr" /etc/sysctl.conf; then
+      echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
   fi
 
-  if [[ ! "$(sysctl net.ipv4.tcp_congestion_control)" == *"bbr" ]]; then
-    echo "net.ipv4.tcp_congestion_control = bbr" >> /etc/sysctl.conf
-  fi
   sysctl -p
 }
 
@@ -1276,7 +1277,7 @@ disable_ipv6() {
   if ! grep -q "net.ipv6.conf.$interface_name.disable_ipv6 = 1" /etc/sysctl.conf; then
       echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
   fi
-  
+
   sysctl -p
   tilda "$(text 10)"
 }
@@ -1292,7 +1293,7 @@ enable_ipv6() {
   sed -i "/net.ipv6.conf.default.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.lo.disable_ipv6 = 1/d" /etc/sysctl.conf
   sed -i "/net.ipv6.conf.$interface_name.disable_ipv6 = 1/d" /etc/sysctl.conf
-  
+
   echo -e "IPv6 включен"
   sysctl -p
   tilda "$(text 10)"
@@ -1310,7 +1311,7 @@ swapfile() {
   mkswap /swapfile
   swapon /swapfile
   swapon --show
-  
+
   cat > /usr/local/reverse_proxy/restart_warp <<EOF
 #!/bin/bash
 # Получаем количество занятого пространства в swap (в мегабайтах)
@@ -1387,7 +1388,7 @@ warp() {
   else
     echo "Ошибка: не удалось подключиться к WARP через прокси. Проверьте настройки."
   fi
-  
+
   swapfile
   tilda "$(text 10)"
 }
@@ -1435,7 +1436,7 @@ EOF
 monitoring() {
   info " $(text 66) "
   bash <(curl -Ls https://github.com/cortez24rus/grafana-prometheus/raw/refs/heads/main/prometheus_node_exporter.sh)
-  
+
   COMMENT_METRIC="location /${METRICS} {
     auth_basic \"Restricted Content\";
     auth_basic_user_file /etc/nginx/.htpasswd;
@@ -1446,7 +1447,7 @@ monitoring() {
     proxy_set_header X-Forwarded-Proto \$scheme;
     break;
   }"
-  
+
   tilda "$(text 10)"
 }
 
@@ -1485,7 +1486,7 @@ EOF
     proxy_set_header X-Forwarded-Proto \$scheme;
     break;
   }"
-  
+
   systemctl restart shellinabox
   tilda "$(text 10)"
 }
@@ -2140,7 +2141,7 @@ install_panel() {
     warning " $(text 38) "
     sleep 3
   done
-  
+
   echo ${SECRET_PASSWORD} | gpg --batch --yes --passphrase-fd 0 -d x-ui.gpg > x-ui.db
   echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
 
@@ -2155,12 +2156,12 @@ install_panel() {
   database_change
 
   x-ui stop
-  
+
   rm -rf x-ui.gpg
   rm -rf /etc/x-ui/x-ui.db.backup
   [ -f /etc/x-ui/x-ui.db ] && mv /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.backup
   mv x-ui.db /etc/x-ui/
-  
+
   x-ui start
   echo -e "20\n1" | x-ui > /dev/null 2>&1
   tilda "$(text 10)"
@@ -2174,7 +2175,7 @@ enabling_security() {
   BLOCK_ZONE_IP=$(echo ${IP4} | cut -d '.' -f 1-3).0/22
 
   case "$SYSTEM" in
-    Debian|Ubuntu )  
+    Debian|Ubuntu)
       ufw --force reset
       ufw allow 22/tcp
       ufw allow 443/tcp
@@ -2182,7 +2183,7 @@ enabling_security() {
       ufw --force enable
       ;;
 
-    CentOS|Fedora )
+    CentOS|Fedora)
       systemctl enable --now firewalld
       firewall-cmd --permanent --zone=public --add-port=22/tcp
       firewall-cmd --permanent --zone=public --add-port=443/tcp
@@ -2217,7 +2218,7 @@ ssh_setup() {
     cat > /etc/motd <<EOF
 
 ################################################################################
-                        WARNING: AUTHORIZED ACCESS ONLY                         
+                        WARNING: AUTHORIZED ACCESS ONLY
 ################################################################################
 
 This system is for the use of authorized users only. Individuals using this
@@ -2275,7 +2276,6 @@ data_output() {
   out_data " $(text 60) " "${SUB_URI}user"
   if [[ $CHOISE_DNS = "2" ]]; then
     out_data " $(text 61) " "https://${DOMAIN}/${ADGUARDPATH}/login.html"
-    
   fi
   echo
   out_data " $(text 62) " "ssh -p 22 ${USERNAME}@${IP4}"
