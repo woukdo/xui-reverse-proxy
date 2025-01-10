@@ -2360,9 +2360,23 @@ download_website() {
 }
 
 add_reverse_proxy() {
-  wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
-  ln -s /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
-  chmod +x /usr/local/reverse_proxy/reverse_proxy
+  # Путь к файлу обновления
+  UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
+
+  # Создание скрипта обновления с использованием cat и EOF
+  cat <<EOF > "$UPDATE_SCRIPT"
+  #!/bin/bash
+wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
+ln -sf /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
+chmod +x /usr/local/reverse_proxy/reverse_proxy
+EOF
+
+  # Сделать файл исполнимым
+  chmod +x "$UPDATE_SCRIPT"
+  # Добавление задачи в crontab для выполнения каждый день в полночь
+  (crontab -l 2>/dev/null; echo "0 0 * * * $UPDATE_SCRIPT") | crontab -
+  # Немедленный запуск скрипта
+  $UPDATE_SCRIPT
 }
 
 ###################################
