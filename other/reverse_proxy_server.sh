@@ -1274,8 +1274,7 @@ disable_ipv6() {
   fi
   if [[ ! "$(sysctl net.ipv6.conf.$interface_name.disable_ipv6)" == *"= 1" ]]; then
     echo "net.ipv6.conf.$interface_name.disable_ipv6 = 1" >> /etc/sysctl.conf
-  fi
-  sysctl -p
+  fi  sysctl -p
   tilda "$(text 10)"
 }
 
@@ -1433,7 +1432,6 @@ monitoring() {
   bash <(curl -Ls https://github.com/cortez24rus/grafana-prometheus/raw/refs/heads/main/prometheus_node_exporter.sh)
   
   COMMENT_METRIC="location /${METRICS} {
-    if (\$hack = 1) {return 404;}
     auth_basic \"Restricted Content\";
     auth_basic_user_file /etc/nginx/.htpasswd;
     proxy_pass http://127.0.0.1:9100/metrics;
@@ -1473,7 +1471,6 @@ SHELLINABOX_ARGS="--no-beep --localhost-only --disable-ssl"
 EOF
 
   COMMENT_SHELLBOX="location /${SHELLBOX} {
-    if (\$hack = 1) {return 404;}
     auth_basic \"Restricted Content\";
     auth_basic_user_file /etc/nginx/.htpasswd;
     proxy_pass http://127.0.0.1:4200;
