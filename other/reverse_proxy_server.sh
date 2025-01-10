@@ -74,8 +74,8 @@ E[11]="Enter username:"
 R[11]="Введите имя пользователя:"
 E[12]="Enter user password:"
 R[12]="Введите пароль пользователя:"
-E[13]="Enter the primary domain name:"
-R[13]="Введите основное доменное имя:"
+E[13]="Enter your domain name:"
+R[13]="Введите ваше доменное имя:"
 E[14]="Error: the entered address '$temp_value' is incorrectly formatted."
 R[14]="Ошибка: введённый адрес '$temp_value' имеет неверный формат."
 E[15]="Enter your email registered with Cloudflare:"
@@ -282,7 +282,7 @@ show_help() {
 
 ###################################
 ### Reading values ​​from file
-###################################
+################################### 
 read_defaults_from_file() {
   if [[ -f $defaults_file ]]; then
     # Чтение и выполнение строк из файла
@@ -701,14 +701,11 @@ check_cf_token() {
 
     # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
-      echo "SUBDOMAIN"
-      reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем основной домен
+      reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
       DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
       echo
       reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем субдомен
       SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
-      echo "DOMAIN > $DOMAIN"
-      echo "SUB_DOMAIN > $SUB_DOMAIN"
     else
       # Если subdomain не задан, продолжаем работать с доменом.
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
@@ -727,9 +724,6 @@ check_cf_token() {
       fi
     fi
 
-    # Получаем домен для сертификатов, обрезаем до последних двух частей.
-    CERT_DOMAIN=$(crop_domain "$DOMAIN")
-    echo "CERT_DOMAIN > $CERT_DOMAIN"
     # Запрашиваем email пользователя
     while [[ -z $EMAIL ]]; do
       reading " $(text 15) " EMAIL
@@ -880,6 +874,8 @@ data_entry() {
   reading " $(text 12) " PASSWORD
   [[ ${args[addu]} == "true" ]] && add_user
 
+  tilda "$(text 10)"
+
   check_cf_token
 
   tilda "$(text 10)"
@@ -976,11 +972,11 @@ data_entry() {
     reading " $(text 35) " ADMIN_ID
     echo
     reading " $(text 34) " BOT_TOKEN
-    tilda "$(text 10)"
   fi
 
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
   SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
+  tilda "$(text 10)"
 }
 
 ###################################
@@ -1161,6 +1157,7 @@ dns_encryption() {
       ;;
     2)
       COMMENT_AGH="location /${ADGUARDPATH}/ {
+    if (\$hack = 1) {return 404;}
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
@@ -1417,7 +1414,7 @@ EOF
   attempt=0
   max_attempts=2
   while [ $attempt -lt $max_attempts ]; do
-    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${CERT_DOMAIN},*.${CERT_DOMAIN} --agree-tos -m ${EMAIL} --no-eff-email --non-interactive
+    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${DOMAIN},*.${DOMAIN} --agree-tos -m ${EMAIL} --no-eff-email --non-interactive
 	  if [ $? -eq 0 ]; then
       break
     else
@@ -1438,6 +1435,7 @@ monitoring() {
   bash <(curl -Ls https://github.com/cortez24rus/grafana-prometheus/raw/refs/heads/main/prometheus_node_exporter.sh)
 
   COMMENT_METRIC="location /${METRICS} {
+    if (\$hack = 1) {return 404;}
     auth_basic \"Restricted Content\";
     auth_basic_user_file /etc/nginx/.htpasswd;
     proxy_pass http://127.0.0.1:9100/metrics;
@@ -1477,6 +1475,7 @@ SHELLINABOX_ARGS="--no-beep --localhost-only --disable-ssl"
 EOF
 
   COMMENT_SHELLBOX="location /${SHELLBOX} {
+    if (\$hack = 1) {return 404;}
     auth_basic \"Restricted Content\";
     auth_basic_user_file /etc/nginx/.htpasswd;
     proxy_pass http://127.0.0.1:4200;
@@ -1579,7 +1578,7 @@ http {
   ssl_session_tickets                  off;
   ssl_prefer_server_ciphers            on;
   ssl_protocols                        TLSv1.2 TLSv1.3;
-  ssl_ciphers                          TLS13_AES_128_GCM_SHA256:TLS13_AES_256_GCM_SHA384:TLS13_CHACHA20_POLY1305_SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305;
+  ssl_ciphers                          HIGH:!aNULL:!eNULL:!MD5:!DES:!RC4:!ADH:!SSLv3:!EXP:!PSK:!DSS;
   ssl_stapling                         on;
   ssl_stapling_verify                  on;
   resolver                             127.0.0.1 valid=60s;
@@ -1638,12 +1637,18 @@ EOF
 local_conf() {
   cat > /etc/nginx/conf.d/local.conf <<EOF
 server {
-  listen                               9090 default_server;
-  server_name                          ${CERT_DOMAIN} *.${CERT_DOMAIN};
+  listen                               80;
+  server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
-    return 301                         https://\$host\$request_uri;
+    return 301                         https://${DOMAIN}\$request_uri;
   }
 }
+server {
+  listen                               9090 default_server;
+  server_name                          ${DOMAIN} *.${DOMAIN};
+  location / {
+    return 301                         https://${DOMAIN}\$request_uri;
+  }
 server {
   listen                               36076 ssl proxy_protocol;
   ssl_reject_handshake                 on;
@@ -1651,12 +1656,13 @@ server {
 server {
   listen                               36077 ssl proxy_protocol;
   http2                                on;
-  server_name                          ${CERT_DOMAIN} *.${CERT_DOMAIN};
+  http3                                on;
+  server_name                          ${DOMAIN} *.${DOMAIN};
 
   # SSL
-  ssl_certificate                      /etc/letsencrypt/live/${CERT_DOMAIN}/fullchain.pem;
-  ssl_certificate_key                  /etc/letsencrypt/live/${CERT_DOMAIN}/privkey.pem;
-  ssl_trusted_certificate              /etc/letsencrypt/live/${CERT_DOMAIN}/chain.pem;
+  ssl_certificate                      /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+  ssl_certificate_key                  /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+  ssl_trusted_certificate              /etc/letsencrypt/live/${DOMAIN}/chain.pem;
 
   # Diffie-Hellman parameter for DHE ciphersuites
   ssl_dhparam                          /etc/nginx/dhparam.pem;
@@ -1665,8 +1671,17 @@ server {
   index index.html index.htm index.php index.nginx-debian.html;
   root /var/www/html/;
 
+  if (\$host !~* ^(.+\.)?${DOMAIN}\$ ){return 444;}
+  if (\$scheme ~* https) {set \$safe 1;}
+  if (\$ssl_server_name !~* ^(.+\.)?${DOMAIN}\$ ) {set \$safe "\${safe}0"; }
+  if (\$safe = 10){return 444;}
+  if (\$request_uri ~ "(\"|'|\`|~|,|:|--|;|%|\\$|&&|\?\?|0x00|0X00|\||\\|\{|\}|\[|\]|<|>|\.\.\.|\.\.\/|\/\/\/)"){set \$hack 1;}
+  error_page 400 402 403 500 501 502 503 504 =404 /404;
+  proxy_intercept_errors on;
+
   # PANEL
   location /${WEB_BASE_PATH} {
+    if (\$hack = 1) {return 404;}
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -1679,6 +1694,7 @@ server {
   }
   # SUB
   location /${SUB_PATH} {
+    if (\$hack = 1) {return 404;}
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -1688,6 +1704,7 @@ server {
   }
   # SUB JSON
   location /${SUB_JSON_PATH} {
+    if (\$hack = 1) {return 404;}  
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -1695,14 +1712,9 @@ server {
     proxy_pass http://127.0.0.1:36074/${SUB_JSON_PATH};
     break;
   }
-  # SPLIT
-  location /${CDNSPLIT} {
-    proxy_pass http://127.0.0.1:2063;
-    proxy_http_version 1.1;
-    proxy_redirect off;
-  }
   # GRPC WEBSOCKET HTTPUpgrade
   location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
+    if (\$hack = 1) {return 404;}
     client_max_body_size 0;
     client_body_timeout 1d;
     grpc_read_timeout 1d;
@@ -1717,10 +1729,7 @@ server {
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
     proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    if (\$content_type ~* "GRPC") {
-      grpc_pass grpc://127.0.0.1:\$fwdport\$is_args\$args;
-      break;
-    }
+    if (\$content_type ~* "GRPC") { grpc_pass grpc://127.0.0.1:\$fwdport\$is_args\$args; break; }
     proxy_pass http://127.0.0.1:\$fwdport\$is_args\$args;
     break;
   }
@@ -2040,8 +2049,8 @@ settings_xtls() {
   "enableSessionResumption": false,
   "certificates": [
     {
-    "certificateFile": "/etc/letsencrypt/live/${CERT_DOMAIN}/fullchain.pem",
-    "keyFile": "/etc/letsencrypt/live/${CERT_DOMAIN}/privkey.pem",
+    "certificateFile": "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem",
+    "keyFile": "/etc/letsencrypt/live/${DOMAIN}/privkey.pem",
     "ocspStapling": 3600,
     "oneTimeLoading": false,
     "usage": "encipherment",
@@ -2400,7 +2409,6 @@ main() {
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
-        tilda "$(text 10)"
         ;;
       2)
         download_website
