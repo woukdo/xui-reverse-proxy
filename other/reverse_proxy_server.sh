@@ -2289,6 +2289,7 @@ change_domain() {
   CHANGE_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
   CHANGE_DOMAIN=${CHANGE_DOMAIN#*"/live/"}
   CHANGE_DOMAIN=${CHANGE_DOMAIN%"/"*}
+  echo "$CHANGE_DOMAIN"
 
 # UPDATE inbounds
 # SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$NEW_DOMAIN')
