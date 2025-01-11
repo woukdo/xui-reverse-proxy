@@ -2,7 +2,7 @@
 # wget -N https://git && bash .sh d
 
 ###################################
-### standard values
+### Standard values
 ###################################
 VERSION=1.4.0
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
@@ -225,8 +225,17 @@ E[86]="1. Standard installation"
 R[86]="1. Стандартная установка"
 E[87]="2. Copy someone else's website to your server, experimental option"
 R[87]="2. Скопировать чужой сайт на ваш сервер, экспериментальная опция"
-E[88]=""
-R[88]=""
+E[88]="3. Change the domain name for the proxy"
+R[88]="3. Изменить доменное имя для прокси"
+E[89]="4. Forced reissue of certificates"
+R[89]="4. Принудительный перевыпуск сертификатов"
+E[90]="5. Disable IPv6"
+R[90]="5. Отключение IPv6"
+E[91]="6. Enable IPv6"
+R[91]="6. Включение IPv6"
+E[92]=""
+R[92]=""
+
 
 ###################################
 ### Help output
@@ -374,7 +383,7 @@ validate_true_false() {
 ###################################
 parse_args() {
   local opts
-  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,help -- "$@")
+  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o:v --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update:,help -- "$@")
   if [[ $? -ne 0 ]]; then
     return 1
   fi
@@ -488,6 +497,11 @@ parse_args() {
         normalize_case subdomain
         validate_true_false subdomain "$2" || return 1
         shift 2
+        ;;
+      --update)
+        echo "Script update..."
+        #echo "Script update..."
+        return 1
         ;;
       -h|--help)
         return 1
@@ -2456,8 +2470,8 @@ main() {
     echo "================================="
     info " $(text 86) "                      # Install
     info " $(text 87) "                      # Steam web site
-    echo " 3. Изменить доменное имя"         # Change domain
-    echo " 4. Перевыпуск сертификатов"       # Renew cert
+    echo " 3. Изменить доменное имя для прокси"         # Change domain
+    echo " 4. Принудительный перевыпуск сертификатов"       # Renew cert
     echo " 5. Отключение IPv6"               # Disable IPv6
     echo " 6. Включение IPv6"                # Enable IPv6
     info " $(text 84) "                      # Exit
