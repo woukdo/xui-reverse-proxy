@@ -518,7 +518,8 @@ parse_args() {
         shift 2
         ;;
       --update)
-        warning "Script update version: $VERSION_MANAGER"
+        CURRENT_VERSION=$(wget -qO- https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
+        warning "Script update version: $CURRENT_VERSION"
         echo
         update_reverse_proxy
         exit 0
