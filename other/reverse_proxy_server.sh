@@ -383,7 +383,7 @@ validate_true_false() {
 ###################################
 parse_args() {
   local opts
-  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o:v --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update:,help -- "$@")
+  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,help -- "$@")
   if [[ $? -ne 0 ]]; then
     return 1
   fi
@@ -2474,6 +2474,7 @@ main() {
     info " $(text 89) "                      # Renew cert
     info " $(text 90) "                      # Disable IPv6
     info " $(text 91) "                      # Enable IPv6
+    echo
     info " $(text 84) "                      # Exit
     echo "================================="
     reading " $(text 1) " choice_menu        # Choise
