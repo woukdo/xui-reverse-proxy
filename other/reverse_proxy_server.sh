@@ -2470,10 +2470,10 @@ main() {
     echo "================================="
     info " $(text 86) "                      # Install
     info " $(text 87) "                      # Steam web site
-    echo " 3. Изменить доменное имя для прокси"         # Change domain
-    echo " 4. Принудительный перевыпуск сертификатов"       # Renew cert
-    echo " 5. Отключение IPv6"               # Disable IPv6
-    echo " 6. Включение IPv6"                # Enable IPv6
+    info " $(text 88) "                      # Change domain
+    info " $(text 89) "                      # Renew cert
+    info " $(text 90) "                      # Disable IPv6
+    info " $(text 91) "                      # Enable IPv6
     info " $(text 84) "                      # Exit
     echo "================================="
     reading " $(text 1) " choice_menu        # Choise
