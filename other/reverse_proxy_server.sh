@@ -1406,15 +1406,19 @@ warp() {
 
 #  systemctl status warp-svc || echo "Служба warp-svc не найдена или не запустилась."
 
-  warp-cli --accept-tos disconnect || true
-  warp-cli --accept-tos registration delete || true
-  script -q -c "echo y | warp-cli registration new"
-  warp-cli --accept-tos mode proxy
-  warp-cli --accept-tos proxy port 40000
-  warp-cli --accept-tos connect
+  sleep 1
+  yes | warp-cli registration new
+  sleep 1
+  warp-cli mode proxy
+  sleep 1
+  warp-cli proxy port 40000
+  sleep 1
+  warp-cli connect
+  sleep 1
   warp-cli debug qlog disable
-  warp-cli tunnel stats
+  sleep 2
 
+  warp-cli tunnel stats
   if curl -x socks5h://localhost:40000 https://2ip.io; then
     echo "Настройка завершена: WARP подключен и работает."
   else
