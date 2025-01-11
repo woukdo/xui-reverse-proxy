@@ -2496,7 +2496,7 @@ main() {
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
-        add_reverse_proxy
+        update_reverse_proxy
         data_output
         ;;
       2)
