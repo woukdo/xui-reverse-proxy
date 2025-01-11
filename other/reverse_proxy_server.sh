@@ -291,6 +291,25 @@ show_help() {
 }
 
 ###################################
+### Reverse_proxy manager
+###################################
+update_reverse_proxy() {
+  # Путь к файлу обновления
+  UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
+
+  # Скрипт обновления
+  wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
+  ln -sf /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
+  chmod +x /usr/local/reverse_proxy/reverse_proxy
+
+  # Сделать файл исполнимым
+  chmod +x "$UPDATE_SCRIPT"
+  # Добавление задачи в crontab для выполнения каждый день в полночь
+  CRON_RULE2="0 0 * * * reverse_proxy --update"
+  ( crontab -l | grep -Fxq "$CRON_RULE2" ) || ( crontab -l; echo "$CRON_RULE2" ) | crontab -
+}
+
+###################################
 ### Reading values ​​from file
 ################################### 
 read_defaults_from_file() {
@@ -500,8 +519,8 @@ parse_args() {
         ;;
       --update)
         echo "Script update..."
-        #echo "Script update..."
-        return 1
+        update_reverse_proxy
+        exit 0
         ;;
       -h|--help)
         return 1
@@ -2314,30 +2333,6 @@ data_output() {
 }
 
 ###################################
-### Reverse_proxy manager
-###################################
-add_reverse_proxy() {
-  # Путь к файлу обновления
-  UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
-
-  # Создание скрипта обновления с использованием cat и EOF
-  cat <<EOF > "$UPDATE_SCRIPT"
-  #!/bin/bash
-wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
-ln -sf /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
-chmod +x /usr/local/reverse_proxy/reverse_proxy
-EOF
-
-  # Сделать файл исполнимым
-  chmod +x "$UPDATE_SCRIPT"
-  # Добавление задачи в crontab для выполнения каждый день в полночь
-  CRON_RULE2="0 0 * * * $UPDATE_SCRIPT"
-  ( crontab -l | grep -Fxq "$CRON_RULE2" ) || ( crontab -l; echo "$CRON_RULE2" ) | crontab -
-  # Немедленный запуск скрипта
-  $UPDATE_SCRIPT
-}
-
-###################################
 ### Downloadr webiste
 ###################################
 download_website() {
@@ -2451,13 +2446,13 @@ log_clear() {
 ###################################
 main() {
   clear
-  banner_xray
   log_entry
   read_defaults_from_file
   parse_args "$@" || show_help
   [[ ${args[skip-check]} == "false" ]] && check_root
   [[ ${args[skip-check]} == "false" ]] && check_ip
   check_operating_system
+  banner_xray
   select_language
   if [ -f ${defaults_file} ]; then
     tilda "$(text 4)"
