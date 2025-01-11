@@ -295,12 +295,12 @@ show_help() {
 ###################################
 update_reverse_proxy() {
   # Путь к файлу обновления
-  UPDATE_SCRIPT="/usr/local/bin/reverse_proxy"
+  UPDATE_SCRIPT="/usr/local/reverse_proxy/reverse_proxy"
 
   # Скрипт обновления
-  wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
-  ln -sf /usr/local/reverse_proxy/reverse_proxy /usr/local/bin/reverse_proxy
-  chmod +x /usr/local/reverse_proxy/reverse_proxy
+  wget -O $UPDATE_SCRIPT https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
+  ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
+  chmod +x $UPDATE_SCRIPT
 
   # Сделать файл исполнимым
   chmod +x "$UPDATE_SCRIPT"
