@@ -2427,10 +2427,17 @@ renew_cert() {
   NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
   NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
 
-  if [ ! -f /etc/letsencrypt/live/${NGINX_DOMAIN}/fullchain.pem ]; then
-    check_cf_token
-    mv /etc/letsencrypt/live/$NGINX_DOMAIN/ /etc/letsencrypt/live/backup_$NGINX_DOMAIN
-    issuance_of_certificates
+  # Проверка наличия сертификата
+  if [ -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
+    # Создание резервной копии старых сертификатов
+    TIMESTAMP=$(date +"%Y%m%d%H%M%S")
+    BACKUP_DIR="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP}"
+    mkdir -p "$BACKUP_DIR"
+    mv /etc/letsencrypt/live/${NGINX_DOMAIN} "$BACKUP_DIR"
+    mv /etc/letsencrypt/archive/${NGINX_DOMAIN} "$BACKUP_DIR/archive"
+    mv /etc/letsencrypt/renewal/${NGINX_DOMAIN}.conf "$BACKUP_DIR/renewal.conf"
+
+    echo "Резервная копия сертификатов сохранена в $BACKUP_DIR"
   else
     certbot renew --force-renewal
   fi
