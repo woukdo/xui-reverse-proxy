@@ -2393,6 +2393,18 @@ cert_backup() {
 }
 
 ###################################
+### Restore certificate
+###################################
+restore_cert() {
+  local TEMP_DOMAIN=$1
+  BACKUP_DIR=$(ls -td /etc/letsencrypt/backups/${TEMP_DOMAIN}_* | head -n 1)
+
+  mv "${BACKUP_DIR}/live" /etc/letsencrypt/
+  mv "${BACKUP_DIR}/archive" /etc/letsencrypt/
+  mv "${BACKUP_DIR}/renewal" /etc/letsencrypt/
+}
+
+###################################
 ### Database change in domain
 ###################################
 database_change_domain() {
@@ -2451,6 +2463,10 @@ renew_cert() {
   else
     cert_backup "$NGINX_DOMAIN"
     certbot renew --force-renewal
+    if [ $? -ne 0 ]; then
+      restore_cert "$NGINX_DOMAIN"
+      exit 1
+    fi
   fi
 
   # Перезапуск Nginx
