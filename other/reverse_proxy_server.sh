@@ -2424,7 +2424,7 @@ change_domain() {
 ###################################
 renew_cert() {
   # Получение домена из конфигурации Nginx
-  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/nginx.conf | head -n 1)
+  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
   echo "$NGINX_DOMAIN"
   NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
   echo "$NGINX_DOMAIN"
