@@ -7,7 +7,7 @@
 VERSION=1.4.0
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
-defaults_file="/usr/local/reverse_proxy/reinstall_defaults.conf"
+DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
 
 ###################################
 ### Initialization and Declarations
@@ -313,13 +313,13 @@ update_reverse_proxy() {
 ### Reading values ​​from file
 ################################### 
 read_defaults_from_file() {
-  if [[ -f $defaults_file ]]; then
+  if [[ -f $DEFAULT_FILE ]]; then
     # Чтение и выполнение строк из файла
     while IFS= read -r line; do
       # Пропускаем пустые строки и комментарии
       [[ -z "$line" || "$line" =~ ^# ]] && continue
       eval "$line"
-    done < $defaults_file
+    done < $DEFAULT_FILE
   else
     # Если файл не найден, используем значения по умолчанию
     defaults[utils]=true
@@ -347,7 +347,7 @@ read_defaults_from_file() {
 ### Writing values ​​to a file
 ###################################
 write_defaults_to_file() {
-  cat > ${defaults_file}<<EOF
+  cat > ${DEFAULT_FILE}<<EOF
 defaults[utils]=false
 defaults[dns]=false
 defaults[addu]=false
@@ -2459,9 +2459,10 @@ main() {
   check_operating_system
   banner_xray
   select_language
-  if [ -f ${defaults_file} ]; then
-    tilda "$(text 4)"
+  if [ -f ${DEFAULT_FILE} ]; then
+    warning " $(text 4) "
   fi
+  sleep 2
   while true; do
     clear
     banner_xray
@@ -2477,9 +2478,9 @@ main() {
     echo
     info " $(text 84) "                      # Exit
     echo "================================="
-    reading " $(text 1) " choice_menu        # Choise
+    reading " $(text 1) " CHOICE_MENU        # Choise
     tilda "$(text 10)"
-    case $choice_menu in
+    case $CHOICE_MENU in
       1)
         clear
         banner_xray
