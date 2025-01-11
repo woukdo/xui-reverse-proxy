@@ -2425,31 +2425,22 @@ change_domain() {
 renew_cert() {
   # Получение домена из конфигурации Nginx
   NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
-  echo "$NGINX_DOMAIN"
   NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
-  echo "$NGINX_DOMAIN"
   NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
-  echo "$NGINX_DOMAIN"
 
   # Проверка наличия сертификатов
   if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
-    echo "$NGINX_DOMAIN"
     check_cf_token
     issuance_of_certificates
   else
-    echo "$NGINX_DOMAIN"
     # Создание резервной копии старых сертификатов
     TIMESTAMP=$(date +"%Y%m%d%H%M%S")
     BACKUP_DIR="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP}"
     mkdir -p "$BACKUP_DIR"
-    mv /etc/letsencrypt/live/${NGINX_DOMAIN} "$BACKUP_DIR"
+    mv /etc/letsencrypt/live/${NGINX_DOMAIN} "$BACKUP_DIR/live"
     mv /etc/letsencrypt/archive/${NGINX_DOMAIN} "$BACKUP_DIR/archive"
-    mv /etc/letsencrypt/renewal/${NGINX_DOMAIN}.conf "$BACKUP_DIR/renewal.conf"
+    mv /etc/letsencrypt/renewal/${NGINX_DOMAIN}.conf "$BACKUP_DIR/renewal"
 
-    echo "Резервная копия сертификатов сохранена в $BACKUP_DIR"
-
-    # Перевыпуск сертификатов
-    echo "Сертификаты найдены. Выполняется их обновление."
     certbot renew --force-renewal
   fi
 
