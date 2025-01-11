@@ -1453,7 +1453,7 @@ EOF
   attempt=0
   max_attempts=2
   while [ $attempt -lt $max_attempts ]; do
-    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${DOMAIN},*.${DOMAIN} --agree-tos -m ${EMAIL} --no-eff-email --non-interactive
+    certbot certonly --dns-cloudflare --dns-cloudflare-credentials ${CF_CREDENTIALS_PATH} --dns-cloudflare-propagation-seconds 30 --rsa-key-size 4096 -d ${DOMAIN},*.${DOMAIN} --agree-tos -m ${EMAIL} --cert-name ${DOMAIN} --no-eff-email --non-interactive
 	  if [ $? -eq 0 ]; then
       break
     else
@@ -2430,10 +2430,12 @@ renew_cert() {
 
   # Проверка наличия сертификатов
   if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
-    echo "Сертификаты не найдены. Выполняется выпуск новых."
+    echo $NGINX_DOMAIN
+    certbot delete --cert-name ${NGINX_DOMAIN} --non-interactive --quiet
     check_cf_token
     issuance_of_certificates
   else
+    echo $NGINX_DOMAIN
     # Создание резервной копии старых сертификатов
     TIMESTAMP=$(date +"%Y%m%d%H%M%S")
     BACKUP_DIR="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP}"
