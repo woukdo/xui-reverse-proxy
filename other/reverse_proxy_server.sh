@@ -2377,6 +2377,21 @@ download_website() {
 }
 
 ###################################
+### Certificate backup
+###################################
+cert_backup() {
+  local TEMP_DOMAIN=$1
+  # Создание резервной копии старых сертификатов
+  TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+  BACKUP_DIR="/etc/letsencrypt/backups/${TEMP_DOMAIN}_${TIMESTAMP}"
+
+  mkdir -p "${BACKUP_DIR}"
+  mv /etc/letsencrypt/live ${BACKUP_DIR}
+  mv /etc/letsencrypt/archive ${BACKUP_DIR}
+  mv /etc/letsencrypt/renewal ${BACKUP_DIR}
+}
+
+###################################
 ### Database change in domain
 ###################################
 database_change_domain() {
@@ -2405,7 +2420,7 @@ change_domain() {
   OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
   
   check_cf_token
-  mv /etc/letsencrypt/live/$OLD_DOMAIN/ /etc/letsencrypt/live/backup_$OLD_DOMAIN
+  cert_backup "$OLD_DOMAIN"
   issuance_of_certificates  
 
   database_change_domain
@@ -2433,14 +2448,7 @@ renew_cert() {
     check_cf_token
     issuance_of_certificates
   else
-    # Создание резервной копии старых сертификатов
-    TIMESTAMP=$(date +"%Y%m%d%H%M%S")
-    BACKUP_DIR="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP}"
-    mkdir -p "$BACKUP_DIR"
-    mv /etc/letsencrypt/live/${NGINX_DOMAIN} "$BACKUP_DIR/live"
-    mv /etc/letsencrypt/archive/${NGINX_DOMAIN} "$BACKUP_DIR/archive"
-    mv /etc/letsencrypt/renewal/${NGINX_DOMAIN}.conf "$BACKUP_DIR/renewal"
-
+    cert_backup "$NGINX_DOMAIN"
     certbot renew --force-renewal
   fi
 
