@@ -2399,9 +2399,9 @@ restore_cert() {
   local TEMP_DOMAIN=$1
   BACKUP_DIR=$(ls -td /etc/letsencrypt/backups/${TEMP_DOMAIN}_* | head -n 1)
 
-  mv "${BACKUP_DIR}/live" /etc/letsencrypt/
-  mv "${BACKUP_DIR}/archive" /etc/letsencrypt/
-  mv "${BACKUP_DIR}/renewal" /etc/letsencrypt/
+  cp -r "${BACKUP_DIR}/live" /etc/letsencrypt/
+  cp -r "${BACKUP_DIR}/archive" /etc/letsencrypt/
+  cp -r "${BACKUP_DIR}/renewal" /etc/letsencrypt/
 }
 
 ###################################
