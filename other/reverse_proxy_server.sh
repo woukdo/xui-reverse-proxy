@@ -4,7 +4,7 @@
 ###################################
 ### Standard values
 ###################################
-VERSION_MANAGER=1.4.0b
+VERSION_MANAGER=1.4.0c
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
