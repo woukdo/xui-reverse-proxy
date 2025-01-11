@@ -4,7 +4,7 @@
 ###################################
 ### Standard values
 ###################################
-VERSION=1.4.0a
+VERSION=1.4.0b
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
@@ -519,7 +519,6 @@ parse_args() {
         ;;
       --update)
         warning "Script update version: $VERSION"
-        echo "Script update version: $VERSION"
         echo
         update_reverse_proxy
         exit 0
