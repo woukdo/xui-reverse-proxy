@@ -295,7 +295,7 @@ show_help() {
 ###################################
 update_reverse_proxy() {
   # Путь к файлу обновления
-  UPDATE_SCRIPT="/usr/local/bin/update_reverse_proxy"
+  UPDATE_SCRIPT="/usr/local/bin/reverse_proxy"
 
   # Скрипт обновления
   wget -O /usr/local/bin/reverse_proxy https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/test/other/reverse_proxy_server.sh
