@@ -519,6 +519,7 @@ parse_args() {
         ;;
       --update)
         echo "Script update version: $VERSION..."
+        echo
         update_reverse_proxy
         exit 0
         ;;
