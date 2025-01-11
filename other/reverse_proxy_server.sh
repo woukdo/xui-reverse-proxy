@@ -4,7 +4,7 @@
 ###################################
 ### Standard values
 ###################################
-VERSION=1.4.0b
+VERSION_MANAGER=1.4.0b
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
@@ -219,8 +219,8 @@ E[83]="Terminal emulator Shell in a box."
 R[83]="Эмулятор терминала Shell in a box."
 E[84]="0. Exit script"
 R[84]="0. Выход из скрипта"
-E[85]="MENU $VERSION"
-R[85]="МЕНЮ $VERSION"
+E[85]="MENU $VERSION_MANAGER"
+R[85]="МЕНЮ $VERSION_MANAGER"
 E[86]="1. Standard installation"
 R[86]="1. Стандартная установка"
 E[87]="2. Copy someone else's website to your server, experimental option"
@@ -518,7 +518,7 @@ parse_args() {
         shift 2
         ;;
       --update)
-        warning "Script update version: $VERSION"
+        warning "Script update version: $VERSION_MANAGER"
         echo
         update_reverse_proxy
         exit 0
