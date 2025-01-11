@@ -298,7 +298,7 @@ update_reverse_proxy() {
   UPDATE_SCRIPT="/usr/local/reverse_proxy/reverse_proxy"
 
   # Скрипт обновления
-  wget -O $UPDATE_SCRIPT hhttps://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh
+  wget -O $UPDATE_SCRIPT https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x $UPDATE_SCRIPT
 
