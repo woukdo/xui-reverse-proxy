@@ -4,7 +4,7 @@
 ###################################
 ### Standard values
 ###################################
-VERSION_MANAGER=1.4.0e
+VERSION_MANAGER=1.4.0f
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 export DEBIAN_FRONTEND=noninteractive
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
@@ -2378,49 +2378,26 @@ download_website() {
 }
 
 ###################################
-### Certificate backup
+### Create a backup of certificates
 ###################################
-cert_backup() {
-  local BACKUP_DIR_L=$1
-
-  mkdir -p "${BACKUP_DIR_L}"
-  cp -r /etc/letsencrypt/live ${BACKUP_DIR_L}
-  cp -r /etc/letsencrypt/archive ${BACKUP_DIR_L}
-  cp -r /etc/letsencrypt/renewal ${BACKUP_DIR_L}
-}
-
-###################################
-### Reissue of certificates
-###################################
-renew_cert() {
-  # Получение домена из конфигурации Nginx
-  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
-  NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
-  NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
-  local TIMESTAMP_L=$(date +"%Y%m%d_%H%M%S")
-  local BACKUP_DIR_L="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP_L}"
-
-  # Проверка наличия сертификатов
-  if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
-    check_cf_token
-    cert_backup "$BACKUP_DIR_L"
-    issuance_of_certificates
-  else
-    cert_backup "$BACKUP_DIR_L"
-    certbot renew --force-renewal
-    if [ $? -ne 0 ]; then
-      return 1
-    fi
-  fi
+create_cert_backup() {
+  local DOMAIN=$1
+  local ACTION=$2 # Тип действия: "cp" или "mv"
+  local TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+  local BACKUP_DIR="/etc/letsencrypt/backups/${DOMAIN}_${TIMESTAMP}"
   
-  # Перезапуск Nginx
-  systemctl restart nginx
+  mkdir -p "${BACKUP_DIR}"
+  
+  $ACTION /etc/letsencrypt/live ${BACKUP_DIR}
+  $ACTION /etc/letsencrypt/archive ${BACKUP_DIR}
+  $ACTION /etc/letsencrypt/renewal ${BACKUP_DIR}
 }
 
 ###################################
 ### Database change in domain
 ###################################
 database_change_domain() {
+  local DB_PATH="/etc/x-ui/x-ui.db"
   sqlite3 $DB_PATH <<EOF
 UPDATE settings 
 SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
@@ -2440,12 +2417,13 @@ EOF
 ### Change domain name
 ###################################
 change_domain() {
-  DB_PATH="/etc/x-ui/x-ui.db"
-  SQL_QUERY="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
+  local SQL_QUERY="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
   OLD_SUB_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.externalProxy[].dest' | sort -u)
   OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
   
-  renew_cert
+  check_cf_token
+  create_cert_backup "$OLD_DOMAIN" "mv"
+  issuance_of_certificates
 
   database_change_domain
   sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
@@ -2456,6 +2434,31 @@ change_domain() {
 
   systemctl restart nginx
   tilda "$(text 10)"
+}
+
+###################################
+### Reissue of certificates
+###################################
+renew_cert() {
+  # Получение домена из конфигурации Nginx
+  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
+  NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
+  NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
+
+  # Проверка наличия сертификатов
+  if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
+    check_cf_token
+    issuance_of_certificates
+  else
+    create_cert_backup "$NGINX_DOMAIN" "cp"
+    certbot renew --force-renewal
+    if [ $? -ne 0 ]; then
+      return 1
+    fi
+  fi
+  
+  # Перезапуск Nginx
+  systemctl restart nginx
 }
 
 ###################################
