@@ -2381,27 +2381,12 @@ download_website() {
 ### Certificate backup
 ###################################
 cert_backup() {
-  local TEMP_DOMAIN=$1
-  # Создание резервной копии старых сертификатов
-  TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-  BACKUP_DIR="/etc/letsencrypt/backups/${TEMP_DOMAIN}_${TIMESTAMP}"
+  local BACKUP_DIR_L=$1
 
-  mkdir -p "${BACKUP_DIR}"
-  mv /etc/letsencrypt/live ${BACKUP_DIR}
-  mv /etc/letsencrypt/archive ${BACKUP_DIR}
-  mv /etc/letsencrypt/renewal ${BACKUP_DIR}
-}
-
-###################################
-### Restore certificate
-###################################
-restore_cert() {
-  local TEMP_DOMAIN=$1
-  BACKUP_DIR=$(ls -td /etc/letsencrypt/backups/${TEMP_DOMAIN}_* | head -n 1)
-
-  cp -r "${BACKUP_DIR}/live" /etc/letsencrypt/
-  cp -r "${BACKUP_DIR}/archive" /etc/letsencrypt/
-  cp -r "${BACKUP_DIR}/renewal" /etc/letsencrypt/
+  mkdir -p "${BACKUP_DIR_L}"
+  cp -r /etc/letsencrypt/live ${BACKUP_DIR_L}
+  cp -r /etc/letsencrypt/archive ${BACKUP_DIR_L}
+  cp -r /etc/letsencrypt/renewal ${BACKUP_DIR_L}
 }
 
 ###################################
@@ -2432,9 +2417,7 @@ change_domain() {
   OLD_SUB_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.externalProxy[].dest' | sort -u)
   OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
   
-  check_cf_token
-  cert_backup "$OLD_DOMAIN"
-  issuance_of_certificates  
+  renew_cert
 
   database_change_domain
   sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
@@ -2455,20 +2438,22 @@ renew_cert() {
   NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
   NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
   NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
+  local TIMESTAMP_L=$(date +"%Y%m%d_%H%M%S")
+  local BACKUP_DIR_L="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP_L}"
 
   # Проверка наличия сертификатов
   if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
     check_cf_token
+    cert_backup "$BACKUP_DIR_L"
     issuance_of_certificates
   else
-    cert_backup "$NGINX_DOMAIN"
+    cert_backup "$BACKUP_DIR_L"
     certbot renew --force-renewal
     if [ $? -ne 0 ]; then
-      restore_cert "$NGINX_DOMAIN"
-      exit 1
+      return 1
     fi
   fi
-
+  
   # Перезапуск Nginx
   systemctl restart nginx
 }
