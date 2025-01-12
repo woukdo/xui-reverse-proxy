@@ -5,7 +5,7 @@
 ### Standard values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0g
+VERSION_MANAGER=1.4.0h
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
@@ -236,8 +236,8 @@ E[90]="5. Disable IPv6"
 R[90]="5. Отключение IPv6"
 E[91]="6. Enable IPv6"
 R[91]="6. Включение IPv6"
-E[92]=""
-R[92]=""
+E[92]="Press Enter to return to the menu..."
+R[92]="Нажмите Enter, чтобы вернуться в меню..."
 
 
 ###################################
@@ -2554,7 +2554,8 @@ main() {
         warning " $(text 76) "
         ;;
     esac
-    read -rp "Нажмите Enter, чтобы вернуться в меню..." dummy
+    info " $(text 92) "
+    read -r dummy
   done
   log_clear
 }
