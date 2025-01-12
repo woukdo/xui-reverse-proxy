@@ -10,6 +10,7 @@ SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
+DB_SCRIPT_URL="https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/other/x-ui.gpg"
 
 ###################################
 ### Initialization and Declarations
@@ -2190,7 +2191,7 @@ EOF
 install_panel() {
   info " $(text 46) "
 
-  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/other/x-ui.gpg; do
+  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused $DB_SCRIPT_URL; do
     warning " $(text 38) "
     sleep 3
   done
