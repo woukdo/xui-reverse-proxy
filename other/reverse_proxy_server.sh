@@ -2390,6 +2390,34 @@ cert_backup() {
 }
 
 ###################################
+### Reissue of certificates
+###################################
+renew_cert() {
+  # Получение домена из конфигурации Nginx
+  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
+  NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
+  NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
+  local TIMESTAMP_L=$(date +"%Y%m%d_%H%M%S")
+  local BACKUP_DIR_L="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP_L}"
+
+  # Проверка наличия сертификатов
+  if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
+    check_cf_token
+    cert_backup "$BACKUP_DIR_L"
+    issuance_of_certificates
+  else
+    cert_backup "$BACKUP_DIR_L"
+    certbot renew --force-renewal
+    if [ $? -ne 0 ]; then
+      return 1
+    fi
+  fi
+  
+  # Перезапуск Nginx
+  systemctl restart nginx
+}
+
+###################################
 ### Database change in domain
 ###################################
 database_change_domain() {
@@ -2428,34 +2456,6 @@ change_domain() {
 
   systemctl restart nginx
   tilda "$(text 10)"
-}
-
-###################################
-### Reissue of certificates
-###################################
-renew_cert() {
-  # Получение домена из конфигурации Nginx
-  NGINX_DOMAIN=$(grep "ssl_certificate" /etc/nginx/conf.d/local.conf | head -n 1)
-  NGINX_DOMAIN=${NGINX_DOMAIN#*"/live/"}
-  NGINX_DOMAIN=${NGINX_DOMAIN%"/"*}
-  local TIMESTAMP_L=$(date +"%Y%m%d_%H%M%S")
-  local BACKUP_DIR_L="/etc/letsencrypt/backups/${NGINX_DOMAIN}_${TIMESTAMP_L}"
-
-  # Проверка наличия сертификатов
-  if [ ! -d /etc/letsencrypt/live/${NGINX_DOMAIN} ]; then
-    check_cf_token
-    cert_backup "$BACKUP_DIR_L"
-    issuance_of_certificates
-  else
-    cert_backup "$BACKUP_DIR_L"
-    certbot renew --force-renewal
-    if [ $? -ne 0 ]; then
-      return 1
-    fi
-  fi
-  
-  # Перезапуск Nginx
-  systemctl restart nginx
 }
 
 ###################################
