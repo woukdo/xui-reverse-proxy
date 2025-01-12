@@ -2428,7 +2428,10 @@ change_domain() {
   issuance_of_certificates
 
   database_change_domain
-  sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/stream-enabled/stream.conf
+  sed -i -e "
+    s/$OLD_SUB_DOMAIN/$SUB_DOMAIN/g;
+    s/$OLD_DOMAIN/$DOMAIN/g;
+  " /etc/nginx/stream-enabled/stream.conf
   sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/conf.d/local.conf
   
   echo "$OLD_DOMAIN > $DOMAIN"
