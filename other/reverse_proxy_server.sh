@@ -2211,8 +2211,8 @@ install_panel() {
   x-ui stop
 
   rm -rf x-ui.gpg
-  rm -rf /etc/x-ui/x-ui.db.backup
-  [ -f /etc/x-ui/x-ui.db ] && mv /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.backup
+  rm -rf $DB_PATH.backup
+  [ -f $DB_PATH ] && mv $DB_PATH $DB_PATH.backup
   mv x-ui.db /etc/x-ui/
 
   x-ui start
