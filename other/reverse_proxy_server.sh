@@ -4,10 +4,12 @@
 ###################################
 ### Standard values
 ###################################
+export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER=1.4.0f
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
-export DEBIAN_FRONTEND=noninteractive
 DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
+DB_PATH="/etc/x-ui/x-ui.db"
+SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
 
 ###################################
 ### Initialization and Declarations
@@ -298,7 +300,7 @@ update_reverse_proxy() {
   UPDATE_SCRIPT="/usr/local/reverse_proxy/reverse_proxy"
 
   # Скрипт обновления
-  wget -O $UPDATE_SCRIPT https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh
+  wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x $UPDATE_SCRIPT
 
@@ -518,7 +520,7 @@ parse_args() {
         shift 2
         ;;
       --update)
-        CURRENT_VERSION=$(wget -qO- https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
+        CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
         warning "Script update version: $CURRENT_VERSION"
         echo
         update_reverse_proxy
@@ -2397,7 +2399,6 @@ create_cert_backup() {
 ### Database change in domain
 ###################################
 database_change_domain() {
-  local DB_PATH="/etc/x-ui/x-ui.db"
   sqlite3 $DB_PATH <<EOF
 UPDATE settings 
 SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
