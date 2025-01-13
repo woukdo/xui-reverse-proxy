@@ -2196,7 +2196,8 @@ install_panel() {
 
   echo ${SECRET_PASSWORD} | gpg --batch --yes --passphrase-fd 0 -d x-ui.gpg > x-ui.db
   echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
-
+  echo -e "20\n1" | x-ui > /dev/null 2>&1
+  
   x-ui stop
   rm -rf x-ui.gpg
   rm -rf ${DB_PATH}.backup
@@ -2214,7 +2215,6 @@ install_panel() {
   database_change
 
   x-ui start
-  echo -e "20\n1" | x-ui > /dev/null 2>&1
   tilda "$(text 10)"
 }
 
