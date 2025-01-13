@@ -5,12 +5,12 @@
 ### Standard values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0h
+VERSION_MANAGER=1.4.0g
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/defaultFlags.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
-DB_SCRIPT_URL="https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/other/x-ui.gpg"
+DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/other/x-ui.gpg"
 
 ###################################
 ### Initialization and Declarations
@@ -2145,8 +2145,6 @@ EOF
 ### Changing the Database
 ###################################
 database_change() {
-  DB_PATH="x-ui.db"
-
   sqlite3 $DB_PATH <<EOF
 UPDATE users 
 SET username = '$USERNAME', password = '$PASSWORD' 
@@ -2199,6 +2197,12 @@ install_panel() {
   echo ${SECRET_PASSWORD} | gpg --batch --yes --passphrase-fd 0 -d x-ui.gpg > x-ui.db
   echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
 
+  x-ui stop
+  rm -rf x-ui.gpg
+  rm -rf ${DB_PATH}.backup
+  [ -f ${DB_PATH} ] && mv ${DB_PATH} ${DB_PATH}.backup
+  mv x-ui.db /etc/x-ui/
+
   settings_grpc
   settings_split
   settings_httpu
@@ -2208,13 +2212,6 @@ install_panel() {
   settings_xtls
   sniffing_inbounds
   database_change
-
-  x-ui stop
-
-  rm -rf x-ui.gpg
-  rm -rf $DB_PATH.backup
-  [ -f $DB_PATH ] && mv $DB_PATH $DB_PATH.backup
-  mv x-ui.db /etc/x-ui/
 
   x-ui start
   echo -e "20\n1" | x-ui > /dev/null 2>&1
