@@ -7,7 +7,7 @@
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER=1.4.0h
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
-DEFAULT_FILE="/usr/local/reverse_proxy/reinstall_defaults.conf"
+DEFAULT_FLAGS="/usr/local/reverse_proxy/defaultFlags.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
 DB_SCRIPT_URL="https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/other/x-ui.gpg"
@@ -316,13 +316,13 @@ update_reverse_proxy() {
 ### Reading values ​​from file
 ################################### 
 read_defaults_from_file() {
-  if [[ -f $DEFAULT_FILE ]]; then
+  if [[ -f $DEFAULT_FLAGS ]]; then
     # Чтение и выполнение строк из файла
     while IFS= read -r line; do
       # Пропускаем пустые строки и комментарии
       [[ -z "$line" || "$line" =~ ^# ]] && continue
       eval "$line"
-    done < $DEFAULT_FILE
+    done < $DEFAULT_FLAGS
   else
     # Если файл не найден, используем значения по умолчанию
     defaults[utils]=true
@@ -350,7 +350,7 @@ read_defaults_from_file() {
 ### Writing values ​​to a file
 ###################################
 write_defaults_to_file() {
-  cat > ${DEFAULT_FILE}<<EOF
+  cat > ${DEFAULT_FLAGS}<<EOF
 defaults[utils]=false
 defaults[dns]=false
 defaults[addu]=false
@@ -2486,7 +2486,7 @@ main() {
   check_operating_system
   banner_xray
   select_language
-  if [ -f ${DEFAULT_FILE} ]; then
+  if [ -f ${DEFAULT_FLAGS} ]; then
     warning " $(text 4) "
   fi
   sleep 2
