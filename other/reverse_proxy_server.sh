@@ -1078,6 +1078,75 @@ EOL
 }
 
 ###################################
+### WARP
+###################################
+warp() {
+  info " $(text 43) "
+
+  curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+  echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
+  ${PACKAGE_UPDATE[int]}
+  ${PACKAGE_INSTALL[int]} cloudflare-warp
+
+#  mkdir -p /etc/systemd/system/warp-svc.service.d
+#  cd /usr/local/reverse_proxy/
+
+#  case "$SYSTEM" in
+#    Debian|Ubuntu)
+#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/pool/$(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2)/main/c/cloudflare-warp/cloudflare-warp_2024.6.497-1_amd64.deb"; do
+#        warning " $(text 38) "
+#        sleep 3
+#      done
+#      apt install -y ./cloudflare-warp_2024.6.497-1_amd64.deb
+#      ;;
+#
+#    CentOS|Fedora)
+#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/rpm/x86_64/cloudflare-warp-2024.6.497-1.x86_64.rpm"; do
+#        warning " $(text 38) "
+#        sleep 3
+#      done
+#      sudo yum localinstall -y cloudflare-warp-2024.6.497-1.x86_64.rpm
+#      ;;
+#  esac
+
+#  rm -rf cloudflare-warp_*
+#  cd ~
+
+#  cat > /etc/systemd/system/warp-svc.service.d/override.conf <<EOF
+#[Service]
+#LogLevelMax=3
+#EOF
+
+#  systemctl daemon-reload
+#  systemctl restart warp-svc.service
+#  sleep 3
+
+#  systemctl status warp-svc || echo "Служба warp-svc не найдена или не запустилась."
+
+  sleep 1
+  yes | warp-cli registration new
+  sleep 1
+  warp-cli mode proxy
+  sleep 1
+  warp-cli proxy port 40000
+  sleep 1
+  warp-cli connect
+  sleep 1
+  warp-cli debug qlog disable
+  sleep 2
+
+  warp-cli tunnel stats
+  if curl -x socks5h://localhost:40000 https://2ip.io; then
+    echo "Настройка завершена: WARP подключен и работает."
+  else
+    echo "Ошибка: не удалось подключиться к WARP через прокси. Проверьте настройки."
+  fi
+
+  swapfile
+  tilda "$(text 10)"
+}
+
+###################################
 ### Installing packages
 ###################################
 installation_of_utilities() {
@@ -1362,75 +1431,6 @@ fi
 EOF
   chmod +x /usr/local/reverse_proxy/restart_warp
   { crontab -l; echo "* * * * * /usr/local/reverse_proxy/restart_warp"; } | crontab -
-}
-
-###################################
-### WARP
-###################################
-warp() {
-  info " $(text 43) "
-
-  curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
-  echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
-  ${PACKAGE_UPDATE[int]}
-  ${PACKAGE_INSTALL[int]} cloudflare-warp
-
-#  mkdir -p /etc/systemd/system/warp-svc.service.d
-#  cd /usr/local/reverse_proxy/
-
-#  case "$SYSTEM" in
-#    Debian|Ubuntu)
-#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/pool/$(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2)/main/c/cloudflare-warp/cloudflare-warp_2024.6.497-1_amd64.deb"; do
-#        warning " $(text 38) "
-#        sleep 3
-#      done
-#      apt install -y ./cloudflare-warp_2024.6.497-1_amd64.deb
-#      ;;
-#
-#    CentOS|Fedora)
-#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/rpm/x86_64/cloudflare-warp-2024.6.497-1.x86_64.rpm"; do
-#        warning " $(text 38) "
-#        sleep 3
-#      done
-#      sudo yum localinstall -y cloudflare-warp-2024.6.497-1.x86_64.rpm
-#      ;;
-#  esac
-
-#  rm -rf cloudflare-warp_*
-#  cd ~
-
-#  cat > /etc/systemd/system/warp-svc.service.d/override.conf <<EOF
-#[Service]
-#LogLevelMax=3
-#EOF
-
-#  systemctl daemon-reload
-#  systemctl restart warp-svc.service
-#  sleep 3
-
-#  systemctl status warp-svc || echo "Служба warp-svc не найдена или не запустилась."
-
-  sleep 1
-  yes | warp-cli registration new
-  sleep 1
-  warp-cli mode proxy
-  sleep 1
-  warp-cli proxy port 40000
-  sleep 1
-  warp-cli connect
-  sleep 1
-  warp-cli debug qlog disable
-  sleep 2
-
-  warp-cli tunnel stats
-  if curl -x socks5h://localhost:40000 https://2ip.io; then
-    echo "Настройка завершена: WARP подключен и работает."
-  else
-    echo "Ошибка: не удалось подключиться к WARP через прокси. Проверьте настройки."
-  fi
-
-  swapfile
-  tilda "$(text 10)"
 }
 
 ###################################
@@ -2510,12 +2510,12 @@ main() {
         banner_xray
         warning_banner
         data_entry
+        [[ ${args[warp]} == "true" ]] && warp
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
         [[ ${args[dns]} == "true" ]] && dns_encryption
         [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
         [[ ${args[bbr]} == "true" ]] && enable_bbr
         [[ ${args[ipv6]} == "true" ]] && disable_ipv6
-        [[ ${args[warp]} == "true" ]] && warp
         [[ ${args[cert]} == "true" ]] && issuance_of_certificates
         [[ ${args[mon]} == "true" ]] && monitoring
         [[ ${args[shell]} == "true" ]] && shellinabox
