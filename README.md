@@ -126,3 +126,47 @@ The script will then prompt you for the necessary configuration information:
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/cortez24rus/xui-reverse-proxy.svg?variant=adaptive)](https://starchart.cc/cortez24rus/xui-reverse-proxy)
+
+
+
+
+```mermaid
+graph TB
+    %% Main Components
+    CP((Control<br>Panel))
+    
+    %% Zones with rounded rectangles
+    subgraph "Zones"
+        Z1[Zone A - Europe]
+        Z2[Zone B - Asia]
+    end
+
+    %% Servers as circles
+    S1((Server<br>Germany))
+    S2((Server<br>France))
+    S3((Server<br>Singapore))
+
+    %% User Access as hexagons
+    U1{VPN Client}
+    U2{Telegram Bot}
+
+    %% Simple Connections
+    CP --> Z1 & Z2
+    Z1 --> S1 & S2
+    Z2 --> S3
+    U1 & U2 --> CP
+
+    %% Clean Modern Colors
+    classDef panel fill:#6366F1,stroke:#4338CA,stroke-width:2px,color:#fff
+    classDef zone fill:#34D399,stroke:#059669,stroke-width:2px,color:#fff
+    classDef server fill:#F472B6,stroke:#DB2777,stroke-width:2px,color:#fff
+    classDef user fill:#60A5FA,stroke:#2563EB,stroke-width:2px,color:#fff
+
+    class CP panel
+    class Z1,Z2 zone
+    class S1,S2,S3 server
+    class U1,U2 user
+
+    %% Add Labels
+    linkStyle default stroke:#6B7280,stroke-width:2px
+```
