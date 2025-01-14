@@ -249,7 +249,8 @@ show_help() {
   echo "       [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]"
   echo "       [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]"
   echo "       [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]"
-  echo "       [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [-h|--help]"
+  echo "       [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]"
+  echo "       [-h|--help]"
   echo
   echo "  -u, --utils <true|false>       Additional utilities                             (default: ${defaults[utils]})"
   echo "                                 Дополнительные утилиты"
@@ -287,6 +288,8 @@ show_help() {
   echo "                                 Отключение проверки"
   echo "  -o, --subdomain <true|false>   Support for subdomains                           (default: ${defaults[subdomain]})"
   echo "                                 Поддержка субдоменов"
+  echo "      --update <true|false>      Updating the script version (Version on github: ${VERSION_MANAGER})"
+  echo "                                 Обновление версии скрипта (Версия на github: ${VERSION_MANAGER})"
   echo "  -h, --help                     Display this help message"
   echo "                                 Показать это сообщение помощи"
   echo
@@ -2508,7 +2511,6 @@ log_clear() {
 ### Main function
 ###################################
 main() {
-  clear
   log_entry
   read_defaults_from_file
   parse_args "$@" || show_help
