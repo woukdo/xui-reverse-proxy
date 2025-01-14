@@ -5,7 +5,7 @@
 ### Standard values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0n
+VERSION_MANAGER=1.4.0o
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/defaultFlags.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
@@ -2504,6 +2504,12 @@ UPDATE settings SET value = 'SUB_JSON_URI' WHERE LOWER(key) LIKE '%subjsonuri%';
 EOF
 }
 
+directory_size() {
+  echo
+  read -rp "Введите директорию для проверки размера: " DIRECTORY
+  du -ah ${DIRECTORY} --max-depth=1 | grep -v '/$' | sort -rh | head -10
+}
+
 ###################################
 ### Removing all escape sequences
 ###################################
@@ -2539,6 +2545,7 @@ main() {
     info " $(text 89) "                      # Renew cert
     info " $(text 90) "                      # Disable IPv6
     info " $(text 91) "                      # Enable IPv6
+    echo " 7. Размер директории"
     echo
     info " $(text 84) "                      # Exit
     echo "================================="
@@ -2582,6 +2589,9 @@ main() {
         ;;
       6)
         enable_ipv6
+        ;;
+      7)
+        directory_size
         ;;
       0)
         clear
