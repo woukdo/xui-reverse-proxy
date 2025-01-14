@@ -750,7 +750,6 @@ check_cf_token() {
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
         reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
         TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
-        echo
       done
 
       # Проверяем, если домен соответствует регулярному выражению
@@ -762,6 +761,8 @@ check_cf_token() {
         SUB_DOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUB_DOMAIN
       fi
     fi
+
+    echo
 
     # Запрашиваем email пользователя
     while [[ -z $EMAIL ]]; do
@@ -1084,7 +1085,7 @@ warp() {
   curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
   echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
   ${PACKAGE_UPDATE[int]}
-  ${PACKAGE_INSTALL[int]} cloudflare-warp
+  ${PACKAGE_INSTALL[int]} gpg cloudflare-warp
 
 #  mkdir -p /etc/systemd/system/warp-svc.service.d
 #  cd /usr/local/reverse_proxy/
