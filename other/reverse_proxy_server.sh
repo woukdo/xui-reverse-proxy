@@ -913,8 +913,6 @@ data_entry() {
   reading " $(text 12) " PASSWORD
   [[ ${args[addu]} == "true" ]] && add_user
 
-  tilda "$(text 10)"
-
   check_cf_token
 
   tilda "$(text 10)"
