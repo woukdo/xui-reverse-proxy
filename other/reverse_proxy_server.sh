@@ -1082,10 +1082,11 @@ EOL
 warp() {
   info " $(text 43) "
 
+  ${PACKAGE_INSTALL[int]} gpg
   curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
   echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
   ${PACKAGE_UPDATE[int]}
-  ${PACKAGE_INSTALL[int]} gpg cloudflare-warp
+  ${PACKAGE_INSTALL[int]} cloudflare-warp
 
 #  mkdir -p /etc/systemd/system/warp-svc.service.d
 #  cd /usr/local/reverse_proxy/
