@@ -2488,6 +2488,7 @@ UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_STEAL' WHERE LOWER(remark
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%whatsapp%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
 
+UPDATE settings SET value = 'SECRET' WHERE LOWER(key) LIKE '%secret%';
 UPDATE settings SET value = '/WEB_BASE_PATH/' WHERE LOWER(key) LIKE '%webbasepath%';
 UPDATE settings SET value = '/SUB_PATH/' WHERE LOWER(key) LIKE '%subpath%';
 UPDATE settings SET value = 'SUB_URI' WHERE LOWER(key) LIKE '%suburi%';
