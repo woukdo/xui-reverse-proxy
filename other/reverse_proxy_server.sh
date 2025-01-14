@@ -527,7 +527,7 @@ parse_args() {
         warning "Script update version: $CURRENT_VERSION"
         echo
         update_reverse_proxy
-        return 0
+        exit 0
         ;;
       --depers)
         echo "Depersonalization database..."
