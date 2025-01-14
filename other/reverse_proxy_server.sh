@@ -2351,9 +2351,9 @@ data_output() {
 ###################################
 download_website() {
   reading " $(text 13) " sitelink
+  local NGINX_CONFIG_L="/etc/nginx/conf.d/local.conf"
   wget -P /var/www --mirror --convert-links --adjust-extension --page-requisites --no-parent https://${sitelink}
 
-  rm -rf /var/www/*
   mkdir ./testdir
   wget -q -P ./testdir https://${sitelink}
   index=$(ls ./testdir)
@@ -2382,7 +2382,11 @@ download_website() {
 
   sitedir=${resultfile#"/var/www/"}
   sitedir=${sitedir%"/${index}"}
-  echo ""
+
+  NEW_ROOT="root /var/www/${sitedir};"
+  NEW_INDEX="index ${index};"
+  sed -i '/^\s*root\s.*/c\ '"$NEW_ROOT" $NGINX_CONFIG
+  sed -i '/^\s*index\s.*/c\ '"$NEW_INDEX" $NGINX_CONFIG
 }
 
 ###################################
