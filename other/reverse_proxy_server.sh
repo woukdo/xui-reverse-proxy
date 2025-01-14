@@ -405,7 +405,7 @@ validate_true_false() {
 ###################################
 parse_args() {
   local opts
-  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,help -- "$@")
+  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,depers,help -- "$@")
   if [[ $? -ne 0 ]]; then
     return 1
   fi
@@ -525,6 +525,11 @@ parse_args() {
         warning "Script update version: $CURRENT_VERSION"
         echo
         update_reverse_proxy
+        return 0
+        ;;
+      --depers)
+        echo "Depersonalization database..."
+	depersonalization_db
         exit 0
         ;;
       -h|--help)
@@ -2468,31 +2473,20 @@ renew_cert() {
 ### Depersonalization of the database
 ###################################
 depersonalization_db() {
-  local SUB_DOMAIN_DP="www.example.com"
-  local DOMAIN_DP="example.com"
-  local SQL_QUERY_DP="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
-  
-  local OLD_SUB_DOMAIN_DP=$(sqlite3 "$DB_PATH" "$SQL_QUERY_DP" | jq -r '.externalProxy[].dest' | sort -u)
-  local OLD_DOMAIN_DP=$(sqlite3 "$DB_PATH" "$SQL_QUERY_DP" | jq -r '.realitySettings.serverNames[]' | sort -u)
-
   cp ${DB_PATH} /root/
   
   sqlite3 /root/x-ui.db <<EOF
 UPDATE users 
-SET username = 'admin', password = 'admin' 
+SET username = 'user', password = 'password' 
 WHERE id = 1;
 
-UPDATE settings 
-SET value = REPLACE(value, '$OLD_DOMAIN_DP', '$DOMAIN_DP') 
-WHERE value LIKE '%$OLD_DOMAIN_DP%';
-
-UPDATE inbounds 
-SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN_DP', '$SUB_DOMAIN_DP') 
-WHERE stream_settings LIKE '%$OLD_SUB_DOMAIN_DP%';
-
-UPDATE inbounds 
-SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN') 
-WHERE stream_settings LIKE '%$OLD_DOMAIN%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_SPLIT' WHERE LOWER(remark) LIKE '%split%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%whatsapp%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
 
 UPDATE settings SET value = '/WEB_BASE_PATH/' WHERE LOWER(key) LIKE '%webbasepath%';
 UPDATE settings SET value = '/SUB_PATH/' WHERE LOWER(key) LIKE '%subpath%';
@@ -2582,9 +2576,6 @@ main() {
       6)
         enable_ipv6
         ;;
-      7)
-        depersonalization_db
-	;;
       0)
         clear
         break
