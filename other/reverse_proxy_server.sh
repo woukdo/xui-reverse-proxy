@@ -531,7 +531,7 @@ parse_args() {
         ;;
       --depers)
         echo "Depersonalization database..."
-	depersonalization_db
+	      depersonalization_db
         exit 0
         ;;
       -h|--help)
@@ -2506,7 +2506,7 @@ EOF
 
 directory_size() {
   echo
-  read -rp "Введите директорию для проверки размера: " DIRECTORY
+  read -e -p "Введите директорию для проверки размера: " DIRECTORY
   du -ah ${DIRECTORY} --max-depth=1 | grep -v '/$' | sort -rh | head -10
 }
 
