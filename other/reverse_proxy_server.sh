@@ -5,7 +5,7 @@
 ### Standard values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0k
+VERSION_MANAGER=1.4.0l
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/defaultFlags.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
