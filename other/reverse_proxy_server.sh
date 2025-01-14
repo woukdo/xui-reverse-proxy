@@ -2511,6 +2511,7 @@ main() {
         clear
         banner_xray
         warning_banner
+        update_reverse_proxy
         data_entry
         [[ ${args[warp]} == "true" ]] && warp
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
@@ -2522,7 +2523,6 @@ main() {
         [[ ${args[mon]} == "true" ]] && monitoring
         [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
-        update_reverse_proxy
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
         [[ ${args[firewall]} == "true" ]] && enabling_security
