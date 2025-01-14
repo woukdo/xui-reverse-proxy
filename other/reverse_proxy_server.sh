@@ -5,7 +5,7 @@
 ### Standard values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0m
+VERSION_MANAGER=1.4.0n
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/defaultFlags.conf"
 DB_PATH="/etc/x-ui/x-ui.db"
@@ -2385,6 +2385,7 @@ download_website() {
 
   NEW_ROOT="root /var/www/${sitedir};"
   NEW_INDEX="index ${index};"
+  
   sed -i '/^\s*root\s.*/c\ '"$NEW_ROOT" $NGINX_CONFIG
   sed -i '/^\s*index\s.*/c\ '"$NEW_INDEX" $NGINX_CONFIG
 }
