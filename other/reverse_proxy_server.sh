@@ -2465,6 +2465,44 @@ renew_cert() {
 }
 
 ###################################
+### Depersonalization of the database
+###################################
+depersonalization_db() {
+  local SUB_DOMAIN_DP="www.example.com"
+  local DOMAIN_DP="example.com"
+  local SQL_QUERY_DP="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
+  
+  local OLD_SUB_DOMAIN_DP=$(sqlite3 "$DB_PATH" "$SQL_QUERY_DP" | jq -r '.externalProxy[].dest' | sort -u)
+  local OLD_DOMAIN_DP=$(sqlite3 "$DB_PATH" "$SQL_QUERY_DP" | jq -r '.realitySettings.serverNames[]' | sort -u)
+
+  cp ${DB_PATH} /root/
+  
+  sqlite3 /root/x-ui.db <<EOF
+UPDATE users 
+SET username = 'admin', password = 'admin' 
+WHERE id = 1;
+
+UPDATE settings 
+SET value = REPLACE(value, '$OLD_DOMAIN_DP', '$DOMAIN_DP') 
+WHERE value LIKE '%$OLD_DOMAIN_DP%';
+
+UPDATE inbounds 
+SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN_DP', '$SUB_DOMAIN_DP') 
+WHERE stream_settings LIKE '%$OLD_SUB_DOMAIN_DP%';
+
+UPDATE inbounds 
+SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN') 
+WHERE stream_settings LIKE '%$OLD_DOMAIN%';
+
+UPDATE settings SET value = '/WEB_BASE_PATH/' WHERE LOWER(key) LIKE '%webbasepath%';
+UPDATE settings SET value = '/SUB_PATH/' WHERE LOWER(key) LIKE '%subpath%';
+UPDATE settings SET value = 'SUB_URI' WHERE LOWER(key) LIKE '%suburi%';
+UPDATE settings SET value = '/SUB_JSON_PATH/' WHERE LOWER(key) LIKE '%subjsonpath%';
+UPDATE settings SET value = 'SUB_JSON_URI' WHERE LOWER(key) LIKE '%subjsonuri%';
+EOF
+}
+
+###################################
 ### Removing all escape sequences
 ###################################
 log_clear() {
@@ -2544,6 +2582,9 @@ main() {
       6)
         enable_ipv6
         ;;
+      7)
+        depersonalization_db
+	;;
       0)
         clear
         break
