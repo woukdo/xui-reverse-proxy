@@ -2506,6 +2506,8 @@ EOF
 
 directory_size() {
   read -e -p "Введите директорию для проверки размера: " DIRECTORY
+  free -h
+  echo
   du -ah ${DIRECTORY} --max-depth=1 | grep -v '/$' | sort -rh | head -10
 }
 
