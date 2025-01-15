@@ -2,7 +2,7 @@
 # wget -N https://git && bash .sh d
 
 ###################################
-### Standard values
+### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER=1.4.0o
