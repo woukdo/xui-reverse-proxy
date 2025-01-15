@@ -61,11 +61,12 @@ This script is designed for quick and easy setup of a reverse proxy server using
 
 ### Help message of the script:
 ```
-Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
-                 [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
-                 [-c|--cert <true|false>] [-m|--mon <true|false>] [-n|--nginx <true|false>] [-p|--panel <true|false>]
-                 [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>] [-g|--generate <true|false>]
-                 [-x|--skip-check <true|false>] [-h|--help]
+Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
+         [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
+         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>] 
+         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]
+         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]
+         [-h|--help]
 
   -u, --utils <true|false>       Additional utilities                           (default: true)
   -d, --dns <true|false>         DNS encryption                                 (default: true)
@@ -76,6 +77,7 @@ Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>]
   -w, --warp <true|false>        Warp                                           (default: true)
   -c, --cert <true|false>        Certificate issuance for domain                (default: true)
   -m, --mon <true|false>         Monitoring services (node_exporter)            (default: false)
+  -l, --shell <true|false>       Shell In A Box installation                    (default: false)
   -n, --nginx <true|false>       NGINX installation                             (default: true)
   -p, --panel <true|false>       Panel installation for user management         (default: true)
   -f, --firewall <true|false>    Firewall configuration                         (default: true)
@@ -83,8 +85,9 @@ Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>]
   -t, --tgbot <true|false>       Telegram bot integration                       (default: false)
   -g, --generate <true|false>    Generate a random string for configuration     (default: true)
   -x, --skip-check <true|false>  Disable the check functionality                (default: false)
+  -o, --subdomain <true|false>   Support for subdomains                         (default: false)
+      --update <true|false>      Updating the script version (Version on github: -)"
   -h, --help                     Display this help message
-
 ```
 
 ### Installation of REVERSE_PROXY:
@@ -124,47 +127,3 @@ The script will then prompt you for the necessary configuration information:
 
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/cortez24rus/xui-reverse-proxy.svg?variant=adaptive)](https://starchart.cc/cortez24rus/xui-reverse-proxy)
-
-
-
-
-```mermaid
-graph TB
-    %% Main Components
-    CP((Control<br>Panel))
-    
-    %% Zones with rounded rectangles
-    subgraph "Zones"
-        Z1[Zone A - Europe]
-        Z2[Zone B - Asia]
-    end
-
-    %% Servers as circles
-    S1((Server<br>Germany))
-    S2((Server<br>France))
-    S3((Server<br>Singapore))
-
-    %% User Access as hexagons
-    U1{VPN Client}
-    U2{Telegram Bot}
-
-    %% Simple Connections
-    CP --> Z1 & Z2
-    Z1 --> S1 & S2
-    Z2 --> S3
-    U1 & U2 --> CP
-
-    %% Clean Modern Colors
-    classDef panel fill:#6366F1,stroke:#4338CA,stroke-width:2px,color:#fff
-    classDef zone fill:#34D399,stroke:#059669,stroke-width:2px,color:#fff
-    classDef server fill:#F472B6,stroke:#DB2777,stroke-width:2px,color:#fff
-    classDef user fill:#60A5FA,stroke:#2563EB,stroke-width:2px,color:#fff
-
-    class CP panel
-    class Z1,Z2 zone
-    class S1,S2,S3 server
-    class U1,U2 user
-
-    %% Add Labels
-    linkStyle default stroke:#6B7280,stroke-width:2px
-```
