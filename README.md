@@ -1,4 +1,4 @@
-# REVERSE_RPOXY ([Russian](/README_RU.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" /> 
+# REVERSE_PROXY ([Russian](/README_RU.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" /> 
 ![Total Views Month Badge](https://img.shields.io/badge/Total%20V%20Per%20Month-2265-blue)
 ![Unique Views Month Badge](https://img.shields.io/badge/Unique%20V%20Per%20Month-352-green)
 <p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image" ></a></p>
