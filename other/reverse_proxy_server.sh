@@ -5,10 +5,10 @@
 ### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0o
+VERSION_MANAGER=1.4.0k
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
-DEFAULT_FLAGS="/usr/local/reverse_proxy/defaultFlags.conf"
-DB_PATH="/etc/x-ui/x-ui.db"
+DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
+PATH_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/other/x-ui.gpg"
 
@@ -92,14 +92,14 @@ E[18]="Error: invalid domain, API token/key, or email. Please try again."
 R[18]="Ошибка: неправильно введён домен, API токен/ключ или почта. Попробуйте снова."
 E[19]="Enter SNI for Reality (do not enter your domain):"
 R[19]="Введите SNI для Reality (не вводите ваш домен):"
-E[20]="Enter gRPC path:"
-R[20]="Введите путь к gRPC:"
-E[21]="Enter SplitHTTP path:"
-R[21]="Введите путь к SplitHTTP:"
-E[22]="Enter HTTPUpgrade path:"
-R[22]="Введите путь к HTTPUpgrade:"
-E[23]="Enter Websocket path:"
-R[23]="Введите путь к Websocket:"
+E[20]=""
+R[20]=""
+E[21]=""
+R[21]=""
+E[22]=""
+R[22]=""
+E[23]=""
+R[23]=""
 E[24]="Enter Node Exporter path:"
 R[24]="Введите путь к Node Exporter:"
 E[25]="Enter Adguard-home path:"
@@ -222,22 +222,27 @@ E[83]="Terminal emulator Shell in a box."
 R[83]="Эмулятор терминала Shell in a box."
 E[84]="0. Exit script"
 R[84]="0. Выход из скрипта"
-E[85]="MENU $VERSION_MANAGER"
-R[85]="МЕНЮ $VERSION_MANAGER"
-E[86]="1. Standard installation"
-R[86]="1. Стандартная установка"
-E[87]="2. Copy someone else's website to your server, experimental option"
-R[87]="2. Скопировать чужой сайт на ваш сервер, экспериментальная опция"
-E[88]="3. Change the domain name for the proxy"
-R[88]="3. Изменить доменное имя для прокси"
-E[89]="4. Forced reissue of certificates"
-R[89]="4. Принудительный перевыпуск сертификатов"
-E[90]="5. Disable IPv6"
-R[90]="5. Отключение IPv6"
-E[91]="6. Enable IPv6"
-R[91]="6. Включение IPv6"
-E[92]="Press Enter to return to the menu..."
-R[92]="Нажмите Enter, чтобы вернуться в меню..."
+E[85]="Press Enter to return to the menu..."
+R[85]="Нажмите Enter, чтобы вернуться в меню..."
+E[86]="MENU $VERSION_MANAGER"
+R[86]="МЕНЮ $VERSION_MANAGER"
+E[87]="1. Standard installation"
+R[87]="1. Стандартная установка"
+E[88]="2. "
+R[88]="2. Миграция на новую версию."
+E[89]="3. Copy someone else's website to your server."
+R[89]="3. Скопировать чужой сайт на ваш сервер."
+E[90]="4. Change the domain name for the proxy."
+R[90]="4. Изменить доменное имя для прокси."
+E[91]="5. Forced reissue of certificates."
+R[91]="5. Принудительный перевыпуск сертификатов."
+E[92]="6. Disable IPv6."
+R[92]="6. Отключение IPv6."
+E[93]="7. Enable IPv6."
+R[93]="7. Включение IPv6."
+E[94]="8. Find out the size of the directory."
+R[94]="8. Узнать размер директории."
+
 
 ###################################
 ### Help output
@@ -798,18 +803,6 @@ validate_path() {
   # Проверка на пустое значение
   while true; do
     case "$VARIABLE_NAME" in
-      CDNGRPC)
-        reading " $(text 20) " PATH_VALUE
-        ;;
-      CDNSPLIT)
-        reading " $(text 21) " PATH_VALUE
-        ;;
-      CDNHTTPU)
-        reading " $(text 22) " PATH_VALUE
-        ;;
-      CDNWS)
-        reading " $(text 23) " PATH_VALUE
-        ;;
       METRICS)
         reading " $(text 24) " PATH_VALUE
         ;;
@@ -846,18 +839,6 @@ validate_path() {
 
   # Присваиваем значение переменной
   case "$VARIABLE_NAME" in
-    CDNGRPC)
-      export CDNGRPC="$ESCAPED_PATH"
-      ;;
-    CDNSPLIT)
-      export CDNSPLIT="$ESCAPED_PATH"
-      ;;
-    CDNHTTPU)
-      export CDNHTTPU="$ESCAPED_PATH"
-      ;;
-    CDNWS)
-      export CDNWS="$ESCAPED_PATH"
-      ;;
     METRICS)
       export METRICS="$ESCAPED_PATH"
       ;;
@@ -910,12 +891,20 @@ choise_dns () {
 }
 
 ###################################
+### Generating paths for cdn
+###################################
+generate_path_cdn(){
+  CDNGRPC=$(eval ${generate[path]})
+  CDNXHTTP=$(eval ${generate[path]})
+  CDNHTTPU=$(eval ${generate[path]})
+  CDNWS=$(eval ${generate[path]})
+}
+
+###################################
 ### Data entry
 ###################################
 data_entry() {
   tilda "$(text 10)"
-#  reading " $(text 70) " SECRET_PASSWORD
-
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
@@ -931,25 +920,15 @@ data_entry() {
 
   reading " $(text 19) " REALITY
 
+  generate_path_cdn
+
   if [[ ${args[generate]} == "true" ]]; then
     echo
-    CDNGRPC=$(eval ${generate[path]})
-    CDNSPLIT=$(eval ${generate[path]})
-    CDNHTTPU=$(eval ${generate[path]})
-    CDNWS=$(eval ${generate[path]})
     WEB_BASE_PATH=$(eval ${generate[path]})
     SUB_PATH=$(eval ${generate[path]})
     SUB_JSON_PATH=$(eval ${generate[path]})
   else
     echo
-    validate_path CDNGRPC
-    echo
-    validate_path CDNSPLIT
-    echo
-    validate_path CDNHTTPU
-    echo
-    validate_path CDNWS
-    tilda "$(text 10)"
     validate_path WEB_BASE_PATH
     echo
     validate_path SUB_PATH
@@ -1870,10 +1849,10 @@ EOF
 }
 
 ###################################
-### Split
+### xhttp
 ###################################
-settings_split() {
-  STREAM_SETTINGS_SPLIT=$(cat <<EOF
+settings_xhttp() {
+  STREAM_SETTINGS_XHTTP=$(cat <<EOF
 {
   "network": "splithttp",
   "security": "none",
@@ -1886,7 +1865,7 @@ settings_split() {
   }
   ],
   "splithttpSettings": {
-  "path": "${CDNSPLIT}",
+  "path": "${CDNXHTTP}",
   "host": "",
   "headers": {},
   "scMaxConcurrentPosts": "100-200",
@@ -2148,30 +2127,49 @@ EOF
 }
 
 ###################################
-### Changing the Database
+### Updating username, password in users
 ###################################
-database_change() {
-  sqlite3 $DB_PATH <<EOF
-UPDATE users 
-SET username = '$USERNAME', password = '$PASSWORD' 
-WHERE id = 1;
+update_user_db() {
+  sqlite3 $PATH_DB <<EOF
+UPDATE users SET username = '$USERNAME', password = '$PASSWORD' WHERE id = 1;
+EOF
+}
 
+###################################
+### Updating stream_settings in inbound
+###################################
+update_stream_settings_db() {
+  sqlite3 $PATH_DB <<EOF
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_SPLIT' WHERE LOWER(remark) LIKE '%split%';
+UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%whatsapp%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
+EOF
+}
 
+###################################
+### Updating sniffing in inbound
+###################################
+update_sniffing_settings_db() {
+  sqlite3 $PATH_DB <<EOF
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%split%';
+UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%steal%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%whatsapp%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xtls%';
+EOF
+}
 
+###################################
+### Updating value in settings
+###################################
+update_settings_db() {
+  sqlite3 $PATH_DB <<EOF
 UPDATE settings SET value = '/${WEB_BASE_PATH}/' WHERE LOWER(key) LIKE '%webbasepath%';
 UPDATE settings SET value = '/${SUB_PATH}/' WHERE LOWER(key) LIKE '%subpath%';
 UPDATE settings SET value = '${SUB_URI}' WHERE LOWER(key) LIKE '%suburi%';
@@ -2180,14 +2178,15 @@ UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri
 EOF
 }
 
-# json_rules() {
-#   SUB_JSON_RULES=$(cat <<EOF
-# [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:ru","keyword:su","keyword:kg","keyword:by","keyword:kz","keyword:rt","keyword:yandex","keyword:avito.","keyword:2gis.","keyword:gismeteo.","keyword:livejournal."]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
-# EOF
-#   )
-# }
-# UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
-#   json_rules
+###################################
+### Changing the Database
+###################################
+change_db() {
+  update_user_db
+  update_stream_settings_db
+  update_sniffing_settings_db
+  update_settings_db
+}
 
 ###################################
 ### Panel installation
@@ -2208,19 +2207,19 @@ install_panel() {
 
   x-ui stop
   rm -rf x-ui.gpg
-  rm -rf ${DB_PATH}.backup
-  [ -f ${DB_PATH} ] && mv ${DB_PATH} ${DB_PATH}.backup
+  rm -rf ${PATH_DB}.backup
+  [ -f ${PATH_DB} ] && mv ${PATH_DB} ${PATH_DB}.backup
   mv x-ui.db /etc/x-ui/
 
   settings_grpc
-  settings_split
+  settings_xhttp
   settings_httpu
   settings_ws
   settings_steal
   settings_reality
   settings_xtls
   sniffing_inbounds
-  database_change
+  change_db
 
   x-ui start
   tilda "$(text 10)"
@@ -2410,7 +2409,7 @@ create_cert_backup() {
 ### Database change in domain
 ###################################
 database_change_domain() {
-  sqlite3 $DB_PATH <<EOF
+  sqlite3 $PATH_DB <<EOF
 UPDATE settings 
 SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
 WHERE value LIKE '%$OLD_DOMAIN%';
@@ -2429,10 +2428,7 @@ EOF
 ### Change domain name
 ###################################
 change_domain() {
-  local SQL_QUERY="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
-  OLD_SUB_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.externalProxy[].dest' | sort -u)
-  OLD_DOMAIN=$(sqlite3 "$DB_PATH" "$SQL_QUERY" | jq -r '.realitySettings.serverNames[]' | sort -u)
-  
+  select_from_db
   check_cf_token
   create_cert_backup "$OLD_DOMAIN" "mv"
   issuance_of_certificates
@@ -2480,15 +2476,13 @@ renew_cert() {
 ### Depersonalization of the database
 ###################################
 depersonalization_db() {
-  cp ${DB_PATH} /root/
+  cp ${PATH_DB} /root/
   
   sqlite3 /root/x-ui.db <<EOF
-UPDATE users 
-SET username = 'user', password = 'password' 
-WHERE id = 1;
+UPDATE users SET username = 'user', password = 'password' WHERE id = 1;
 
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_SPLIT' WHERE LOWER(remark) LIKE '%split%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
@@ -2504,6 +2498,9 @@ UPDATE settings SET value = 'SUB_JSON_URI' WHERE LOWER(key) LIKE '%subjsonuri%';
 EOF
 }
 
+###################################
+### Directory size
+###################################
 directory_size() {
   read -e -p "Введите директорию для проверки размера: " DIRECTORY
   echo
@@ -2511,6 +2508,100 @@ directory_size() {
   echo
   du -ah ${DIRECTORY} --max-depth=1 | grep -v '/$' | sort -rh | head -10
   echo
+}
+
+###################################
+### Query from database
+###################################
+select_from_db(){
+  local SQL_QUERY1="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
+  OLD_SUB_DOMAIN=$(sqlite3 "$PATH_DB" "$SQL_QUERY1" | jq -r '.externalProxy[].dest' | sort -u)
+  OLD_DOMAIN=$(sqlite3 "$PATH_DB" "$SQL_QUERY1" | jq -r '.realitySettings.serverNames[]' | sort -u)
+
+  local SQL_QUERY2="SELECT stream_settings FROM inbounds WHERE remark='REALITY';"
+  REALITY=$(sqlite3 "$PATH_DB" "$SQL_QUERY2" | jq -r '.realitySettings.serverNames[0]')
+
+  result1=$(sqlite3 "$SOURCE_DB" "SELECT username, password FROM users WHERE id = 1;")
+  USERNAME=$(echo "$result1" | cut -d '|' -f 1)  # Первая часть (username)
+  PASSWORD=$(echo "$result1" | cut -d '|' -f 2)  # Вторая часть (password)
+
+  result2=$(sqlite3 "$SOURCE_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
+  WEB_BASE_PATH=$(echo "$result2" | sed -n '1p' | sed 's/^\/\(.*\)\/$/\1/')
+  SUB_PATH=$(echo "$result2" | sed -n '2p' | sed 's/^\/\(.*\)\/$/\1/')
+  SUB_JSON_PATH=$(echo "$result2" | sed -n '3p' | sed 's/^\/\(.*\)\/$/\1/')
+}
+
+###################################
+### Client traffic migration
+###################################
+client_traffics_migration_db(){
+  sqlite3 "$PATH_DB" <<EOF
+ATTACH '$SOURCE_DB' AS source;
+INSERT OR REPLACE INTO client_traffics SELECT * FROM source.client_traffics;
+DETACH source;
+EOF
+}
+
+###################################
+### Settings migration
+###################################
+settings_migration_db(){
+  sqlite3 "$PATH_DB" <<EOF
+ATTACH '$SOURCE_DB' AS source;
+INSERT OR REPLACE INTO settings SELECT * FROM source.settings;
+DETACH source;
+EOF
+}
+
+###################################
+### Inbounds settings migration
+###################################
+inbounds_settings_migration_db(){
+  sqlite3 "$PATH_DB" <<EOF
+ATTACH DATABASE '$SOURCE_DB' AS source;
+
+UPDATE inbounds
+SET settings = (
+SELECT inbounds.settings
+FROM source.inbounds AS inbounds
+WHERE inbounds.remark = inbounds.remark
+)
+
+WHERE EXISTS (
+SELECT 1
+FROM source.inbounds AS inbounds
+WHERE inbounds.remark = inbounds.remark
+);
+
+DETACH DATABASE source;
+EOF
+}
+
+###################################
+### Migration to a new version
+###################################
+migration(){
+  x-ui stop
+  sleep 3
+  
+  PATH_DB="/etc/x-ui/x-ui.db"
+  SOURCE_DB=${PATH_DB}.mgr
+  rm -rf ${PATH_DB}.*
+  mv ${PATH_DB} ${SOURCE_DB}
+  
+  select_from_db
+  DOMAIN=${OLD_DOMAIN}
+  SUB_DOMAIN=${OLD_SUB_DOMAIN}
+  generate_path_cdn
+  nginx_setup
+  install_panel
+  
+  client_traffics_migration_db
+  settings_migration_db
+  inbounds_settings_migration_db
+
+  sleep 3
+  x-ui start
 }
 
 ###################################
@@ -2540,15 +2631,16 @@ main() {
     clear
     banner_xray
     echo "================================="
-    info " $(text 85) "                      # MENU
+    info " $(text 86) "                      # MENU
     echo "================================="
-    info " $(text 86) "                      # Install
-    info " $(text 87) "                      # Steam web site
-    info " $(text 88) "                      # Change domain
-    info " $(text 89) "                      # Renew cert
-    info " $(text 90) "                      # Disable IPv6
-    info " $(text 91) "                      # Enable IPv6
-    echo " 7. Размер директории"
+    info " $(text 87) "                      # Install
+    info " $(text 88) "                      # Migration
+    info " $(text 89) "                      # Steam web site
+    info " $(text 90) "                      # Change domain
+    info " $(text 91) "                      # Renew cert
+    info " $(text 92) "                      # Disable IPv6
+    info " $(text 93) "                      # Enable IPv6
+    info " $(text 94) "                      # Directory size
     echo
     info " $(text 84) "                      # Exit
     echo "================================="
@@ -2579,21 +2671,24 @@ main() {
         data_output
         ;;
       2)
-        download_website
+        migration
         ;;
       3)
-        change_domain
+        download_website
         ;;
       4)
-        renew_cert
+        change_domain
         ;;
       5)
-        disable_ipv6
+        renew_cert
         ;;
       6)
-        enable_ipv6
+        disable_ipv6
         ;;
       7)
+        enable_ipv6
+        ;;
+      8)
         directory_size
         ;;
       0)
@@ -2604,10 +2699,21 @@ main() {
         warning " $(text 76) "
         ;;
     esac
-    info " $(text 92) "
+    info " $(text 85) "
     read -r dummy
   done
   log_clear
 }
 
 main "$@"
+
+
+
+# json_rules() {
+#   SUB_JSON_RULES=$(cat <<EOF
+# [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:ru","keyword:su","keyword:kg","keyword:by","keyword:kz","keyword:rt","keyword:yandex","keyword:avito.","keyword:2gis.","keyword:gismeteo.","keyword:livejournal."]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+# EOF
+#   )
+# }
+# UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
+#   json_rules
