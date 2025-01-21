@@ -1854,33 +1854,43 @@ EOF
 settings_xhttp() {
   STREAM_SETTINGS_XHTTP=$(cat <<EOF
 {
-  "network": "splithttp",
+  "network": "xhttp",
   "security": "none",
   "externalProxy": [
-  {
-    "forceTls": "tls",
-    "dest": "${DOMAIN}",
-    "port": 443,
-    "remark": ""
-  }
+    {
+      "forceTls": "tls",
+      "dest": "${DOMAIN}",
+      "port": 443,
+      "remark": ""
+    }
   ],
-  "splithttpSettings": {
-  "path": "${CDNXHTTP}",
-  "host": "",
-  "headers": {},
-  "scMaxConcurrentPosts": "100-200",
-  "scMaxEachPostBytes": "1000000-2000000",
-  "scMinPostsIntervalMs": "10-50",
-  "noSSEHeader": false,
-  "xPaddingBytes": "100-1000",
-  "xmux": {
-    "maxConcurrency": "16-32",
-    "maxConnections": 0,
-    "cMaxReuseTimes": "64-128",
-    "cMaxLifetimeMs": 0
+  "xhttpSettings": {
+    "path": "/${CDNXHTTP}",
+    "host": "",
+    "headers": {},
+    "scMaxBufferedPosts": 30,
+    "scMaxEachPostBytes": "1000000",
+    "noSSEHeader": false,
+    "xPaddingBytes": "100-1000",
+    "mode": "packet-up"
   },
-  "mode": "auto",
-  "noGRPCHeader": false
+  "sockopt": {
+    "acceptProxyProtocol": false,
+    "tcpFastOpen": true,
+    "mark": 0,
+    "tproxy": "off",
+    "tcpMptcp": true,
+    "tcpNoDelay": true,
+    "domainStrategy": "UseIP",
+    "tcpMaxSeg": 1440,
+    "dialerProxy": "",
+    "tcpKeepAliveInterval": 0,
+    "tcpKeepAliveIdle": 300,
+    "tcpUserTimeout": 10000,
+    "tcpcongestion": "bbr",
+    "V6Only": false,
+    "tcpWindowClamp": 600,
+    "interface": ""
   }
 }
 EOF
@@ -2141,11 +2151,11 @@ EOF
 update_stream_settings_db() {
   sqlite3 $PATH_DB <<EOF
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%split%';
+UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%whatsapp%';
+UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%reality%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
 EOF
 }
@@ -2156,11 +2166,11 @@ EOF
 update_sniffing_settings_db() {
   sqlite3 $PATH_DB <<EOF
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%split%';
+UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%whatsapp%';
+UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%reality%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xtls%';
 EOF
 }
@@ -2182,6 +2192,15 @@ EOF
 ### Changing the Database
 ###################################
 change_db() {
+  settings_grpc
+  settings_xhttp
+  settings_httpu
+  settings_ws
+  settings_steal
+  settings_reality
+  settings_xtls
+  sniffing_inbounds
+
   update_user_db
   update_stream_settings_db
   update_sniffing_settings_db
@@ -2211,14 +2230,6 @@ install_panel() {
   [ -f ${PATH_DB} ] && mv ${PATH_DB} ${PATH_DB}.backup
   mv x-ui.db /etc/x-ui/
 
-  settings_grpc
-  settings_xhttp
-  settings_httpu
-  settings_ws
-  settings_steal
-  settings_reality
-  settings_xtls
-  sniffing_inbounds
   change_db
 
   x-ui start
@@ -2478,26 +2489,10 @@ renew_cert() {
 ### Depersonalization of the database
 ###################################
 depersonalization_db() {
-  cp ${PATH_DB} /root/
-  
-  sqlite3 /root/x-ui.db <<EOF
-UPDATE users SET username = 'user', password = 'password' WHERE id = 1;
-
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%split%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%whatsapp%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
-
-UPDATE settings SET value = 'SECRET' WHERE LOWER(key) LIKE '%secret%';
-UPDATE settings SET value = '/WEB_BASE_PATH/' WHERE LOWER(key) LIKE '%webbasepath%';
-UPDATE settings SET value = '/SUB_PATH/' WHERE LOWER(key) LIKE '%subpath%';
-UPDATE settings SET value = 'SUB_URI' WHERE LOWER(key) LIKE '%suburi%';
-UPDATE settings SET value = '/SUB_JSON_PATH/' WHERE LOWER(key) LIKE '%subjsonpath%';
-UPDATE settings SET value = 'SUB_JSON_URI' WHERE LOWER(key) LIKE '%subjsonuri%';
-EOF
+  cp ${PATH_DB} ${PATH_DB}.temp
+  change_db
+  mv ${PATH_DB} /root/
+  mv ${PATH_DB}.temp ${PATH_DB}
 }
 
 ###################################
