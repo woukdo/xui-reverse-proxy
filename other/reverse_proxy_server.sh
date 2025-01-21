@@ -5,7 +5,7 @@
 ### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0k
+VERSION_MANAGER=1.4.0R
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
@@ -228,14 +228,14 @@ E[86]="MENU $VERSION_MANAGER"
 R[86]="МЕНЮ $VERSION_MANAGER"
 E[87]="1. Standard installation"
 R[87]="1. Стандартная установка"
-E[88]="2. "
-R[88]="2. Миграция на новую версию."
-E[89]="3. Copy someone else's website to your server."
-R[89]="3. Скопировать чужой сайт на ваш сервер."
-E[90]="4. Change the domain name for the proxy."
-R[90]="4. Изменить доменное имя для прокси."
-E[91]="5. Forced reissue of certificates."
-R[91]="5. Принудительный перевыпуск сертификатов."
+E[88]="2. Migration to a new version with client retention."
+R[88]="2. Миграция на новую версию с сохранением клиентов."
+E[89]="3. Change the domain name for the proxy."
+R[89]="3. Изменить доменное имя для прокси."
+E[90]="4. Forced reissue of certificates."
+R[90]="4. Принудительный перевыпуск сертификатов."
+E[91]="5. Copy someone else's website to your server."
+R[91]="5. Скопировать чужой сайт на ваш сервер."
 E[92]="6. Disable IPv6."
 R[92]="6. Отключение IPv6."
 E[93]="7. Enable IPv6."
@@ -2635,9 +2635,9 @@ main() {
     echo "================================="
     info " $(text 87) "                      # Install
     info " $(text 88) "                      # Migration
-    info " $(text 89) "                      # Steam web site
-    info " $(text 90) "                      # Change domain
-    info " $(text 91) "                      # Renew cert
+    info " $(text 89) "                      # Change domain
+    info " $(text 90) "                      # Renew cert
+    info " $(text 91) "                      # Steal web site
     info " $(text 92) "                      # Disable IPv6
     info " $(text 93) "                      # Enable IPv6
     info " $(text 94) "                      # Directory size
@@ -2674,13 +2674,13 @@ main() {
         migration
         ;;
       3)
-        download_website
-        ;;
-      4)
         change_domain
         ;;
-      5)
+      4)
         renew_cert
+        ;;
+      5)
+        download_website
         ;;
       6)
         disable_ipv6
