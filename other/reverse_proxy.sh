@@ -9,7 +9,7 @@ VERSION_MANAGER=1.4.0t
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
-SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
+SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/database/x-ui.db"
 
 ###################################
