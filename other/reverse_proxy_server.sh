@@ -2141,7 +2141,7 @@ EOF
 update_stream_settings_db() {
   sqlite3 $PATH_DB <<EOF
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
+UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%split%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
@@ -2156,7 +2156,7 @@ EOF
 update_sniffing_settings_db() {
   sqlite3 $PATH_DB <<EOF
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xhttp%';
+UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%split%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%steal%';
@@ -2482,7 +2482,7 @@ depersonalization_db() {
 UPDATE users SET username = 'user', password = 'password' WHERE id = 1;
 
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
-UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
+UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%split%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = 'STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
