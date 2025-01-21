@@ -5,7 +5,7 @@
 ### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0R
+VERSION_MANAGER=1.4.0s
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
@@ -2353,7 +2353,7 @@ download_website() {
   local NGINX_CONFIG_L="/etc/nginx/conf.d/local.conf"
   wget -P /var/www --mirror --convert-links --adjust-extension --page-requisites --no-parent https://${sitelink}
 
-  mkdir ./testdir
+  mkdir -p ./testdir
   wget -q -P ./testdir https://${sitelink}
   index=$(ls ./testdir)
   rm -rf ./testdir
@@ -2382,11 +2382,13 @@ download_website() {
   sitedir=${resultfile#"/var/www/"}
   sitedir=${sitedir%"/${index}"}
 
-  NEW_ROOT="root /var/www/${sitedir};"
-  NEW_INDEX="index ${index};"
+  NEW_ROOT=" root /var/www/${sitedir};"
+  NEW_INDEX=" index ${index};"
   
-  sed -i '/^\s*root\s.*/c\ '"$NEW_ROOT" $NGINX_CONFIG
-  sed -i '/^\s*index\s.*/c\ '"$NEW_INDEX" $NGINX_CONFIG
+  sed -i '/^\s*root\s.*/c\ '"$NEW_ROOT" $NGINX_CONFIG_L
+  sed -i '/^\s*index\s.*/c\ '"$NEW_INDEX" $NGINX_CONFIG_L
+
+  systemctl restart nginx
 }
 
 ###################################
