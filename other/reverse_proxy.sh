@@ -5,12 +5,12 @@
 ### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0s
+VERSION_MANAGER=1.4.0t
 SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy_server.sh"
-DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/other/x-ui.gpg"
+DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/database/x-ui.db"
 
 ###################################
 ### Initialization and Declarations
@@ -1742,6 +1742,21 @@ server {
     proxy_pass http://127.0.0.1:36074/${SUB_JSON_PATH};
     break;
   }
+  # XHTTP
+  location /${CDNXHTTP} {
+    grpc_pass grpc://unix:/dev/shm/uds2023.sock;
+    grpc_buffer_size         16k;
+    grpc_socket_keepalive    on;
+    grpc_read_timeout        1h;
+    grpc_send_timeout        1h;
+
+    grpc_set_header Connection         "";
+    grpc_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+    grpc_set_header X-Forwarded-Proto  $scheme;
+    grpc_set_header X-Forwarded-Port   $server_port;
+    grpc_set_header Host               $host;
+    grpc_set_header X-Forwarded-Host   $host;
+  }
   # GRPC WEBSOCKET HTTPUpgrade
   location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
     if (\$hack = 1) {return 404;}
@@ -2218,14 +2233,12 @@ install_panel() {
     sleep 3
   done
 
-  echo ${SECRET_PASSWORD} | gpg --batch --yes --passphrase-fd 0 -d x-ui.gpg > x-ui.db
   echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
   sleep 1
   echo -e "20\n1" | x-ui
   sleep 2
 
   x-ui stop
-  rm -rf x-ui.gpg
   rm -rf ${PATH_DB}.backup
   [ -f ${PATH_DB} ] && mv ${PATH_DB} ${PATH_DB}.backup
   mv x-ui.db /etc/x-ui/
