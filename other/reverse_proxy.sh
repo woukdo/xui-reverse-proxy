@@ -1751,11 +1751,11 @@ server {
     grpc_send_timeout        1h;
 
     grpc_set_header Connection         "";
-    grpc_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
-    grpc_set_header X-Forwarded-Proto  $scheme;
-    grpc_set_header X-Forwarded-Port   $server_port;
-    grpc_set_header Host               $host;
-    grpc_set_header X-Forwarded-Host   $host;
+    grpc_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
+    grpc_set_header X-Forwarded-Proto  \$scheme;
+    grpc_set_header X-Forwarded-Port   \$server_port;
+    grpc_set_header Host               \$host;
+    grpc_set_header X-Forwarded-Host   \$host;
   }
   # GRPC WEBSOCKET HTTPUpgrade
   location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
