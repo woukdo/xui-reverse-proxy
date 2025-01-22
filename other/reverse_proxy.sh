@@ -388,7 +388,7 @@ normalize_case() {
 
 ###################################
 ### Validation of true/false value
-################################### 
+###################################
 validate_true_false() {
   local key=$1
   local value=$2
@@ -830,7 +830,7 @@ validate_path() {
       break
     fi
   done
-  
+
   # Экранируем пробелы в пути
   local ESCAPED_PATH=$(echo "$PATH_VALUE" | sed 's/ /\\ /g')
 
@@ -905,7 +905,7 @@ data_entry() {
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
-  
+
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
@@ -1480,7 +1480,7 @@ nginx_conf() {
 user                                   ${USERNGINX};
 pid                                    /var/run/nginx.pid;
 worker_processes                       auto;
-worker_rlimit_nofile                   65535; 
+worker_rlimit_nofile                   65535;
 error_log                              /var/log/nginx/error.log;
 include                                /etc/nginx/modules-enabled/*.conf;
 events {
@@ -1511,7 +1511,7 @@ http {
   tcp_nopush                           on;
   tcp_nodelay                          on;
   server_tokens                        off;
-  log_not_found                        off; 
+  log_not_found                        off;
   types_hash_max_size                  2048;
   types_hash_bucket_size               64;
   client_max_body_size                 16M;
@@ -1652,7 +1652,7 @@ server {
   }
   # SUB JSON
   location /${SUB_JSON_PATH} {
-    if (\$hack = 1) {return 404;}  
+    if (\$hack = 1) {return 404;}
     proxy_redirect off;
     proxy_set_header Host \$host;
     proxy_set_header X-Real-IP \$remote_addr;
@@ -2203,7 +2203,7 @@ install_panel() {
   info " $(text 46) "
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
   SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
-  
+
   while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused $DB_SCRIPT_URL; do
     warning " $(text 38) "
     sleep 3
@@ -2384,7 +2384,7 @@ download_website() {
 
   NEW_ROOT=" root /var/www/${sitedir};"
   NEW_INDEX=" index ${index};"
-  
+
   sed -i '/^\s*root\s.*/c\ '"$NEW_ROOT" $NGINX_CONFIG_L
   sed -i '/^\s*index\s.*/c\ '"$NEW_INDEX" $NGINX_CONFIG_L
 
@@ -2399,9 +2399,9 @@ create_cert_backup() {
   local ACTION=$2 # Тип действия: "cp" или "mv"
   local TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
   local BACKUP_DIR="/etc/letsencrypt/backups/${DOMAIN}_${TIMESTAMP}"
-  
+
   mkdir -p "${BACKUP_DIR}"
-  
+
   $ACTION /etc/letsencrypt/live ${BACKUP_DIR}
   $ACTION /etc/letsencrypt/archive ${BACKUP_DIR}
   $ACTION /etc/letsencrypt/renewal ${BACKUP_DIR}
@@ -2412,16 +2412,16 @@ create_cert_backup() {
 ###################################
 database_change_domain() {
   sqlite3 $PATH_DB <<EOF
-UPDATE settings 
-SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN') 
+UPDATE settings
+SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN')
 WHERE value LIKE '%$OLD_DOMAIN%';
 
-UPDATE inbounds 
-SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN', '$SUB_DOMAIN') 
+UPDATE inbounds
+SET stream_settings = REPLACE(stream_settings, '$OLD_SUB_DOMAIN', '$SUB_DOMAIN')
 WHERE stream_settings LIKE '%$OLD_SUB_DOMAIN%';
 
-UPDATE inbounds 
-SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN') 
+UPDATE inbounds
+SET stream_settings = REPLACE(stream_settings, '$OLD_DOMAIN', '$DOMAIN')
 WHERE stream_settings LIKE '%$OLD_DOMAIN%';
 EOF
 }
@@ -2441,7 +2441,7 @@ change_domain() {
     s/$OLD_DOMAIN/$DOMAIN/g;
   " /etc/nginx/stream-enabled/stream.conf
   sed -i -e "s/$OLD_DOMAIN/$DOMAIN/g" /etc/nginx/conf.d/local.conf
-  
+
   echo "$OLD_DOMAIN > $DOMAIN"
   echo "$OLD_SUB_DOMAIN > $SUB_DOMAIN"
 
@@ -2469,7 +2469,7 @@ renew_cert() {
       return 1
     fi
   fi
-  
+
   # Перезапуск Nginx
   systemctl restart nginx
 }
@@ -2569,19 +2569,19 @@ EOF
 migration(){
   x-ui stop
   sleep 3
-  
+
   PATH_DB="/etc/x-ui/x-ui.db"
   SOURCE_DB=${PATH_DB}.mgr
   rm -rf ${PATH_DB}.*
   mv ${PATH_DB} ${SOURCE_DB}
-  
+
   select_from_db
   DOMAIN=${OLD_DOMAIN}
   SUB_DOMAIN=${OLD_SUB_DOMAIN}
   generate_path_cdn
   nginx_setup
   install_panel
-  
+
   client_traffics_migration_db
   settings_migration_db
   inbounds_settings_migration_db
