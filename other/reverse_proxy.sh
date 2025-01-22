@@ -1474,41 +1474,6 @@ EOF
 }
 
 ###################################
-### NGINX
-###################################
-nginx_setup() {
-  info " $(text 45) "
-
-  mkdir -p /etc/nginx/stream-enabled/
-  mkdir -p /etc/nginx/conf.d/
-  rm -rf /etc/nginx/conf.d/default.conf
-  touch /etc/nginx/.htpasswd
-  htpasswd -nb "$USERNAME" "$PASSWORD" > /etc/nginx/.htpasswd
-  openssl dhparam -out /etc/nginx/dhparam.pem 2048
-
-  case "$SYSTEM" in
-    Debian|Ubuntu)
-      USERNGINX="www-data"
-      ;;
-
-    CentOS|Fedora)
-      USERNGINX="nginx"
-      ;;
-  esac
-
-  nginx_conf
-  stream_conf
-  local_conf
-  random_site
-
-  systemctl daemon-reload
-  systemctl restart nginx
-  nginx -s reload
-
-  tilda "$(text 10)"
-}
-
-###################################
 ### http conf
 ###################################
 nginx_conf() {
@@ -1776,6 +1741,41 @@ random_site() {
   fi
 
   cd ~
+}
+
+###################################
+### NGINX
+###################################
+nginx_setup() {
+  info " $(text 45) "
+
+  mkdir -p /etc/nginx/stream-enabled/
+  mkdir -p /etc/nginx/conf.d/
+  rm -rf /etc/nginx/conf.d/default.conf
+  touch /etc/nginx/.htpasswd
+  htpasswd -nb "$USERNAME" "$PASSWORD" > /etc/nginx/.htpasswd
+  openssl dhparam -out /etc/nginx/dhparam.pem 2048
+
+  case "$SYSTEM" in
+    Debian|Ubuntu)
+      USERNGINX="www-data"
+      ;;
+
+    CentOS|Fedora)
+      USERNGINX="nginx"
+      ;;
+  esac
+
+  nginx_conf
+  stream_conf
+  local_conf
+  random_site
+
+  systemctl daemon-reload
+  systemctl restart nginx
+  nginx -s reload
+
+  tilda "$(text 10)"
 }
 
 ###################################
@@ -2158,6 +2158,25 @@ EOF
 }
 
 ###################################
+### Json routing rules
+###################################
+json_rules() {
+  SUB_JSON_RULES=$(cat <<EOF
+[{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+EOF
+)
+}
+
+###################################
+### Updating json rules in the database
+###################################
+update_json_rules_db(){
+  sqlite3 $PATH_DB <<EOF
+UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
+EOF                                                                                                                                                                    
+}                                                                                                                                                              
+
+###################################
 ### Changing the Database
 ###################################
 change_db() {
@@ -2169,11 +2188,13 @@ change_db() {
   settings_reality
   settings_xtls
   sniffing_inbounds
+  json_rules
 
   update_user_db
   update_stream_settings_db
   update_sniffing_settings_db
   update_settings_db
+  update_json_rules_db
 }
 
 ###################################
@@ -2673,14 +2694,3 @@ main() {
 }
 
 main "$@"
-
-
-
-# json_rules() {
-#   SUB_JSON_RULES=$(cat <<EOF
-# [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:ru","keyword:su","keyword:kg","keyword:by","keyword:kz","keyword:rt","keyword:yandex","keyword:avito.","keyword:2gis.","keyword:gismeteo.","keyword:livejournal."]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
-# EOF
-#   )
-# }
-# UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
-#   json_rules
