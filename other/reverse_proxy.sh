@@ -2,7 +2,7 @@
 # wget -N https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy.sh && bash reverse_proxy.sh d
 
 ###################################
-### Default values
+### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER=1.4.0v
