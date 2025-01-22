@@ -2629,8 +2629,8 @@ main() {
     info " $(text 94) "                      # Directory size
     echo
     info " $(text 84) "                      # Exit
-    echo
     tilda "|-----------------------------------------------------------------------------|"
+    echo
     reading " $(text 1) " CHOICE_MENU        # Choise
     tilda "$(text 10)"
     case $CHOICE_MENU in
