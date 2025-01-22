@@ -1,12 +1,11 @@
 #!/usr/bin/env bash
-# wget -N https://git && bash .sh d
+# wget -N https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy.sh && bash reverse_proxy.sh d
 
 ###################################
 ### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER=1.4.0u
-SECRET_PASSWORD="84ghrhhu43884hgHGrhguhure7!"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy.sh"
@@ -2170,11 +2169,11 @@ EOF
 ###################################
 ### Updating json rules in the database
 ###################################
-update_json_rules_db(){
+update_json_rules_db() {
   sqlite3 $PATH_DB <<EOF
 UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
-EOF                                                                                                                                                                    
-}                                                                                                                                                              
+EOF
+}
 
 ###################################
 ### Changing the Database
