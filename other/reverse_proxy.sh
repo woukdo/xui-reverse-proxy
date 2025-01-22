@@ -2507,11 +2507,11 @@ select_from_db(){
   local SQL_QUERY2="SELECT stream_settings FROM inbounds WHERE remark='REALITY';"
   REALITY=$(sqlite3 "$PATH_DB" "$SQL_QUERY2" | jq -r '.realitySettings.serverNames[0]')
 
-  result1=$(sqlite3 "$SOURCE_DB" "SELECT username, password FROM users WHERE id = 1;")
+  result1=$(sqlite3 "$PATH_DB" "SELECT username, password FROM users WHERE id = 1;")
   USERNAME=$(echo "$result1" | cut -d '|' -f 1)  # Первая часть (username)
   PASSWORD=$(echo "$result1" | cut -d '|' -f 2)  # Вторая часть (password)
 
-  result2=$(sqlite3 "$SOURCE_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
+  result2=$(sqlite3 "$PATH_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
   WEB_BASE_PATH=$(echo "$result2" | sed -n '1p' | sed 's/^\/\(.*\)\/$/\1/')
   SUB_PATH=$(echo "$result2" | sed -n '2p' | sed 's/^\/\(.*\)\/$/\1/')
   SUB_JSON_PATH=$(echo "$result2" | sed -n '3p' | sed 's/^\/\(.*\)\/$/\1/')
