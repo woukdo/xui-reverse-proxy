@@ -78,8 +78,8 @@ E[11]="Enter username:"
 R[11]="Введите имя пользователя:"
 E[12]="Enter user password:"
 R[12]="Введите пароль пользователя:"
-E[13]="Enter your domain name:"
-R[13]="Введите ваше доменное имя:"
+E[13]="Enter your domain A record:"
+R[13]="Введите доменную запись типа A:"
 E[14]="Error: the entered address '$temp_value' is incorrectly formatted."
 R[14]="Ошибка: введённый адрес '$temp_value' имеет неверный формат."
 E[15]="Enter your email registered with Cloudflare:"
@@ -92,8 +92,8 @@ E[18]="Error: invalid domain, API token/key, or email. Please try again."
 R[18]="Ошибка: неправильно введён домен, API токен/ключ или почта. Попробуйте снова."
 E[19]="Enter SNI for Reality (do not enter your domain):"
 R[19]="Введите SNI для Reality (не вводите ваш домен):"
-E[20]=""
-R[20]=""
+E[20]="Error: failed to connect to WARP. Manual acceptance of the terms of service is required."
+R[20]="Ошибка: не удалось подключиться к WARP. Требуется вручную согласиться с условиями использования."
 E[21]=""
 R[21]=""
 E[22]=""
@@ -214,8 +214,8 @@ E[79]="Configuring site template."
 R[79]="Настройка шаблона сайта."
 E[80]="Random template name:"
 R[80]="Случайное имя шаблона:"
-E[81]="Enter the second domain name:"
-R[81]="Введите второе доменное имя:"
+E[81]="Enter your domain CNAME record:"
+R[81]="Введите доменную запись типа CNAME:"
 E[82]="Enter Shell in a box path:"
 R[82]="Введите путь к Shell in a box:"
 E[83]="Terminal emulator Shell in a box."
@@ -781,14 +781,12 @@ check_cf_token() {
       reading " $(text 15) " EMAIL
       echo
     done
-
     # Запрашиваем Cloudflare токен
     while [[ -z $CFTOKEN ]]; do
       reading " $(text 16) " CFTOKEN
     done
 
-    # Если флаг skip-check не задан как true, выполняем запрос на тестовый ответ
-    [[ ${args[skip-check]} == "false" ]] && get_test_response
+    get_test_response
     info " $(text 17) "
   done
 }
@@ -908,18 +906,14 @@ data_entry() {
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
+  
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
-
   tilda "$(text 10)"
-
   choise_dns
-
   tilda "$(text 10)"
-
   reading " $(text 19) " REALITY
-
   generate_path_cdn
 
   if [[ ${args[generate]} == "true" ]]; then
@@ -997,9 +991,6 @@ data_entry() {
     echo
     reading " $(text 34) " BOT_TOKEN
   fi
-
-  SUB_URI=https://${DOMAIN}/${SUB_PATH}/
-  SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
   tilda "$(text 10)"
 }
 
@@ -1060,76 +1051,6 @@ EOL
   systemctl enable nginx
   systemctl restart nginx
   systemctl status nginx --no-pager
-}
-
-###################################
-### WARP
-###################################
-warp() {
-  info " $(text 43) "
-
-  ${PACKAGE_INSTALL[int]} gpg
-  curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
-  echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
-  ${PACKAGE_UPDATE[int]}
-  ${PACKAGE_INSTALL[int]} cloudflare-warp
-
-#  mkdir -p /etc/systemd/system/warp-svc.service.d
-#  cd /usr/local/reverse_proxy/
-
-#  case "$SYSTEM" in
-#    Debian|Ubuntu)
-#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/pool/$(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2)/main/c/cloudflare-warp/cloudflare-warp_2024.6.497-1_amd64.deb"; do
-#        warning " $(text 38) "
-#        sleep 3
-#      done
-#      apt install -y ./cloudflare-warp_2024.6.497-1_amd64.deb
-#      ;;
-#
-#    CentOS|Fedora)
-#      while ! wget --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://pkg.cloudflareclient.com/rpm/x86_64/cloudflare-warp-2024.6.497-1.x86_64.rpm"; do
-#        warning " $(text 38) "
-#        sleep 3
-#      done
-#      sudo yum localinstall -y cloudflare-warp-2024.6.497-1.x86_64.rpm
-#      ;;
-#  esac
-
-#  rm -rf cloudflare-warp_*
-#  cd ~
-
-#  cat > /etc/systemd/system/warp-svc.service.d/override.conf <<EOF
-#[Service]
-#LogLevelMax=3
-#EOF
-
-#  systemctl daemon-reload
-#  systemctl restart warp-svc.service
-#  sleep 3
-
-#  systemctl status warp-svc || echo "Служба warp-svc не найдена или не запустилась."
-
-  sleep 1
-  yes | warp-cli registration new
-  sleep 1
-  warp-cli mode proxy
-  sleep 1
-  warp-cli proxy port 40000
-  sleep 1
-  warp-cli connect
-  sleep 1
-  warp-cli debug qlog disable
-  sleep 2
-
-  warp-cli tunnel stats
-  if curl -x socks5h://localhost:40000 https://2ip.io; then
-    echo "Настройка завершена: WARP подключен и работает."
-  else
-    echo "Ошибка: не удалось подключиться к WARP через прокси. Проверьте настройки."
-  fi
-
-  swapfile
-  tilda "$(text 10)"
 }
 
 ###################################
@@ -1417,6 +1338,39 @@ fi
 EOF
   chmod +x /usr/local/reverse_proxy/restart_warp
   { crontab -l; echo "* * * * * /usr/local/reverse_proxy/restart_warp"; } | crontab -
+}
+
+###################################
+### WARP
+###################################
+warp() {
+  info " $(text 43) "
+  curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+  echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
+  ${PACKAGE_UPDATE[int]}
+  ${PACKAGE_INSTALL[int]} cloudflare-warp
+
+  sleep 1
+  yes | warp-cli registration new
+  sleep 1
+  warp-cli mode proxy
+  sleep 1
+  warp-cli proxy port 40000
+  sleep 1
+  warp-cli connect
+  sleep 1
+  warp-cli debug qlog disable
+  sleep 2
+
+  warp-cli tunnel stats
+  if curl -x socks5h://localhost:40000 https://2ip.io; then
+    "WARP is connected successfully."
+  else
+    warning " $(text 20) "
+  fi
+
+  swapfile
+  tilda "$(text 10)"
 }
 
 ###################################
@@ -2227,7 +2181,9 @@ change_db() {
 ###################################
 install_panel() {
   info " $(text 46) "
-
+  SUB_URI=https://${DOMAIN}/${SUB_PATH}/
+  SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
+  
   while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused $DB_SCRIPT_URL; do
     warning " $(text 38) "
     sleep 3
@@ -2631,6 +2587,7 @@ main() {
   [[ ${args[skip-check]} == "false" ]] && check_root
   [[ ${args[skip-check]} == "false" ]] && check_ip
   check_operating_system
+  check_dependencies
   banner_xray
   select_language
   if [ -f ${DEFAULT_FLAGS} ]; then
@@ -2662,12 +2619,12 @@ main() {
         banner_xray
         warning_banner
         data_entry
-        [[ ${args[warp]} == "true" ]] && warp
         [[ ${args[utils]} == "true" ]] && installation_of_utilities
         [[ ${args[dns]} == "true" ]] && dns_encryption
         [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
         [[ ${args[bbr]} == "true" ]] && enable_bbr
         [[ ${args[ipv6]} == "true" ]] && disable_ipv6
+	[[ ${args[warp]} == "true" ]] && warp
         [[ ${args[cert]} == "true" ]] && issuance_of_certificates
         [[ ${args[mon]} == "true" ]] && monitoring
         [[ ${args[shell]} == "true" ]] && shellinabox
