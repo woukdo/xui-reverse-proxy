@@ -2607,7 +2607,6 @@ main() {
   [[ ${args[skip-check]} == "false" ]] && check_root
   [[ ${args[skip-check]} == "false" ]] && check_ip
   check_operating_system
-  check_dependencies
   banner_xray
   select_language
   if [ -f ${DEFAULT_FLAGS} ]; then
@@ -2636,6 +2635,7 @@ main() {
     case $CHOICE_MENU in
       1)
         clear
+        check_dependencies
         banner_xray
         warning_banner
         data_entry
