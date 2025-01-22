@@ -223,8 +223,8 @@ E[84]="0. Exit script"
 R[84]="0. Выход из скрипта"
 E[85]="Press Enter to return to the menu..."
 R[85]="Нажмите Enter, чтобы вернуться в меню..."
-E[86]="MENU $VERSION_MANAGER"
-R[86]="МЕНЮ $VERSION_MANAGER"
+E[86]="Reverse proxy manager $VERSION_MANAGER"
+E[86]="Reverse proxy manager $VERSION_MANAGER"
 E[87]="1. Standard installation"
 R[87]="1. Стандартная установка"
 E[88]="2. Migration to a new version with client retention."
@@ -2616,9 +2616,9 @@ main() {
   while true; do
     clear
     banner_xray
-    tilda "$(text 10)"
+    tilda "|-----------------------------------------------------------------------------|"
     info " $(text 86) "                      # MENU
-    tilda "$(text 10)"
+    tilda "|-----------------------------------------------------------------------------|"
     info " $(text 87) "                      # Install
     info " $(text 88) "                      # Migration
     info " $(text 89) "                      # Change domain
@@ -2629,7 +2629,7 @@ main() {
     info " $(text 94) "                      # Directory size
     echo
     info " $(text 84) "                      # Exit
-    tilda "$(text 10)"
+    tilda "|-----------------------------------------------------------------------------|"
     reading " $(text 1) " CHOICE_MENU        # Choise
     tilda "$(text 10)"
     case $CHOICE_MENU in
