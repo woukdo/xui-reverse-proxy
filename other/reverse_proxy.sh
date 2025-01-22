@@ -5,7 +5,7 @@
 ### Default values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER=1.4.0u
+VERSION_MANAGER=1.4.0v
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy.sh"
@@ -2488,7 +2488,7 @@ depersonalization_db() {
 ### Directory size
 ###################################
 directory_size() {
-  read -e -p "Введите директорию для проверки размера: " DIRECTORY
+  read -e -p "Enter a directory: " DIRECTORY
   echo
   free -h
   echo
@@ -2616,9 +2616,9 @@ main() {
   while true; do
     clear
     banner_xray
-    echo "================================="
+    tilda "$(text 10)"
     info " $(text 86) "                      # MENU
-    echo "================================="
+    tilda "$(text 10)"
     info " $(text 87) "                      # Install
     info " $(text 88) "                      # Migration
     info " $(text 89) "                      # Change domain
@@ -2629,7 +2629,7 @@ main() {
     info " $(text 94) "                      # Directory size
     echo
     info " $(text 84) "                      # Exit
-    echo "================================="
+    tilda "$(text 10)"
     reading " $(text 1) " CHOICE_MENU        # Choise
     tilda "$(text 10)"
     case $CHOICE_MENU in
