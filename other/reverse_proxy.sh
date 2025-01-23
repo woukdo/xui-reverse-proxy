@@ -2575,6 +2575,8 @@ migration(){
   rm -rf ${PATH_DB}.*
   mv ${PATH_DB} ${SOURCE_DB}
 
+  cp -r /etc/nginx /etc/nginx.backup
+
   select_from_db
   DOMAIN=${OLD_DOMAIN}
   SUB_DOMAIN=${OLD_SUB_DOMAIN}
