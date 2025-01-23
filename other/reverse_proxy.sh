@@ -2275,6 +2275,7 @@ ssh_setup() {
     # Настройка баннера
     cat > /etc/motd <<EOF
 
+
 ################################################################################
                         WARNING: AUTHORIZED ACCESS ONLY
 ################################################################################
@@ -2469,7 +2470,6 @@ renew_cert() {
       return 1
     fi
   fi
-
   # Перезапуск Nginx
   systemctl restart nginx
 }
@@ -2567,9 +2567,6 @@ EOF
 ### Migration to a new version
 ###################################
 migration(){
-  x-ui stop
-  sleep 3
-
   PATH_DB="/etc/x-ui/x-ui.db"
   SOURCE_DB=${PATH_DB}.mgr
   rm -rf ${PATH_DB}.*
@@ -2583,7 +2580,8 @@ migration(){
   generate_path_cdn
   nginx_setup
   install_panel
-
+  x-ui stop
+  
   client_traffics_migration_db
   settings_migration_db
   inbounds_settings_migration_db
@@ -2592,13 +2590,15 @@ migration(){
   x-ui start
   sleep 1
   
-  if ! systemctl is-active --quiet x-ui.service; then
+  if ! systemctl is-active --quiet x-ui.service || ! systemctl is-active --quiet nginx.service; then
     x-ui stop
     sleep 1
     mv -f ${SOURCE_DB} ${PATH_DB}
     mv -f /etc/nginx.mgr /etc/nginx
     sleep 1
     x-ui start
+    systemctl daemon-reload
+    systemctl restart nginx
   fi
 }
 
