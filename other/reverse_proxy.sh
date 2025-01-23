@@ -1768,8 +1768,7 @@ nginx_setup() {
   nginx_conf
   stream_conf
   local_conf
-  random_site
-
+  
   systemctl daemon-reload
   systemctl restart nginx
   nginx -s reload
@@ -2211,7 +2210,9 @@ install_panel() {
 
   echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
   sleep 1
-  echo -e "20\n1" | x-ui
+  if ! systemctl is-active fail2ban.service; then
+    echo -e "20\n1" | x-ui
+  fi
   sleep 2
 
   x-ui stop
@@ -2663,6 +2664,7 @@ main() {
         [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
         update_reverse_proxy
+	random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
         [[ ${args[firewall]} == "true" ]] && enabling_security
