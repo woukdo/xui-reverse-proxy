@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+.#!/usr/bin/env bash
 # wget -N https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/test/other/reverse_proxy.sh && bash reverse_proxy.sh d
 
 ###################################
@@ -2575,7 +2575,7 @@ migration(){
   rm -rf ${PATH_DB}.*
   mv ${PATH_DB} ${SOURCE_DB}
 
-  cp -r /etc/nginx /etc/nginx.backup
+  cp -r /etc/nginx /etc/nginx.mgr
 
   select_from_db
   DOMAIN=${OLD_DOMAIN}
@@ -2588,8 +2588,18 @@ migration(){
   settings_migration_db
   inbounds_settings_migration_db
 
-  sleep 3
+  sleep 1
   x-ui start
+  sleep 1
+  
+  if ! systemctl is-active --quiet x-ui.service; then
+    x-ui stop
+    sleep 1
+    mv -f ${SOURCE_DB} ${PATH_DB}
+    mv -f /etc/nginx.mgr /etc/nginx
+    sleep 1
+    x-ui start
+  fi
 }
 
 ###################################
