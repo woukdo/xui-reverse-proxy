@@ -2544,23 +2544,23 @@ EOF
 ### Inbounds settings migration
 ###################################
 inbounds_settings_migration_db(){
-  sqlite3 "$PATH_DB" <<EOF
-ATTACH DATABASE '$SOURCE_DB' AS source;
+  sqlite3 $PATH_DB <<EOF
+ATTACH DATABASE '$SOURCE_DB' AS source_db;
 
-UPDATE inbounds
+UPDATE new_db.inbounds
 SET settings = (
-SELECT inbounds.settings
-FROM source.inbounds AS inbounds
-WHERE inbounds.remark = inbounds.remark
+  SELECT source_db.inbounds.settings
+  FROM source_db.inbounds
+  WHERE source_db.inbounds.remark = new_db.inbounds.remark
+  LIMIT 1
 )
-
 WHERE EXISTS (
-SELECT 1
-FROM source.inbounds AS inbounds
-WHERE inbounds.remark = inbounds.remark
+  SELECT 1
+  FROM source_db.inbounds
+  WHERE source_db.inbounds.remark = new_db.inbounds.remark
 );
 
-DETACH DATABASE source;
+DETACH DATABASE source_db;
 EOF
 }
 
