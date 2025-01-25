@@ -92,7 +92,7 @@
 
 Для начала настройки сервера выполните следующую команду в терминале:
 ```sh
-bash <(curl -Ls https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy_server.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh)
 ```
 
 ### Установка случайного шаблона для веб-сайта:
