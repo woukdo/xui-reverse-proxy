@@ -1345,22 +1345,26 @@ EOF
 ###################################
 warp() {
   info " $(text 43) "
-  curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
-  echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list  
+
+  case "$SYSTEM" in
+    Debian|Ubuntu)
+      curl -fsSL https://pkg.cloudflareclient.com/pubkey.gpg | gpg --yes --dearmor --output /usr/share/keyrings/cloudflare-warp-archive-keyring.gpg
+      echo "deb [signed-by=/usr/share/keyrings/cloudflare-warp-archive-keyring.gpg] https://pkg.cloudflareclient.com/ $(grep "VERSION_CODENAME=" /etc/os-release | cut -d "=" -f 2) main" | tee /etc/apt/sources.list.d/cloudflare-client.list
+      ;;
+
+    CentOS|Fedora)
+      curl -fsSl https://pkg.cloudflareclient.com/cloudflare-warp-ascii.repo | tee /etc/yum.repos.d/cloudflare-warp.repo
+      ;;
+  esac
+
   ${PACKAGE_UPDATE[int]}
   ${PACKAGE_INSTALL[int]} cloudflare-warp
 
-  sleep 1
-  yes | warp-cli registration new
-  sleep 1
-  warp-cli mode proxy
-  sleep 1
-  warp-cli proxy port 40000
-  sleep 1
-  warp-cli connect
-  sleep 1
+  warp-cli --accept-tos registration new
+  warp-cli --accept-tos mode proxy
+  warp-cli --accept-tos proxy port 40000
+  warp-cli --accept-tos connect
   warp-cli debug qlog disable
-  sleep 2
 
   warp-cli tunnel stats
   if curl -x socks5h://localhost:40000 https://2ip.io; then
