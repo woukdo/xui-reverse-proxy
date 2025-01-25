@@ -2501,13 +2501,6 @@ directory_size() {
 ### Query from database
 ###################################
 select_from_db(){
-  local SQL_QUERY1="SELECT stream_settings FROM inbounds WHERE remark='STEAL';"
-  OLD_SUB_DOMAIN=$(sqlite3 "$PATH_DB" "$SQL_QUERY1" | jq -r '.externalProxy[].dest' | sort -u)
-  OLD_DOMAIN=$(sqlite3 "$PATH_DB" "$SQL_QUERY1" | jq -r '.realitySettings.serverNames[]' | sort -u)
-
-  local SQL_QUERY2="SELECT stream_settings FROM inbounds WHERE remark='REALITY';"
-  REALITY=$(sqlite3 "$PATH_DB" "$SQL_QUERY2" | jq -r '.realitySettings.serverNames[0]')
-
   result1=$(sqlite3 "$PATH_DB" "SELECT username, password FROM users WHERE id = 1;")
   USERNAME=$(echo "$result1" | cut -d '|' -f 1)  # Первая часть (username)
   PASSWORD=$(echo "$result1" | cut -d '|' -f 2)  # Вторая часть (password)
@@ -2523,9 +2516,9 @@ select_from_db(){
 ###################################
 client_traffics_migration_db(){
   sqlite3 "$PATH_DB" <<EOF
-ATTACH '$SOURCE_DB' AS source;
-INSERT OR REPLACE INTO client_traffics SELECT * FROM source.client_traffics;
-DETACH source;
+ATTACH '$SOURCE_DB' AS source_db;
+INSERT OR REPLACE INTO client_traffics SELECT * FROM source_db.client_traffics;
+DETACH source_db;
 EOF
 }
 
@@ -2534,9 +2527,9 @@ EOF
 ###################################
 settings_migration_db(){
   sqlite3 "$PATH_DB" <<EOF
-ATTACH '$SOURCE_DB' AS source;
-INSERT OR REPLACE INTO settings SELECT * FROM source.settings;
-DETACH source;
+ATTACH '$SOURCE_DB' AS source_db;
+INSERT OR REPLACE INTO settings SELECT * FROM source_db.settings;
+DETACH source_db;
 EOF
 }
 
@@ -2570,15 +2563,26 @@ EOF
 migration(){
   PATH_DB="/etc/x-ui/x-ui.db"
   SOURCE_DB=${PATH_DB}.mgr
-  rm -rf ${PATH_DB}.*
-  mv ${PATH_DB} ${SOURCE_DB}
-
+  echo ${PATH_DB}
+  echo ${SOURCE_DB}
+  cp -r /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.mgr
   cp -r /etc/nginx /etc/nginx.mgr
 
+  DOMAIN=""
+  SUB_DOMAIN=""
+  REALITY=""
+
   select_from_db
-  DOMAIN=${OLD_DOMAIN}
-  SUB_DOMAIN=${OLD_SUB_DOMAIN}
   generate_path_cdn
+  read -rp "A запись: " TEMP_DOMAIN_L  # Запрашиваем домен
+  DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+  echo
+  read -rp "CNAME запись: " TEMP_DOMAIN_L  # Запрашиваем субдомен
+  SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+  echo
+  read -rp "REALITY: " TEMP_REALITY_L
+  REALITY=$(clean_url "$TEMP_REALITY_L")
+  
   nginx_setup
   install_panel
   x-ui stop
@@ -2591,13 +2595,27 @@ migration(){
   x-ui start
   sleep 1
   
-  if ! systemctl is-active --quiet x-ui.service || ! systemctl is-active --quiet nginx.service; then
+  echo "5"
+  
+  output=$(/usr/local/x-ui/bin/xray*)
+  echo $output
+  if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
+    echo "6"
     x-ui stop
     sleep 1
-    mv -f ${SOURCE_DB} ${PATH_DB}
-    mv -f /etc/nginx.mgr /etc/nginx
+    rm -rf /etc/x-ui/x-ui.db
+    rm -rf /etc/x-ui/x-ui.db.backup
+    rm -rf /etc/x-ui/x-ui.db.1
+    mv -f /etc/x-ui/x-ui.db.mgr /etc/x-ui/x-ui.db
     sleep 1
     x-ui start
+  else
+    echo "Xray успешно запущен."
+  fi
+
+  if ! systemctl is-active --quiet nginx.service; then
+    echo "7"
+    mv -f /etc/nginx.mgr /etc/nginx
     systemctl daemon-reload
     systemctl restart nginx
   fi
