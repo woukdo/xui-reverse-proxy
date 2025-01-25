@@ -1,6 +1,4 @@
-# REVERSE_RPOXY ([Russian](/README_RU.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" /> 
-![Total Views Month Badge](https://img.shields.io/badge/Total%20V%20Per%20Month-2265-blue)
-![Unique Views Month Badge](https://img.shields.io/badge/Unique%20V%20Per%20Month-352-green)
+# REVERSE_PROXY ([Russian](/README_RU.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" /> 
 <p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image" ></a></p>
 
 -----
@@ -63,11 +61,12 @@ This script is designed for quick and easy setup of a reverse proxy server using
 
 ### Help message of the script:
 ```
-Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
-                 [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
-                 [-c|--cert <true|false>] [-m|--mon <true|false>] [-n|--nginx <true|false>] [-p|--panel <true|false>]
-                 [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>] [-g|--generate <true|false>]
-                 [-x|--skip-check <true|false>] [-h|--help]
+Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
+         [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
+         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>] 
+         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]
+         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]
+         [-h|--help]
 
   -u, --utils <true|false>       Additional utilities                           (default: true)
   -d, --dns <true|false>         DNS encryption                                 (default: true)
@@ -78,6 +77,7 @@ Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>]
   -w, --warp <true|false>        Warp                                           (default: true)
   -c, --cert <true|false>        Certificate issuance for domain                (default: true)
   -m, --mon <true|false>         Monitoring services (node_exporter)            (default: false)
+  -l, --shell <true|false>       Shell In A Box installation                    (default: false)
   -n, --nginx <true|false>       NGINX installation                             (default: true)
   -p, --panel <true|false>       Panel installation for user management         (default: true)
   -f, --firewall <true|false>    Firewall configuration                         (default: true)
@@ -85,8 +85,9 @@ Usage: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>]
   -t, --tgbot <true|false>       Telegram bot integration                       (default: false)
   -g, --generate <true|false>    Generate a random string for configuration     (default: true)
   -x, --skip-check <true|false>  Disable the check functionality                (default: false)
+  -o, --subdomain <true|false>   Support for subdomains                         (default: false)
+      --update <true|false>      Updating the script version (Version on github: -)"
   -h, --help                     Display this help message
-
 ```
 
 ### Installation of REVERSE_PROXY:
