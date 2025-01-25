@@ -905,7 +905,8 @@ data_entry() {
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
-
+  tilda "$(text 10)"
+  
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
