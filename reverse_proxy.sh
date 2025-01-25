@@ -2656,7 +2656,7 @@ main() {
     info " $(text 86) "                      # MENU
     tilda "|-----------------------------------------------------------------------------|"
     info " $(text 87) "                      # Install
-    info " $(text 88) "                      # Migration
+#    info " $(text 88) "                      # Migration
     info " $(text 89) "                      # Change domain
     info " $(text 90) "                      # Renew cert
     info " $(text 91) "                      # Steal web site
@@ -2681,13 +2681,13 @@ main() {
         [[ ${args[autoupd]} == "true" ]] && setup_auto_updates
         [[ ${args[bbr]} == "true" ]] && enable_bbr
         [[ ${args[ipv6]} == "true" ]] && disable_ipv6
-	[[ ${args[warp]} == "true" ]] && warp
+      	[[ ${args[warp]} == "true" ]] && warp
         [[ ${args[cert]} == "true" ]] && issuance_of_certificates
         [[ ${args[mon]} == "true" ]] && monitoring
         [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
         update_reverse_proxy
-	random_site
+	      random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
         [[ ${args[firewall]} == "true" ]] && enabling_security
@@ -2695,9 +2695,9 @@ main() {
         [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
         ;;
-      2)
-        migration
-        ;;
+#      2)
+#        migration
+#        ;;
       3)
         change_domain
         ;;
