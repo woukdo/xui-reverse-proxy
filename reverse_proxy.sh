@@ -291,7 +291,7 @@ show_help() {
   echo "                                 Отключение проверки"
   echo "  -o, --subdomain <true|false>   Support for subdomains                           (default: ${defaults[subdomain]})"
   echo "                                 Поддержка субдоменов"
-  echo "      --update <true|false>      Updating the script version (Version on github: ${VERSION_MANAGER})"
+  echo "      --update                   Updating the script version (Version on github: ${VERSION_MANAGER})"
   echo "                                 Обновление версии скрипта (Версия на github: ${VERSION_MANAGER})"
   echo "  -h, --help                     Display this help message"
   echo "                                 Показать это сообщение помощи"
@@ -2687,7 +2687,7 @@ main() {
         [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
         update_reverse_proxy
-	      random_site
+	random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
         [[ ${args[firewall]} == "true" ]] && enabling_security
