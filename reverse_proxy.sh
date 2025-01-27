@@ -1480,14 +1480,17 @@ EOF
 ###################################
 ### WEB SUB JSON
 ###################################
-#URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
-#DEST_DIR_SUB_PAGE="/var/www/subpage"
-#DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
-#sudo mkdir -p "$DEST_DIR_SUB_PAGE"
-#sudo curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
-#sed -i "s/\${DOMAIN}/$domain/g" "$DEST_FILE_SUB_PAGE"
-#sed -i "s#\${SUB_JSON_PATH}#$json_path#g" "$DEST_FILE_SUB_PAGE"
-#sed -i "s#\${SUB_PATH}#$sub_path#g" "$DEST_FILE_SUB_PAGE"
+temp(){
+  URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
+  DEST_DIR_SUB_PAGE="/var/www/subpage"
+  mkdir -p "$DEST_DIR_SUB_PAGE"
+  DEST_FILE_SUB_PAGE="/var/www/subpage/index.html"
+  
+  curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
+  sed -i "s/\${DOMAIN}/$domain/g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_JSON_PATH}#$json_path#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_PATH}#$sub_path#g" "$DEST_FILE_SUB_PAGE"
+}
 
 ###################################
 ### http conf
@@ -1570,12 +1573,9 @@ stream_conf() {
   cat > /etc/nginx/stream-enabled/stream.conf <<EOF
 map \$ssl_preread_server_name \$backend {
   ${DOMAIN}                            web;
-  ${SUB_DOMAIN}                        xtls;
   ${REALITY}                           reality;
+  ${SUB_DOMAIN}                        xtls;
   default                              block;
-}
-upstream block {
-  server 127.0.0.1:36076;
 }
 upstream web {
   server 127.0.0.1:7443;
@@ -1585,6 +1585,9 @@ upstream reality {
 }
 upstream xtls {
   server 127.0.0.1:9443;
+}
+upstream block {
+  server 127.0.0.1:36076;
 }
 server {
   listen 443                           reuseport;
@@ -2587,7 +2590,7 @@ EOF
 ###################################
 migration(){
   PATH_DB="/etc/x-ui/x-ui.db"
-  SOURCE_DB=${PATH_DB}.mgr
+  SOURCE_DB="/etc/x-ui/x-ui.db.mgr"
   echo ${PATH_DB}
   echo ${SOURCE_DB}
   cp -r /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.mgr
