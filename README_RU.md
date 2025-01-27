@@ -61,11 +61,12 @@
 
 ### Сообщение помощи для скрипта:
 ```
-Использование: reverse_proxy_server.sh [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
-                 [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
-                 [-c|--cert <true|false>] [-m|--mon <true|false>] [-n|--nginx <true|false>] [-p|--panel <true|false>]
-                 [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>] [-g|--generate <true|false>]
-                 [-x|--skip-check <true|false>] [-h|--help]
+Использование: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
+         [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
+         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>] 
+         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]
+         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]
+         [-h|--help]
 
   -u, --utils <true|false>       Дополнительные утилиты                         (по умолчанию: true)
   -d, --dns <true|false>         Шифрование DNS                                 (по умолчанию: true)
@@ -76,6 +77,7 @@
   -w, --warp <true|false>        Warp                                           (по умолчанию: true)
   -c, --cert <true|false>        Выпуск сертификатов для домена                 (по умолчанию: true)
   -m, --mon <true|false>         Сервисы мониторинга (node_exporter)            (по умолчанию: false)
+  -l, --shell <true|false>       Установка Shell In A Box                       (по умолчанию: false)
   -n, --nginx <true|false>       Установка NGINX                                (по умолчанию: true)
   -p, --panel <true|false>       Установка панели для управления пользователями (по умолчанию: true)
   -f, --firewall <true|false>    Настройка файрвола                             (по умолчанию: true)
@@ -83,6 +85,8 @@
   -t, --tgbot <true|false>       Интеграция Telegram бота                       (по умолчанию: false)
   -g, --generate <true|false>    Генерация случайных путей для конфигурации     (по умолчанию: true)
   -x, --skip-check <true|false>  Отключение проверки                            (по умолчанию: false)
+  -o, --subdomain <true|false>   Поддержка поддоменов                           (по умолчанию: false)
+      --update                   Обновить версию Reverse-proxy manager
   -h, --help                     Показать это сообщение помощи
 ```
 
