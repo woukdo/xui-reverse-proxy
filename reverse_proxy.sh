@@ -1578,6 +1578,7 @@ server {
   listen 443                           reuseport;
   ssl_preread                          on;
   proxy_protocol                       on;
+  set_real_ip_from unix:;
   proxy_pass                           \$backend;
 }
 EOF
