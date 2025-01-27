@@ -86,7 +86,7 @@ Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--add
   -g, --generate <true|false>    Generate a random string for configuration     (default: true)
   -x, --skip-check <true|false>  Disable the check functionality                (default: false)
   -o, --subdomain <true|false>   Support for subdomains                         (default: false)
-      --update <true|false>      Updating the script version (Version on github: -)"
+      --update                   Update version of Reverse-proxy manager
   -h, --help                     Display this help message
 ```
 
