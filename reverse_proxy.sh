@@ -1478,6 +1478,18 @@ EOF
 }
 
 ###################################
+### WEB SUB JSON
+###################################
+#URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
+#DEST_DIR_SUB_PAGE="/var/www/subpage"
+#DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
+#sudo mkdir -p "$DEST_DIR_SUB_PAGE"
+#sudo curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
+#sed -i "s/\${DOMAIN}/$domain/g" "$DEST_FILE_SUB_PAGE"
+#sed -i "s#\${SUB_JSON_PATH}#$json_path#g" "$DEST_FILE_SUB_PAGE"
+#sed -i "s#\${SUB_PATH}#$sub_path#g" "$DEST_FILE_SUB_PAGE"
+
+###################################
 ### http conf
 ###################################
 nginx_conf() {
@@ -1633,6 +1645,13 @@ server {
   error_page 400 402 403 500 501 502 503 504 =404 /404;
   proxy_intercept_errors on;
 
+  # WEB SUB JSON
+  location ~ ^/${WEB_SUB_JSON} {
+    default_type application/json;
+    root /var/www/subpage;
+    index index.html;
+    try_files /index.html =404;
+  }
   # PANEL
   location /${WEB_BASE_PATH} {
     if (\$hack = 1) {return 404;}
