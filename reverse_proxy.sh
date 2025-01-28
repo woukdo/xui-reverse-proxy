@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.1a'
+VERSION_MANAGER='dev 1.4.1b'
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
@@ -2568,17 +2568,24 @@ inbounds_settings_migration_db(){
   sqlite3 $PATH_DB <<EOF
 ATTACH DATABASE '$SOURCE_DB' AS source_db;
 
-UPDATE new_db.inbounds
+UPDATE inbounds
+SET settings = NULL
+WHERE remark IN (
+    SELECT remark
+    FROM source_db.inbounds
+    WHERE source_db.inbounds.remark = inbounds.remark
+);
+
+UPDATE inbounds
 SET settings = (
-  SELECT source_db.inbounds.settings
-  FROM source_db.inbounds
-  WHERE source_db.inbounds.remark = new_db.inbounds.remark
-  LIMIT 1
+    SELECT settings
+    FROM source_db.inbounds
+    WHERE source_db.inbounds.remark = inbounds.remark
 )
 WHERE EXISTS (
-  SELECT 1
-  FROM source_db.inbounds
-  WHERE source_db.inbounds.remark = new_db.inbounds.remark
+    SELECT 1
+    FROM source_db.inbounds
+    WHERE source_db.inbounds.remark = inbounds.remark
 );
 
 DETACH DATABASE source_db;
@@ -2591,8 +2598,6 @@ EOF
 migration(){
   PATH_DB="/etc/x-ui/x-ui.db"
   SOURCE_DB="/etc/x-ui/x-ui.db.mgr"
-  echo ${PATH_DB}
-  echo ${SOURCE_DB}
   cp -r /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.mgr
   cp -r /etc/nginx /etc/nginx.mgr
 
@@ -2679,7 +2684,7 @@ main() {
     info " $(text 86) "                      # MENU
     tilda "|-----------------------------------------------------------------------------|"
     info " $(text 87) "                      # Install
-#    info " $(text 88) "                      # Migration
+    info " $(text 88) "                      # Migration
     info " $(text 89) "                      # Change domain
     info " $(text 90) "                      # Renew cert
     info " $(text 91) "                      # Steal web site
@@ -2718,9 +2723,9 @@ main() {
         [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
         ;;
-#      2)
-#        migration
-#        ;;
+      2)
+        migration
+        ;;
       3)
         change_domain
         ;;
