@@ -7,7 +7,7 @@
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER='dev 1.4.1b'
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
-PATH_DB="/etc/x-ui/x-ui.db"
+DEST_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/database/x-ui.db"
 
@@ -2135,7 +2135,7 @@ EOF
 ### Updating username, password in users
 ###################################
 update_user_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE users SET username = '$USERNAME', password = '$PASSWORD' WHERE id = 1;
 EOF
 }
@@ -2144,7 +2144,7 @@ EOF
 ### Updating stream_settings in inbound
 ###################################
 update_stream_settings_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_GRPC' WHERE LOWER(remark) LIKE '%grpc%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
@@ -2159,7 +2159,7 @@ EOF
 ### Updating sniffing in inbound
 ###################################
 update_sniffing_settings_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%grpc%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%httpu%';
@@ -2174,7 +2174,7 @@ EOF
 ### Updating value in settings
 ###################################
 update_settings_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE settings SET value = '/${WEB_BASE_PATH}/' WHERE LOWER(key) LIKE '%webbasepath%';
 UPDATE settings SET value = '/${SUB_PATH}/' WHERE LOWER(key) LIKE '%subpath%';
 UPDATE settings SET value = '${SUB_URI}' WHERE LOWER(key) LIKE '%suburi%';
@@ -2197,7 +2197,7 @@ EOF
 ### Updating json rules in the database
 ###################################
 update_json_rules_db() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE settings SET value = '${SUB_JSON_RULES}' WHERE LOWER(key) LIKE '%subjsonrules%';
 EOF
 }
@@ -2244,8 +2244,8 @@ install_panel() {
   sleep 2
 
   x-ui stop
-  rm -rf ${PATH_DB}.backup
-  [ -f ${PATH_DB} ] && mv ${PATH_DB} ${PATH_DB}.backup
+  rm -rf ${DEST_DB}.backup
+  [ -f ${DEST_DB} ] && mv ${DEST_DB} ${DEST_DB}.backup
   mv x-ui.db /etc/x-ui/
 
   change_db
@@ -2441,7 +2441,7 @@ create_cert_backup() {
 ### Database change in domain
 ###################################
 database_change_domain() {
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 $DEST_DB <<EOF
 UPDATE settings
 SET value = REPLACE(value, '$OLD_DOMAIN', '$DOMAIN')
 WHERE value LIKE '%$OLD_DOMAIN%';
@@ -2507,10 +2507,10 @@ renew_cert() {
 ### Depersonalization of the database
 ###################################
 depersonalization_db() {
-  cp ${PATH_DB} ${PATH_DB}.temp
+  cp ${DEST_DB} ${DEST_DB}.temp
   change_db
-  mv ${PATH_DB} /root/
-  mv ${PATH_DB}.temp ${PATH_DB}
+  mv ${DEST_DB} /root/
+  mv ${DEST_DB}.temp ${DEST_DB}
 }
 
 ###################################
@@ -2529,11 +2529,11 @@ directory_size() {
 ### Query from database
 ###################################
 select_from_db(){
-  result1=$(sqlite3 "$PATH_DB" "SELECT username, password FROM users WHERE id = 1;")
+  result1=$(sqlite3 "$DEST_DB" "SELECT username, password FROM users WHERE id = 1;")
   USERNAME=$(echo "$result1" | cut -d '|' -f 1)  # Первая часть (username)
   PASSWORD=$(echo "$result1" | cut -d '|' -f 2)  # Вторая часть (password)
 
-  result2=$(sqlite3 "$PATH_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
+  result2=$(sqlite3 "$DEST_DB" "SELECT value FROM settings WHERE key IN ('webBasePath', 'subPath', 'subJsonPath');")
   WEB_BASE_PATH=$(echo "$result2" | sed -n '1p' | sed 's/^\/\(.*\)\/$/\1/')
   SUB_PATH=$(echo "$result2" | sed -n '2p' | sed 's/^\/\(.*\)\/$/\1/')
   SUB_JSON_PATH=$(echo "$result2" | sed -n '3p' | sed 's/^\/\(.*\)\/$/\1/')
@@ -2543,7 +2543,7 @@ select_from_db(){
 ### Client traffic migration
 ###################################
 client_traffics_migration_db(){
-  sqlite3 "$PATH_DB" <<EOF
+  sqlite3 "$DEST_DB" <<EOF
 ATTACH '$SOURCE_DB' AS source_db;
 INSERT OR REPLACE INTO client_traffics SELECT * FROM source_db.client_traffics;
 DETACH source_db;
@@ -2554,7 +2554,7 @@ EOF
 ### Settings migration
 ###################################
 settings_migration_db(){
-  sqlite3 "$PATH_DB" <<EOF
+  sqlite3 "$DEST_DB" <<EOF
 ATTACH '$SOURCE_DB' AS source_db;
 INSERT OR REPLACE INTO settings SELECT * FROM source_db.settings;
 DETACH source_db;
@@ -2565,7 +2565,7 @@ EOF
 ### Inbounds settings migration
 ###################################
 inbounds_settings_migration_db(){
-  sqlite3 $PATH_DB <<EOF
+  sqlite3 "$DEST_DB" <<EOF
 ATTACH DATABASE '$SOURCE_DB' AS source_db;
 
 UPDATE inbounds
@@ -2596,7 +2596,7 @@ EOF
 ### Migration to a new version
 ###################################
 migration(){
-  PATH_DB="/etc/x-ui/x-ui.db"
+  DEST_DB="/etc/x-ui/x-ui.db"
   SOURCE_DB="/etc/x-ui/x-ui.db.mgr"
   cp -r /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.mgr
   cp -r /etc/nginx /etc/nginx.mgr
@@ -2618,18 +2618,13 @@ migration(){
   
   nginx_setup
   install_panel
-  x-ui stop
   
   client_traffics_migration_db
   settings_migration_db
   inbounds_settings_migration_db
 
-  sleep 1
-  x-ui start
-  sleep 1
-  
-  echo "5"
-  
+  x-ui restart
+
   output=$(/usr/local/x-ui/bin/xray*)
   echo $output
   if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
@@ -2641,13 +2636,12 @@ migration(){
     rm -rf /etc/x-ui/x-ui.db.1
     mv -f /etc/x-ui/x-ui.db.mgr /etc/x-ui/x-ui.db
     sleep 1
-    x-ui start
+    x-ui restart
   else
     echo "Xray успешно запущен."
   fi
 
   if ! systemctl is-active --quiet nginx.service; then
-    echo "7"
     mv -f /etc/nginx.mgr /etc/nginx
     systemctl daemon-reload
     systemctl restart nginx
@@ -2715,7 +2709,7 @@ main() {
         [[ ${args[shell]} == "true" ]] && shellinabox
         write_defaults_to_file
         update_reverse_proxy
-	      random_site
+        random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
         [[ ${args[firewall]} == "true" ]] && enabling_security
