@@ -50,13 +50,15 @@ SERVER 2
 ### Includes:
   
 1. Xray server configuration with 3X-UI:
-   - Connection of subscription and JSON subscription for automatic configuration updates.
+   - Subscription and JSON subscription to automatically update configurations.
+  You must enable MUX (multiplexing TCP connections) in each client application
    - VLESS-gRPC-TLS
    - VLESS-XHTTP-TLS
    - VLESS-HTTPUpgrade-TLS
    - VLESS-Websocket-TLS
+  The user “flow”: “xtls-rprx-vision” must be enabled
    - VLESS-TCP-REALITY
-   - VLESS-TCP-REALITY (Steal oneself)
+   - VLESS-TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
    - VLESS-TCP-XTLS-Vision
 3. Configuring NGINX reverse proxy on port 443.
 4. Providing security:
@@ -69,6 +71,8 @@ SERVER 2
 10. Disabling IPv6 to prevent possible vulnerabilities.
 11. Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
 12. Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
+13. Setting up Shell In A Box for secure, web-based SSH access to the server.
+14. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
 
 -----
 
