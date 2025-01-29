@@ -60,8 +60,8 @@ SERVER 2
    - VLESS-TCP-REALITY
    - VLESS-TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
    - VLESS-TCP-XTLS-Vision
-3. Configuring NGINX reverse proxy on port 443.
-4. Providing security:
+2. Configuring NGINX reverse proxy on port 443.
+3. Providing security:
    - Automatic system updates via unattended-upgrades.
    - Configuring Cloudflare SSL certificates with automatic updates to secure connections.
    - Configuring WARP to protect traffic.
@@ -70,9 +70,9 @@ SERVER 2
    - Disabling IPv6 to prevent possible vulnerabilities.
    - Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
    - Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
-5. Enabling BBR - improving the performance of TCP connections.
-6. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
-7. Setting up Shell In A Box for secure, web-based SSH access to the server.
+4. Enabling BBR - improving the performance of TCP connections.
+5. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
+6. Setting up Shell In A Box for secure, web-based SSH access to the server.
 
 -----
 
