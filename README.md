@@ -27,6 +27,7 @@ This script is designed for quick and easy setup of a reverse proxy server using
 2. Configure Cloudflare:
    - Bind your domain to Cloudflare.
    - Add the following DNS records:
+
 SERVER 1
 | Type  | Name             | Content          | Proxy status  |
 | ----- | ---------------- | ---------------- | ------------- |
