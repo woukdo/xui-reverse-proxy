@@ -291,8 +291,8 @@ show_help() {
   echo "                                 Отключение проверки"
   echo "  -o, --subdomain <true|false>   Support for subdomains                           (default: ${defaults[subdomain]})"
   echo "                                 Поддержка субдоменов"
-  echo "      --update                   Updating the script version (Version on github: ${VERSION_MANAGER})"
-  echo "                                 Обновление версии скрипта (Версия на github: ${VERSION_MANAGER})"
+  echo "      --update                   Update version of Reverse-proxy manager (Version on github: ${VERSION_MANAGER})"
+  echo "                                 Обновить версию Reverse-proxy manager (Версия на github: ${VERSION_MANAGER})"
   echo "  -h, --help                     Display this help message"
   echo "                                 Показать это сообщение помощи"
   echo
