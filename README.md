@@ -27,11 +27,17 @@ This script is designed for quick and easy setup of a reverse proxy server using
 2. Configure Cloudflare:
    - Bind your domain to Cloudflare.
    - Add the following DNS records:
-
+SERVER 1
 | Type  | Name             | Content          | Proxy status  |
 | ----- | ---------------- | ---------------- | ------------- |
-| A     | your_domain_name | your_server_ip   | DNS only      |
-| CNAME | www              | your_domain_name | DNS only      |
+| A     | example.com      | your_server_ip   | DNS only      |
+| CNAME | www              | example.com      | DNS only      |
+
+SERVER 2
+| Type  | Name             | Content          | Proxy status  |
+| ----- | ---------------- | ---------------- | ------------- |
+| A     | nl.example.com   | your_server_ip   | DNS only      |
+| CNAME | www.nl           | nl.example.com   | DNS only      |
    
 3. SSL/TLS settings in Cloudflare:
    - Go to SSL/TLS > Overview and select Full for the Configure option.
@@ -43,19 +49,25 @@ This script is designed for quick and easy setup of a reverse proxy server using
 ### Includes:
   
 1. Xray server configuration with 3X-UI:
-   - VLESS-TCP-XTLS-Vision и VLESS-TCP-REALITY (Steal oneself).
    - Connection of subscription and JSON subscription for automatic configuration updates.
-2. Configuring NGINX reverse proxy on port 443.
-3. providing security:
+   - VLESS-gRPC-TLS
+   - VLESS-XHTTP-TLS
+   - VLESS-HTTPUpgrade-TLS
+   - VLESS-Websocket-TLS
+   - VLESS-TCP-REALITY
+   - VLESS-TCP-REALITY (Steal oneself)
+   - VLESS-TCP-XTLS-Vision
+3. Configuring NGINX reverse proxy on port 443.
+4. Providing security:
    - Automatic system updates via unattended-upgrades.
-4. Configuring Cloudflare SSL certificates with automatic updates to secure connections.
-5. Configuring WARP to protect traffic.
-6. Enabling BBR - improving the performance of TCP connections.
-7. Configuring UFW (Uncomplicated Firewall) for access control.
-8. Configuring SSH, to provide the minimum required security.
-9. Disabling IPv6 to prevent possible vulnerabilities.
-10. Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
-11. Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
+5. Configuring Cloudflare SSL certificates with automatic updates to secure connections.
+6. Configuring WARP to protect traffic.
+7. Enabling BBR - improving the performance of TCP connections.
+8. Configuring UFW (Uncomplicated Firewall) for access control.
+9. Configuring SSH, to provide the minimum required security.
+10. Disabling IPv6 to prevent possible vulnerabilities.
+11. Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
+12. Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
 
 -----
 
