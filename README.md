@@ -73,6 +73,7 @@ SERVER 2
 5. Enabling BBR - improving the performance of TCP connections.
 6. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
 7. Setting up Shell In A Box for secure, web-based SSH access to the server.
+8. 
 
 -----
 
