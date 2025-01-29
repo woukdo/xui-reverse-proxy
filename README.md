@@ -71,8 +71,8 @@ SERVER 2
    - Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
    - Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
 5. Enabling BBR - improving the performance of TCP connections.
-6. Setting up Shell In A Box for secure, web-based SSH access to the server.
-7. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
+6. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
+7. Setting up Shell In A Box for secure, web-based SSH access to the server.
 
 -----
 
