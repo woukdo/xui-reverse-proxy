@@ -63,16 +63,16 @@ SERVER 2
 3. Configuring NGINX reverse proxy on port 443.
 4. Providing security:
    - Automatic system updates via unattended-upgrades.
-5. Configuring Cloudflare SSL certificates with automatic updates to secure connections.
-6. Configuring WARP to protect traffic.
-7. Enabling BBR - improving the performance of TCP connections.
-8. Configuring UFW (Uncomplicated Firewall) for access control.
-9. Configuring SSH, to provide the minimum required security.
-10. Disabling IPv6 to prevent possible vulnerabilities.
-11. Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
-12. Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
-13. Setting up Shell In A Box for secure, web-based SSH access to the server.
-14. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
+   - Configuring Cloudflare SSL certificates with automatic updates to secure connections.
+   - Configuring WARP to protect traffic.
+   - Configuring UFW (Uncomplicated Firewall) for access control.
+   - Configuring SSH, to provide the minimum required security.
+   - Disabling IPv6 to prevent possible vulnerabilities.
+   - Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
+   - Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
+5. Enabling BBR - improving the performance of TCP connections.
+6. Setting up Shell In A Box for secure, web-based SSH access to the server.
+7. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
 
 -----
 
