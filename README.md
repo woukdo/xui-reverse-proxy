@@ -3,7 +3,7 @@
 
 -----
 
-### Proxy using VLESS-TCP-XTLS-Vision and VLESS-TCP-REALITY (Steal oneself) behind reverse-proxy NGINX
+### Server using NGINX reverse proxy
 This script is designed for quick and easy setup of a reverse proxy server using NGINX. In this setup, all incoming requests are processed by NGINX, and the server functions as a reverse proxy server only if the request contains the correct path (URI). This enhances security and improves access control management.
 
 > [!IMPORTANT]
@@ -71,8 +71,9 @@ SERVER 2
    - Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
    - Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
 4. Enabling BBR - improving the performance of TCP connections.
-5. Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
-6. Setting up Shell In A Box for secure, web-based SSH access to the server.
+5. Optional extras:
+   - Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
+   - Setting up Shell In A Box for secure, web-based SSH access to the server.
 
 -----
 
