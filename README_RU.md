@@ -51,15 +51,15 @@
   
 1. Конфигурация сервера Xray с 3X-UI:
    - Подписка и JSON подписка для автоматического обновления конфигураций.
-  Необходимо включать MUX (мультиплексирование TCP соединений) в каждом клиентском приложении
-   - VLESS-gRPC-TLS
-   - VLESS-XHTTP-TLS
-   - VLESS-HTTPUpgrade-TLS
-   - VLESS-Websocket-TLS
-  Необходимо включать у пользователя "flow": "xtls-rprx-vision"
-   - VLESS-TCP-REALITY
-   - VLESS-TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
-   - VLESS-TCP-XTLS-Vision
+   - Необходимо включать MUX (мультиплексирование TCP соединений) в каждом клиентском приложении
+     - VLESS-gRPC-TLS
+     - VLESS-XHTTP-TLS
+     - VLESS-HTTPUpgrade-TLS
+     - VLESS-Websocket-TLS
+   - Необходимо включать у пользователя "flow": "xtls-rprx-vision"
+     - VLESS-TCP-REALITY
+     - VLESS-TCP-REALITY (Steal oneself) (отключение приведет к потере доступа)
+     - VLESS-TCP-XTLS-Vision
 2. Настройку обратного прокси NGINX на порт 443.
 3. Обеспечение безопасности:
    - Автоматические обновления системы через unattended-upgrades.
