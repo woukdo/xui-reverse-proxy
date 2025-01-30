@@ -6,6 +6,7 @@
 ###################################
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER=1.4.1
+VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 PATH_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh"
@@ -2213,7 +2214,7 @@ install_panel() {
     sleep 3
   done
 
-  echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
+  echo -e "n" | bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
   sleep 1
   if ! systemctl is-active fail2ban.service; then
     echo -e "20\n1" | x-ui
