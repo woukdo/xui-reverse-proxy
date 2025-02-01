@@ -2301,44 +2301,7 @@ ssh_setup() {
       s/PermitEmptyPasswords yes/PermitEmptyPasswords no/g;
     " /etc/ssh/sshd_config
 
-    # Настройка баннера
-    cat > /etc/motd <<EOF
-
-
-################################################################################
-                        WARNING: AUTHORIZED ACCESS ONLY
-################################################################################
-
-This system is for the use of authorized users only. Individuals using this
-computer system without authority, or in excess of their authority, are subject
-to having all of their activities on this system monitored and recorded.
-
-Any unauthorized access or use of this system is prohibited and may be subject
-to criminal and/or civil penalties. All activities on this system are logged
-and monitored. By accessing this system, you agree to comply with all applicable
-company policies, and you consent to the monitoring and recording of your
-activities.
-
-If you are not an authorized user, you must disconnect immediately.
-
-Unauthorized access to this device is strictly prohibited and will be prosecuted
-to the fullest extent of the law.
-
-################################################################################
-
-            +----------------------------------------------------+
-            | █████ █████ ███████████     █████████   █████ █████|
-            |░░███ ░░███ ░░███░░░░░███   ███░░░░░███ ░░███ ░░███ |
-            | ░░███ ███   ░███    ░███  ░███    ░███  ░░███ ███  |
-            |  ░░█████    ░██████████   ░███████████   ░░█████   |
-            |   ███░███   ░███░░░░░███  ░███░░░░░███    ░░███    |
-            |  ███ ░░███  ░███    ░███  ░███    ░███     ░███    |
-            | █████ █████ █████   █████ █████   █████    █████   |
-            |░░░░░ ░░░░░ ░░░░░   ░░░░░ ░░░░░   ░░░░░    ░░░░░    |
-            +----------------------------------------------------+
-
-
-EOF
+    bash <(curl -Ls https://raw.githubusercontent.com/cortez24rus/motd/refs/heads/main/install.sh)
     systemctl restart ssh
     tilda "$(text 10)"
   fi
