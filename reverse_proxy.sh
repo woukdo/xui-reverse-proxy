@@ -2103,10 +2103,10 @@ settings_xtls() {
   }
   },
   "tcpSettings": {
-  "acceptProxyProtocol": true,
-  "header": {
-    "type": "none"
-  }
+    "acceptProxyProtocol": true,
+    "header": {
+      "type": "none"
+    }
   }
 }
 EOF
