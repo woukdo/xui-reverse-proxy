@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.1b'
+VERSION_MANAGER='dev 1.4.1o'
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
@@ -241,6 +241,8 @@ E[93]="7. Enable IPv6."
 R[93]="7. Включение IPv6."
 E[94]="8. Find out the size of the directory."
 R[94]="8. Узнать размер директории."
+E[95]="Migration is complete."
+R[95]="Миграция завершена."
 
 
 ###################################
@@ -2232,22 +2234,17 @@ install_panel() {
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
   SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
 
-  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused $DB_SCRIPT_URL; do
-    warning " $(text 38) "
-    sleep 3
-  done
-
-  echo -e "n" | bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) > /dev/null 2>&1
-  sleep 1
+  echo -e "n" | bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
   if ! systemctl is-active fail2ban.service; then
     echo -e "20\n1" | x-ui
   fi
-  sleep 2
-
   x-ui stop
-  rm -rf ${DEST_DB}.backup
-  [ -f ${DEST_DB} ] && mv ${DEST_DB} ${DEST_DB}.backup
-  mv x-ui.db /etc/x-ui/
+
+  mv -f /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.backup
+  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused -O /etc/x-ui/x-ui.db "$DB_SCRIPT_URL"; do
+    warning " $(text 38) "
+    sleep 3
+  done
 
   change_db
 
@@ -2535,21 +2532,22 @@ ATTACH DATABASE '$SOURCE_DB' AS source_db;
 UPDATE inbounds
 SET settings = NULL
 WHERE remark IN (
-    SELECT remark
-    FROM source_db.inbounds
-    WHERE source_db.inbounds.remark = inbounds.remark
+  SELECT remark
+  FROM source_db.inbounds
+  WHERE source_db.inbounds.remark = inbounds.remark
 );
 
 UPDATE inbounds
 SET settings = (
-    SELECT settings
-    FROM source_db.inbounds
-    WHERE source_db.inbounds.remark = inbounds.remark
+  SELECT CASE 
+    WHEN source_db.settings IS NOT NULL THEN source_db.settings 
+    ELSE inbounds.settings
+  END
+  FROM source_db.inbounds AS source_db
+  WHERE source_db.remark = inbounds.remark
 )
-WHERE EXISTS (
-    SELECT 1
-    FROM source_db.inbounds
-    WHERE source_db.inbounds.remark = inbounds.remark
+WHERE remark IN (
+  SELECT remark FROM source_db.inbounds
 );
 
 DETACH DATABASE source_db;
@@ -2560,17 +2558,20 @@ EOF
 ### Migration to a new version
 ###################################
 migration(){
-  DEST_DB="/etc/x-ui/x-ui.db"
-  SOURCE_DB="/etc/x-ui/x-ui.db.mgr"
-  cp -r /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.mgr
-  cp -r /etc/nginx /etc/nginx.mgr
+  SOURCE_DB="/etc/x-ui/source.db"
+
+  select_from_db
+  generate_path_cdn
+
+  x-ui stop
+
+  mv -f "$DEST_DB" "$SOURCE_DB"
+  cp -r /etc/nginx /etc/source.nginx
 
   DOMAIN=""
   SUB_DOMAIN=""
   REALITY=""
 
-  select_from_db
-  generate_path_cdn
   read -rp "A запись: " TEMP_DOMAIN_L  # Запрашиваем домен
   DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
   echo
@@ -2580,36 +2581,27 @@ migration(){
   read -rp "REALITY: " TEMP_REALITY_L
   REALITY=$(clean_url "$TEMP_REALITY_L")
   
-  nginx_setup
-  install_panel
-  
+  x-ui stop
   client_traffics_migration_db
   settings_migration_db
   inbounds_settings_migration_db
-
-  x-ui restart
+  x-ui start
 
   output=$(/usr/local/x-ui/bin/xray*)
-  echo $output
+  echo "$output"
   if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
-    echo "6"
     x-ui stop
-    sleep 1
-    rm -rf /etc/x-ui/x-ui.db
-    rm -rf /etc/x-ui/x-ui.db.backup
-    rm -rf /etc/x-ui/x-ui.db.1
-    mv -f /etc/x-ui/x-ui.db.mgr /etc/x-ui/x-ui.db
-    sleep 1
+    mv -f "$SOURCE_DB" "$DEST_DB"
     x-ui restart
-  else
-    echo "Xray успешно запущен."
   fi
 
   if ! systemctl is-active --quiet nginx.service; then
-    mv -f /etc/nginx.mgr /etc/nginx
+    mv -f /etc/source.nginx /etc/nginx
     systemctl daemon-reload
     systemctl restart nginx
   fi
+
+  info " $(text 95) "
 }
 
 ###################################
