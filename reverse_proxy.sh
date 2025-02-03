@@ -2572,13 +2572,13 @@ migration(){
   SUB_DOMAIN=""
   REALITY=""
 
-  read -rp "A запись: " TEMP_DOMAIN_L  # Запрашиваем домен
-  DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+  reading " $(text 13) " TEMP_DOMAIN_L
+  DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
   echo
-  read -rp "CNAME запись: " TEMP_DOMAIN_L  # Запрашиваем субдомен
-  SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+  reading " $(text 81) " TEMP_DOMAIN_L
+  SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
   echo
-  read -rp "REALITY: " TEMP_REALITY_L
+  reading " $(text 19) " TEMP_REALITY_L
   REALITY=$(clean_url "$TEMP_REALITY_L")
   
   nginx_setup
