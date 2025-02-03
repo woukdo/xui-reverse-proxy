@@ -2187,8 +2187,9 @@ EOF
 ### Json routing rules
 ###################################
 json_rules() {
+  # [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
   SUB_JSON_RULES=$(cat <<EOF
-[{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+[{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
 EOF
 )
 }
