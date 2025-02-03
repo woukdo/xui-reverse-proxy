@@ -2581,6 +2581,9 @@ migration(){
   read -rp "REALITY: " TEMP_REALITY_L
   REALITY=$(clean_url "$TEMP_REALITY_L")
   
+  nginx_setup
+  install_panel
+
   x-ui stop
   client_traffics_migration_db
   settings_migration_db
