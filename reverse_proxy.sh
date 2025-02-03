@@ -2572,6 +2572,7 @@ migration(){
   SUB_DOMAIN=""
   REALITY=""
 
+  echo
   reading " $(text 13) " TEMP_DOMAIN_L
   DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
   echo
@@ -2580,6 +2581,7 @@ migration(){
   echo
   reading " $(text 19) " TEMP_REALITY_L
   REALITY=$(clean_url "$TEMP_REALITY_L")
+  echo
   
   nginx_setup
   install_panel
