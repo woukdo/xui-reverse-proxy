@@ -6,6 +6,7 @@
 ###################################
 export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER='dev 1.4.2r'
+VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
@@ -2582,7 +2583,7 @@ migration(){
   reading " $(text 19) " TEMP_REALITY_L
   REALITY=$(clean_url "$TEMP_REALITY_L")
   echo
-  
+
   nginx_setup
   install_panel
 
