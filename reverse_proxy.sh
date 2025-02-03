@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.1o'
+VERSION_MANAGER='dev 1.4.2r'
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
@@ -2587,19 +2587,19 @@ migration(){
   inbounds_settings_migration_db
   x-ui start
 
-  output=$(/usr/local/x-ui/bin/xray*)
-  echo "$output"
-  if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
-    x-ui stop
-    mv -f "$SOURCE_DB" "$DEST_DB"
-    x-ui restart
-  fi
-
-  if ! systemctl is-active --quiet nginx.service; then
-    mv -f /etc/source.nginx /etc/nginx
-    systemctl daemon-reload
-    systemctl restart nginx
-  fi
+#  output=$(/usr/local/x-ui/bin/xray*)
+#  echo "$output"
+#  if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
+#    x-ui stop
+#    mv -f "$SOURCE_DB" "$DEST_DB"
+#    x-ui restart
+#  fi
+#
+#  if ! systemctl is-active --quiet nginx.service; then
+#    mv -f /etc/source.nginx /etc/nginx
+#    systemctl daemon-reload
+#    systemctl restart nginx
+#  fi
 
   info " $(text 95) "
 }
