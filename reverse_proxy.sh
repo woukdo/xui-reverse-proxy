@@ -337,7 +337,7 @@ read_defaults_from_file() {
     defaults[autoupd]=true
     defaults[bbr]=true
     defaults[ipv6]=true
-    defaults[warp]=true
+    defaults[warp]=false
     defaults[cert]=true
     defaults[mon]=false
     defaults[shell]=false
