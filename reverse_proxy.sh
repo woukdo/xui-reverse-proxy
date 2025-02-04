@@ -920,7 +920,6 @@ data_entry() {
   generate_path_cdn
 
   if [[ ${args[generate]} == "true" ]]; then
-    echo
     WEB_BASE_PATH=$(eval ${generate[path]})
     SUB_PATH=$(eval ${generate[path]})
     SUB_JSON_PATH=$(eval ${generate[path]})
@@ -964,7 +963,6 @@ data_entry() {
       out_data " $(text 52)" "type \$env:USERPROFILE\.ssh\id_rsa.pub | ssh -p 22 ${USERNAME}@${IP4} \"cat >> ~/.ssh/authorized_keys\""
       out_data " $(text 53)" "ssh-copy-id -p 22 ${USERNAME}@${IP4}"
       echo
-
       # Цикл проверки наличия ключей
       while true; do
         if [[ -s "/home/${USERNAME}/.ssh/authorized_keys" || -s "/root/.ssh/authorized_keys" ]]; then
@@ -993,8 +991,8 @@ data_entry() {
     reading " $(text 35) " ADMIN_ID
     echo
     reading " $(text 34) " BOT_TOKEN
+    tilda "$(text 10)"
   fi
-  tilda "$(text 10)"
 }
 
 ###################################
@@ -1652,12 +1650,12 @@ server {
   proxy_intercept_errors on;
 
   # WEB SUB JSON
-  location ~ ^/${WEB_SUB_JSON} {
-    default_type application/json;
-    root /var/www/subpage;
-    index index.html;
-    try_files /index.html =404;
-  }
+#  location ~ ^/${WEB_SUB_JSON} {
+#    default_type application/json;
+#    root /var/www/subpage;
+#    index index.html;
+#    try_files /index.html =404;
+#  }
   # PANEL
   location /${WEB_BASE_PATH} {
     if (\$hack = 1) {return 404;}
@@ -2104,10 +2102,10 @@ settings_xtls() {
   }
   },
   "tcpSettings": {
-    "acceptProxyProtocol": true,
-    "header": {
-      "type": "none"
-    }
+  "acceptProxyProtocol": true,
+  "header": {
+    "type": "none"
+  }
   }
 }
 EOF
@@ -2190,12 +2188,12 @@ EOF
 ### Json routing rules
 ###################################
 json_rules() {
-  # [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
   SUB_JSON_RULES=$(cat <<EOF
-[{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+[{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
 EOF
 )
 }
+#[{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
 
 ###################################
 ### Updating json rules in the database
@@ -2241,8 +2239,8 @@ install_panel() {
   fi
   x-ui stop
 
-  mv -f /etc/x-ui/x-ui.db /etc/x-ui/x-ui.db.backup
-  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused -O /etc/x-ui/x-ui.db "$DB_SCRIPT_URL"; do
+  mv -f "$DEST_DB" "$DEST_DB.backup"
+  while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused -O "$DEST_DB" "$DB_SCRIPT_URL"; do
     warning " $(text 38) "
     sleep 3
   done
