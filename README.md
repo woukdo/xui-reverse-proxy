@@ -59,7 +59,7 @@ SERVER 2
    - The user “flow”: “xtls-rprx-vision” must be enabled
      - VLESS-TCP-REALITY
      - VLESS-TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
-     - VLESS-TCP-XTLS-Vision
+     - VLESS-TCP-TLS
 2. Configuring NGINX reverse proxy on port 443.
 3. Providing security:
    - Automatic system updates via unattended-upgrades.

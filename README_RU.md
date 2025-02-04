@@ -59,7 +59,7 @@
    - Необходимо включать у пользователя "flow": "xtls-rprx-vision"
      - VLESS-TCP-REALITY
      - VLESS-TCP-REALITY (Steal oneself) (отключение приведет к потере доступа)
-     - VLESS-TCP-XTLS-Vision
+     - VLESS-TCP-TLS
 2. Настройку обратного прокси NGINX на порт 443.
 3. Обеспечение безопасности:
    - Автоматические обновления системы через unattended-upgrades.
