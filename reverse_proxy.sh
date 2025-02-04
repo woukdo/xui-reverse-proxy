@@ -1175,7 +1175,7 @@ dns_encryption() {
       mkdir -p /etc/nginx/locations
 
       cat > /etc/nginx/locations/adguard.conf <<EOF
-      COMMENT_AGH="location /${ADGUARDPATH}/ {
+location /${ADGUARDPATH}/ {
   if (\$hack = 1) {return 404;}
   proxy_set_header Host \$host;
   proxy_set_header X-Real-IP \$remote_addr;
