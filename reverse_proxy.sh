@@ -1172,18 +1172,23 @@ dns_encryption() {
       tilda "$(text 10)"
       ;;
     2)
+      mkdir -p /etc/nginx/locations
+
+      cat > /etc/nginx/locations/adguard.conf <<EOF
       COMMENT_AGH="location /${ADGUARDPATH}/ {
-    if (\$hack = 1) {return 404;}
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header Range \$http_range;
-    proxy_set_header If-Range \$http_if_range;
-    proxy_redirect /login.html /${ADGUARDPATH}/login.html;
-    proxy_pass http://127.0.0.1:8081/;
-    break;
-  }"
+  if (\$hack = 1) {return 404;}
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header Range \$http_range;
+  proxy_set_header If-Range \$http_if_range;
+  proxy_redirect /login.html /${ADGUARDPATH}/login.html;
+  proxy_pass http://127.0.0.1:8081/;
+  break;
+}
+EOF
+
       dns_adguard_home
       dns_systemd_resolved_for_adguard
       tilda "$(text 10)"
@@ -1421,19 +1426,22 @@ EOF
 ###################################
 monitoring() {
   info " $(text 66) "
+  mkdir -p /etc/nginx/locations
   bash <(curl -Ls https://github.com/cortez24rus/grafana-prometheus/raw/refs/heads/main/prometheus_node_exporter.sh)
 
-  COMMENT_METRIC="location /${METRICS} {
-    if (\$hack = 1) {return 404;}
-    auth_basic \"Restricted Content\";
-    auth_basic_user_file /etc/nginx/.htpasswd;
-    proxy_pass http://127.0.0.1:9100/metrics;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    break;
-  }"
+  cat > /etc/nginx/locations/monitoring.conf <<EOF
+location /${METRICS} {
+  if (\$hack = 1) {return 404;}
+  auth_basic \"Restricted Content\";
+  auth_basic_user_file /etc/nginx/.htpasswd;
+  proxy_pass http://127.0.0.1:9100/metrics;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto \$scheme;
+  break;
+}
+EOF
 
   tilda "$(text 10)"
 }
@@ -1444,6 +1452,7 @@ monitoring() {
 shellinabox() {
   info " $(text 83) "
   apt-get install shellinabox
+  mkdir -p /etc/nginx/locations
 
   cat > /etc/default/shellinabox <<EOF
 # Should shellinaboxd start automatically
@@ -1462,17 +1471,19 @@ SHELLINABOX_PORT=4200
 SHELLINABOX_ARGS="--no-beep --localhost-only --disable-ssl"
 EOF
 
-  COMMENT_SHELLBOX="location /${SHELLBOX} {
-    if (\$hack = 1) {return 404;}
-    auth_basic \"Restricted Content\";
-    auth_basic_user_file /etc/nginx/.htpasswd;
-    proxy_pass http://127.0.0.1:4200;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto \$scheme;
-    break;
-  }"
+  cat > /etc/nginx/locations/shellinabox.conf <<EOF
+location /${SHELLBOX} {
+  if (\$hack = 1) {return 404;}
+  auth_basic \"Restricted Content\";
+  auth_basic_user_file /etc/nginx/.htpasswd;
+  proxy_pass http://127.0.0.1:4200;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Forwarded-Proto \$scheme;
+  break;
+}
+EOF
 
   systemctl restart shellinabox
   tilda "$(text 10)"
@@ -1696,7 +1707,6 @@ server {
     grpc_socket_keepalive    on;
     grpc_read_timeout        1h;
     grpc_send_timeout        1h;
-
     grpc_set_header Connection         "";
     grpc_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
     grpc_set_header X-Forwarded-Proto  \$scheme;
@@ -1725,12 +1735,8 @@ server {
     proxy_pass http://127.0.0.1:\$fwdport\$is_args\$args;
     break;
   }
-  # Node exporter
-  ${COMMENT_METRIC}
-  # SHELLBOX
-  ${COMMENT_SHELLBOX}
-  # Adguard Home
-  ${COMMENT_AGH}
+  # Enable locations (Adguard, Node exporter, Shell in a box)
+  include /etc/nginx/locations/*.conf;
 }
 EOF
 }
