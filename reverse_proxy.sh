@@ -1171,6 +1171,7 @@ dns_encryption() {
       COMMENT_AGH=""
       tilda "$(text 10)"
       ;;
+
     2)
       mkdir -p /etc/nginx/locations
 
@@ -1188,13 +1189,12 @@ location /${ADGUARDPATH}/ {
   break;
 }
 EOF
-
       dns_adguard_home
       dns_systemd_resolved_for_adguard
       tilda "$(text 10)"
       ;;
-    *)
 
+    *)
       warning " $(text 33)"
       dns_encryption
       ;;
