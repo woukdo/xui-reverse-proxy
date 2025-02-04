@@ -2565,7 +2565,7 @@ migration(){
   x-ui stop
 
   mv -f "$DEST_DB" "$SOURCE_DB"
-#  cp -r /etc/nginx /etc/source.nginx
+  cp -r /etc/nginx /etc/source.nginx
 
   DOMAIN=""
   SUB_DOMAIN=""
@@ -2585,11 +2585,14 @@ migration(){
   nginx_setup
   install_panel
 
+  mv -f /etc/source.nginx /etc/nginx
+
   x-ui stop
   client_traffics_migration_db
   settings_migration_db
   inbounds_settings_migration_db
   x-ui start
+
 
 #  output=$(/usr/local/x-ui/bin/xray*)
 #  echo "$output"
