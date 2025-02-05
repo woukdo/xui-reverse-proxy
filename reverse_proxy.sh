@@ -2301,7 +2301,8 @@ install_custom_json(){
   custom_sub_json
   install_singbox_converter
   install_web
-  (crontab -l 2>/dev/null; echo '@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1') | crontab -
+  CRON_RULE3="@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
+  ( crontab -l | grep -Fxq "$CRON_RULE3" ) || ( crontab -l 2>/dev/null; echo "$CRON_RULE3" ) | crontab -
 }
 
 ###################################
