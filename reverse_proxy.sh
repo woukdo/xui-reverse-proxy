@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2r'
+VERSION_MANAGER='dev 1.4.2o'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
@@ -898,6 +898,8 @@ generate_path_cdn(){
   CDNXHTTP=$(eval ${generate[path]})
   CDNHTTPU=$(eval ${generate[path]})
   CDNWS=$(eval ${generate[path]})
+  WEB_SUB_PATH=$(eval ${generate[path]})
+  SUB2_SINGBOX_PATH=$(eval ${generate[path]})
 }
 
 ###################################
@@ -1490,21 +1492,6 @@ EOF
 }
 
 ###################################
-### WEB SUB JSON
-###################################
-temp(){
-  URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
-  DEST_DIR_SUB_PAGE="/var/www/subpage"
-  mkdir -p "$DEST_DIR_SUB_PAGE"
-  DEST_FILE_SUB_PAGE="/var/www/subpage/index.html"
-  
-  curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
-  sed -i "s/\${DOMAIN}/$domain/g" "$DEST_FILE_SUB_PAGE"
-  sed -i "s#\${SUB_JSON_PATH}#$json_path#g" "$DEST_FILE_SUB_PAGE"
-  sed -i "s#\${SUB_PATH}#$sub_path#g" "$DEST_FILE_SUB_PAGE"
-}
-
-###################################
 ### http conf
 ###################################
 nginx_conf() {
@@ -1660,13 +1647,6 @@ server {
   error_page 400 402 403 500 501 502 503 504 =404 /404;
   proxy_intercept_errors on;
 
-  # WEB SUB JSON
-#  location ~ ^/${WEB_SUB_JSON} {
-#    default_type application/json;
-#    root /var/www/subpage;
-#    index index.html;
-#    try_files /index.html =404;
-#  }
   # PANEL
   location /${WEB_BASE_PATH} {
     if (\$hack = 1) {return 404;}
@@ -2237,7 +2217,7 @@ change_db() {
 install_panel() {
   info " $(text 46) "
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
-  SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
+  SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
 
   echo -e "n" | bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
   if ! systemctl is-active fail2ban.service; then
@@ -2255,6 +2235,72 @@ install_panel() {
 
   x-ui start
   tilda "$(text 10)"
+}
+
+###################################
+### CUSTOM SUBSCRIPTION JSON
+###################################
+custom_sub_json(){
+  cat > /etc/nginx/locations/webpagesub.conf <<EOF
+# Web Page Subscription Path
+location ~ ^/${WEB_SUB_PATH} {
+  default_type application/json;
+  root /var/www/subpage;
+  index index.html;
+  try_files /index.html =404;
+}
+EOF
+
+  cat > /etc/nginx/locations/subsingbox.conf <<EOF
+# Sub2sing-box
+location /${SUB2_SINGBOX_PATH}/ {
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:8080/;
+}
+EOF
+}
+
+###################################
+### INSTALL WEB SUB PAGE
+###################################
+install_web(){
+  custom_sub_json
+
+  DEST_DIR_SUB_PAGE="/var/www/subpage"
+  DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
+  sudo mkdir -p "$DEST_DIR_SUB_PAGE"
+
+  URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
+  sudo curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
+
+  sed -i "s/\${DOMAIN}/$DOMAIN/g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_JSON_PATH}#$SUB_JSON_PATH#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_PATH}#$SUB_PATH#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s|sub.legiz.ru|$DOMAIN/$SUB2_SINGBOX_PATH|g" "$DEST_FILE_SUB_PAGE"
+}
+
+###################################
+### INSTALL SINGBOX CONVERTER
+###################################
+install_singbox_converter(){
+  wget -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
+  tar -xvzf /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9-beta.2_linux_amd64/sub2sing-box
+  mv /root/sub2sing-box /usr/bin/
+  chmod +x /usr/bin/sub2sing-box
+  rm /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
+  su -c "/usr/bin/sub2sing-box server & disown" root
+}
+
+###################################
+### INSTALL CUSTOM JSON
+###################################
+install_custom_json(){
+  custom_sub_json
+  install_singbox_converter
+  install_web
 }
 
 ###################################
@@ -2681,6 +2727,7 @@ main() {
         random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
+        install_custom_json
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
