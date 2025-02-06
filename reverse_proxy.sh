@@ -1432,7 +1432,7 @@ monitoring() {
   cat > /etc/nginx/locations/monitoring.conf <<EOF
 location /${METRICS} {
   if (\$hack = 1) {return 404;}
-  auth_basic \"Restricted Content\";
+  auth_basic "Restricted Content";
   auth_basic_user_file /etc/nginx/.htpasswd;
   proxy_pass http://127.0.0.1:9100/metrics;
   proxy_set_header Host \$host;
@@ -1474,7 +1474,7 @@ EOF
   cat > /etc/nginx/locations/shellinabox.conf <<EOF
 location /${SHELLBOX} {
   if (\$hack = 1) {return 404;}
-  auth_basic \"Restricted Content\";
+  auth_basic "Restricted Content";
   auth_basic_user_file /etc/nginx/.htpasswd;
   proxy_pass http://127.0.0.1:4200;
   proxy_set_header Host \$host;
