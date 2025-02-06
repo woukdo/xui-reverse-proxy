@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2q'
+VERSION_MANAGER='dev 1.4.2s'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
@@ -1636,6 +1636,10 @@ server {
   # Site
   index index.html index.htm index.php index.nginx-debian.html;
   root /var/www/html/;
+
+  location ~ ^(/[^./?]+)$ {
+    return 301 \$1/;
+  }
 
   if (\$host !~* ^(.+\.)?${DOMAIN}\$ ){return 444;}
   if (\$scheme ~* https) {set \$safe 1;}
