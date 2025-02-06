@@ -1637,10 +1637,6 @@ server {
   index index.html index.htm index.php index.nginx-debian.html;
   root /var/www/html/;
 
-  location ~ ^(/[^./?]+)$ {
-    return 301 \$1/;
-  }
-
   if (\$host !~* ^(.+\.)?${DOMAIN}\$ ){return 444;}
   if (\$scheme ~* https) {set \$safe 1;}
   if (\$ssl_server_name !~* ^(.+\.)?${DOMAIN}\$ ) {set \$safe "\${safe}0"; }
