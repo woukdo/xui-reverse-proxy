@@ -2246,7 +2246,7 @@ change_db() {
 install_panel() {
   info " $(text 46) "
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
-  SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
+  SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
 
   echo -e "n" | bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
   if ! systemctl is-active fail2ban.service; then
@@ -2329,6 +2329,7 @@ install_custom_json(){
   select_from_db
   WEB_SUB_PATH=$(eval ${generate[path]})
   SUB2_SINGBOX_PATH=$(eval ${generate[path]})
+  SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
 
   while [[ -z "$DOMAIN" ]]; do
     reading " $(text 13) " DOMAIN  # Запрашиваем домен
