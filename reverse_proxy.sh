@@ -2346,13 +2346,14 @@ install_custom_json(){
   install_singbox_converter
   install_web
   
-  x-stop
+  x-ui stop
   update_subjsonuri_db
-  x-start
+  x-ui start
+  nginx -s reload
 
   CRON_RULE3="@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
   ( crontab -l | grep -Fxq "$CRON_RULE3" ) || ( crontab -l 2>/dev/null; echo "$CRON_RULE3" ) | crontab -
-  echo "excellent"
+  echo "custom sub allready"
 }
 
 ###################################
