@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2v'
+VERSION_MANAGER='dev 1.4.2w'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
@@ -94,10 +94,10 @@ E[19]="Enter SNI for Reality (do not enter your domain):"
 R[19]="Введите SNI для Reality (не вводите ваш домен):"
 E[20]="Error: failed to connect to WARP. Manual acceptance of the terms of service is required."
 R[20]="Ошибка: не удалось подключиться к WARP. Требуется вручную согласиться с условиями использования."
-E[21]=""
-R[21]=""
-E[22]=""
-R[22]=""
+E[21]="Access link to node exporter:"
+R[21]="Доступ по ссылке к node exporter:"
+E[22]="Access link to shell in a box:"
+R[22]="Доступ по ссылке к shell in a box:"
 E[23]=""
 R[23]=""
 E[24]="Enter Node Exporter path:"
@@ -2516,10 +2516,19 @@ data_output() {
   echo
   out_data " $(text 59) " "https://${DOMAIN}/${WEB_BASE_PATH}/"
   out_data " $(text 60) " "${SUB_URI}user"
+  echo
   if [[ $CHOISE_DNS = "2" ]]; then
     out_data " $(text 61) " "https://${DOMAIN}/${ADGUARDPATH}/login.html"
+    echo
   fi
-  echo
+  if [[ ${args[mon]} == "true" ]]; then
+    out_data " $(text 21) " "https://${DOMAIN}/${METRICS}/"
+    echo
+  fi
+  if [[ ${args[shell]} == "true" ]]; then
+    out_data " $(text 22) " "https://${DOMAIN}/${SHELLBOX}/"
+    echo
+  fi  
   out_data " $(text 62) " "ssh -p 22 ${USERNAME}@${IP4}"
   echo
   out_data " $(text 63) " "$USERNAME"
