@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2p'
+VERSION_MANAGER='dev 1.4.2q'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
