@@ -2789,8 +2789,6 @@ migration(){
   nginx_setup
   install_panel
 
-  mv -f /etc/source.nginx /etc/nginx
-
   x-ui stop
   client_traffics_migration_db
   settings_migration_db
