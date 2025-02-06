@@ -2223,8 +2223,8 @@ xray_template() {
       {
         "type": "field",
         "domain": [
-          "regexp:.*\\.ru$",
-          "regexp:.*\\.su$"
+          "regexp:.*\\\\.ru$",
+          "regexp:.*\\\\.su$"
         ],
         "outboundTag": "IPv4"
       }
