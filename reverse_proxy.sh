@@ -2196,14 +2196,14 @@ xray_template() {
         "domain": [
           "domain:gemini.google.com"
         ],
-        "outboundTag": "${RULES}"
+        "outboundTag": "IPv4"
       },
       {
         "type": "field",
         "domain": [
           "keyword:xn--"
         ],
-        "outboundTag": "${RULES}"
+        "outboundTag": "IPv4"
       },
       {
         "type": "field",
@@ -2211,14 +2211,14 @@ xray_template() {
           "geosite:intel",
           "category-ru"
         ],
-        "outboundTag": "${RULES}"
+        "outboundTag": "IPv4"
       },
       {
         "type": "field",
         "ip": [
           "geoip:ru"
         ],
-        "outboundTag": "${RULES}"
+        "outboundTag": "IPv4"
       },
       {
         "type": "field",
@@ -2226,7 +2226,7 @@ xray_template() {
           "regexp:.*\\.ru$",
           "regexp:.*\\.su$"
         ],
-        "outboundTag": "${RULES}"
+        "outboundTag": "IPv4"
       }
     ]
   },
