@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2u'
+VERSION_MANAGER='dev 1.4.2v'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
@@ -242,8 +242,12 @@ E[93]="7. Enable IPv6."
 R[93]="7. Включение IPv6."
 E[94]="8. Find out the size of the directory."
 R[94]="8. Узнать размер директории."
-E[95]="Migration is complete."
-R[95]="Миграция завершена."
+E[95]="9. Integrate custom JSON subscription."
+R[95]="9. Интеграция кастомной JSON подписки."
+E[96]="Client migration initiation (experimental feature)."
+R[96]="Начало миграции клиентов (экспериментальная функция)."
+E[97]="Client migration is complete."
+R[97]="Миграция клиентов завершена."
 
 
 ###################################
@@ -254,9 +258,9 @@ show_help() {
   echo "Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]"
   echo "         [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]"
   echo "         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]"
-  echo "         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]"
-  echo "         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]"
-  echo "         [-h|--help]"
+  echo "         [-p|--panel <true|false>] [--custom <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>]"
+  echo "         [-t|--tgbot <true|false>] [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>]"
+  echo "         [--update] [-h|--help]"
   echo
   echo "  -u, --utils <true|false>       Additional utilities                             (default: ${defaults[utils]})"
   echo "                                 Дополнительные утилиты"
@@ -282,6 +286,8 @@ show_help() {
   echo "                                 Установка NGINX"
   echo "  -p, --panel <true|false>       Panel installation for user management           (default: ${defaults[panel]})"
   echo "                                 Установка панели для управления пользователями"
+  echo "      --custom <true|false>      Custom JSON subscription                         (default: ${defaults[custom]})"
+  echo "                                 Кастомная JSON-подписка"  
   echo "  -f, --firewall <true|false>    Firewall configuration                           (default: ${defaults[firewall]})"
   echo "                                 Настройка файрвола"
   echo "  -s, --ssh <true|false>         SSH access                                       (default: ${defaults[ssh]})"
@@ -346,6 +352,7 @@ read_defaults_from_file() {
     defaults[shell]=false
     defaults[nginx]=true
     defaults[panel]=true
+    defaults[custom]=true
     defaults[firewall]=true
     defaults[ssh]=true
     defaults[tgbot]=false
@@ -372,6 +379,7 @@ defaults[mon]=false
 defaults[shell]=false
 defaults[nginx]=true
 defaults[panel]=true
+defaults[custom]=true
 defaults[firewall]=false
 defaults[ssh]=false
 defaults[tgbot]=false
@@ -412,123 +420,39 @@ validate_true_false() {
 ###################################
 ### Parse args
 ###################################
+declare -A arg_map=(
+  [-u]=utils      [--utils]=utils
+  [-d]=dns        [--dns]=dns
+  [-a]=addu       [--addu]=addu
+  [-r]=autoupd    [--autoupd]=autoupd
+  [-b]=bbr        [--bbr]=bbr
+  [-i]=ipv6       [--ipv6]=ipv6
+  [-w]=warp       [--warp]=warp
+  [-c]=cert       [--cert]=cert
+  [-m]=mon        [--mon]=mon
+  [-l]=shell      [--shell]=shell
+  [-n]=nginx      [--nginx]=nginx
+  [-p]=panel      [--panel]=panel
+                  [--custom]=custom
+  [-f]=firewall   [--firewall]=firewall
+  [-s]=ssh        [--ssh]=ssh
+  [-t]=tgbot      [--tgbot]=tgbot
+  [-g]=generate   [--generate]=generate
+  [-x]=skip-check [--skip-check]=skip-check
+  [-o]=subdomain  [--subdomain]=subdomain
+)
+
 parse_args() {
   local opts
-  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,depers,help -- "$@")
+  opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,custom:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,depers,help -- "$@")
+  
   if [[ $? -ne 0 ]]; then
     return 1
   fi
+  
   eval set -- "$opts"
   while true; do
     case $1 in
-      -u|--utils)
-        args[utils]="$2"
-        normalize_case utils
-        validate_true_false utils "$2" || return 1
-        shift 2
-        ;;
-      -d|--dns)
-        args[dns]="$2"
-        normalize_case dns
-        validate_true_false dns "$2" || return 1
-        shift 2
-        ;;
-      -a|--addu)
-        args[addu]="$2"
-        normalize_case addu
-        validate_true_false addu "$2" || return 1
-        shift 2
-        ;;
-      -r|--autoupd)
-        args[autoupd]="$2"
-        normalize_case autoupd
-        validate_true_false autoupd "$2" || return 1
-        shift 2
-        ;;
-      -b|--bbr)
-        args[bbr]="$2"
-        normalize_case bbr
-        validate_true_false bbr "$2" || return 1
-        shift 2
-        ;;
-      -i|--ipv6)
-        args[ipv6]="$2"
-        normalize_case ipv6
-        validate_true_false ipv6 "$2" || return 1
-        shift 2
-        ;;
-      -w|--warp)
-        args[warp]="$2"
-        normalize_case warp
-        validate_true_false warp "$2" || return 1
-        shift 2
-        ;;
-      -c|--cert)
-        args[cert]="$2"
-        normalize_case cert
-        validate_true_false cert "$2" || return 1
-        shift 2
-        ;;
-      -m|--mon)
-        args[mon]="$2"
-        normalize_case mon
-        validate_true_false mon "$2" || return 1
-        shift 2
-        ;;
-      -l|--shell)
-        args[shell]="$2"
-        normalize_case shell
-        validate_true_false shell "$2" || return 1
-        shift 2
-        ;;
-      -n|--nginx)
-        args[nginx]="$2"
-        normalize_case nginx
-        validate_true_false nginx "$2" || return 1
-        shift 2
-        ;;
-      -p|--panel)
-        args[panel]="$2"
-        normalize_case panel
-        validate_true_false panel "$2" || return 1
-        shift 2
-        ;;
-      -f|--firewall)
-        args[firewall]="$2"
-        normalize_case firewall
-        validate_true_false firewall "$2" || return 1
-        shift 2
-        ;;
-      -s|--ssh)
-        args[ssh]="$2"
-        normalize_case ssh
-        validate_true_false ssh "$2" || return 1
-        shift 2
-        ;;
-      -t|--tgbot)
-        args[tgbot]="$2"
-        normalize_case tgbot
-        validate_true_false tgbot "$2" || return 1
-        shift 2
-        ;;
-      -g|--generate)
-        args[generate]="$2"
-        normalize_case generate
-        validate_true_false generate "$2" || return 1
-        shift 2
-        ;;
-      -x|--skip-check)
-        args[skip-check]="$2"
-        normalize_case skip-check
-        validate_true_false skip-check "$2" || return 1
-        shift 2
-        ;;
-      -o|--subdomain)
-        args[subdomain]="$2"
-        normalize_case subdomain
-        validate_true_false subdomain "$2" || return 1
-        shift 2
-        ;;
       --update)
         CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
         warning "Script update version: $CURRENT_VERSION"
@@ -538,7 +462,7 @@ parse_args() {
         ;;
       --depers)
         echo "Depersonalization database..."
-	      depersonalization_db
+        depersonalization_db
         exit 0
         ;;
       -h|--help)
@@ -549,6 +473,14 @@ parse_args() {
         break
         ;;
       *)
+        if [[ -n "${arg_map[$1]}" ]]; then
+          local key="${arg_map[$1]}"
+          args[$key]="$2"
+          normalize_case "$key"
+          validate_true_false "$key" "$2" || return 1
+          shift 2
+          continue
+        fi
         warning " $(text 76) "
         return 1
         ;;
@@ -2147,6 +2079,163 @@ EOF
   )
 }
 
+xray_template() {
+  if [[ ${args[warp]} == "true" ]]; then
+    RULES="warp"
+  else
+    RULES="IPv4"
+  fi
+  XRAY_TEMPLATE_CONFIG=$(cat <<EOF
+{
+  "log": {
+    "access": "./access.log",
+    "dnsLog": false,
+    "error": "./error.log",
+    "loglevel": "warning",
+    "maskAddress": ""
+  },
+  "api": {
+    "tag": "api",
+    "services": [
+      "HandlerService",
+      "LoggerService",
+      "StatsService"
+    ]
+  },
+  "inbounds": [
+    {
+      "tag": "api",
+      "listen": "127.0.0.1",
+      "port": 62789,
+      "protocol": "dokodemo-door",
+      "settings": {
+        "address": "127.0.0.1"
+      }
+    }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "ForceIPv4",
+        "redirect": "",
+        "noises": []
+      }
+    },
+    {
+      "tag": "blocked",
+      "protocol": "blackhole",
+      "settings": {}
+    },
+    {
+      "tag": "IPv4",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      }
+    },
+    {
+      "tag": "warp",
+      "protocol": "socks",
+      "settings": {
+        "servers": [
+          {
+            "address": "127.0.0.1",
+            "port": 40000,
+            "users": []
+          }
+        ]
+      }
+    }
+  ],
+  "policy": {
+    "levels": {
+      "0": {
+        "statsUserDownlink": true,
+        "statsUserUplink": true
+      }
+    },
+    "system": {
+      "statsInboundDownlink": true,
+      "statsInboundUplink": true,
+      "statsOutboundDownlink": true,
+      "statsOutboundUplink": true
+    }
+  },
+  "routing": {
+    "domainStrategy": "AsIs",
+    "rules": [
+      {
+        "type": "field",
+        "inboundTag": [
+          "api"
+        ],
+        "outboundTag": "api"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:category-ads-all",
+          "ext:geosite_IR.dat:category-ads-all",
+          "ext:geosite_IR.dat:malware",
+          "ext:geosite_IR.dat:phishing",
+          "ext:geosite_IR.dat:cryptominers"
+        ],
+        "outboundTag": "blocked"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:google"
+        ],
+        "outboundTag": "IPv4"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "domain:gemini.google.com"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "keyword:xn--"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "geosite:intel",
+          "category-ru"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "ip": [
+          "geoip:ru"
+        ],
+        "outboundTag": "${RULES}"
+      },
+      {
+        "type": "field",
+        "domain": [
+          "regexp:.*\\.ru$",
+          "regexp:.*\\.su$"
+        ],
+        "outboundTag": "${RULES}"
+      }
+    ]
+  },
+  "stats": {}
+}
+EOF
+  )
+}
+
 ###################################
 ### Updating username, password in users
 ###################################
@@ -2196,6 +2285,7 @@ UPDATE settings SET value = '/${SUB_PATH}/' WHERE LOWER(key) LIKE '%subpath%';
 UPDATE settings SET value = '${SUB_URI}' WHERE LOWER(key) LIKE '%suburi%';
 UPDATE settings SET value = '/${SUB_JSON_PATH}/' WHERE LOWER(key) LIKE '%subjsonpath%';
 UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri%';
+UPDATE settings SET value = '${XRAY_TEMPLATE_CONFIG}' WHERE LOWER(key) LIKE '%xraytemplateconfig%';
 EOF
 }
 
@@ -2232,6 +2322,7 @@ change_db() {
   settings_xtls
   sniffing_inbounds
   json_rules
+  xray_template
 
   update_user_db
   update_stream_settings_db
@@ -2660,6 +2751,7 @@ EOF
 ### Migration to a new version
 ###################################
 migration(){
+  info " $(text 96) "
   SOURCE_DB="/etc/x-ui/source.db"
 
   select_from_db
@@ -2696,7 +2788,6 @@ migration(){
   inbounds_settings_migration_db
   x-ui start
 
-
 #  output=$(/usr/local/x-ui/bin/xray*)
 #  echo "$output"
 #  if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
@@ -2711,7 +2802,7 @@ migration(){
 #    systemctl restart nginx
 #  fi
 
-  info " $(text 95) "
+  info " $(text 97) "
 }
 
 ###################################
@@ -2751,6 +2842,7 @@ main() {
     info " $(text 92) "                      # Disable IPv6
     info " $(text 93) "                      # Enable IPv6
     info " $(text 94) "                      # Directory size
+    info " $(text 95) "                      # Custom json    
     echo
     info " $(text 84) "                      # Exit
     tilda "|-----------------------------------------------------------------------------|"
@@ -2778,7 +2870,7 @@ main() {
         random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
-        install_custom_json
+        [[ ${args[custom]} == "true" ]] && install_custom_json
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
@@ -2804,6 +2896,9 @@ main() {
         ;;
       8)
         directory_size
+        ;;
+      9)
+        install_custom_json
         ;;
       0)
         clear
