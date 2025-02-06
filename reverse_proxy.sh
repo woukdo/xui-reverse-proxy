@@ -2768,8 +2768,9 @@ migration(){
 
   x-ui stop
 
+  cp "$DEST_DB" "/root/source.db"
   mv -f "$DEST_DB" "$SOURCE_DB"
-  cp -r /etc/nginx /etc/source.nginx
+  cp -r /etc/nginx /root/source.nginx
 
   DOMAIN=""
   SUB_DOMAIN=""
