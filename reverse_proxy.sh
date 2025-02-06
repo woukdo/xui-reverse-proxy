@@ -898,8 +898,6 @@ generate_path_cdn(){
   CDNXHTTP=$(eval ${generate[path]})
   CDNHTTPU=$(eval ${generate[path]})
   CDNWS=$(eval ${generate[path]})
-  WEB_SUB_PATH=$(eval ${generate[path]})
-  SUB2_SINGBOX_PATH=$(eval ${generate[path]})
 }
 
 ###################################
@@ -1175,7 +1173,7 @@ dns_encryption() {
       ;;
 
     2)
-      mkdir -p /etc/nginx/locations
+      mkdir -p /etc/nginx/locations/
 
       cat > /etc/nginx/locations/adguard.conf <<EOF
 location /${ADGUARDPATH}/ {
@@ -1428,7 +1426,7 @@ EOF
 ###################################
 monitoring() {
   info " $(text 66) "
-  mkdir -p /etc/nginx/locations
+  mkdir -p /etc/nginx/locations/
   bash <(curl -Ls https://github.com/cortez24rus/grafana-prometheus/raw/refs/heads/main/prometheus_node_exporter.sh)
 
   cat > /etc/nginx/locations/monitoring.conf <<EOF
@@ -1454,7 +1452,7 @@ EOF
 shellinabox() {
   info " $(text 83) "
   apt-get install shellinabox
-  mkdir -p /etc/nginx/locations
+  mkdir -p /etc/nginx/locations/
 
   cat > /etc/default/shellinabox <<EOF
 # Should shellinaboxd start automatically
@@ -1647,78 +1645,143 @@ server {
   error_page 400 402 403 500 501 502 503 504 =404 /404;
   proxy_intercept_errors on;
 
-  # PANEL
-  location /${WEB_BASE_PATH} {
-    if (\$hack = 1) {return 404;}
-    proxy_redirect off;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header Range \$http_range;
-    proxy_set_header If-Range \$http_if_range;
-    proxy_pass http://127.0.0.1:36075/${WEB_BASE_PATH};
-    break;
-  }
-  # SUB
-  location /${SUB_PATH} {
-    if (\$hack = 1) {return 404;}
-    proxy_redirect off;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://127.0.0.1:36074/${SUB_PATH};
-    break;
-  }
-  # SUB JSON
-  location /${SUB_JSON_PATH} {
-    if (\$hack = 1) {return 404;}
-    proxy_redirect off;
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    proxy_pass http://127.0.0.1:36074/${SUB_JSON_PATH};
-    break;
-  }
-  # XHTTP
-  location /${CDNXHTTP} {
-    grpc_pass grpc://unix:/dev/shm/uds2023.sock;
-    grpc_buffer_size         16k;
-    grpc_socket_keepalive    on;
-    grpc_read_timeout        1h;
-    grpc_send_timeout        1h;
-    grpc_set_header Connection         "";
-    grpc_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
-    grpc_set_header X-Forwarded-Proto  \$scheme;
-    grpc_set_header X-Forwarded-Port   \$server_port;
-    grpc_set_header Host               \$host;
-    grpc_set_header X-Forwarded-Host   \$host;
-  }
-  # GRPC WEBSOCKET HTTPUpgrade
-  location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
-    if (\$hack = 1) {return 404;}
-    client_max_body_size 0;
-    client_body_timeout 1d;
-    grpc_read_timeout 1d;
-    grpc_socket_keepalive on;
-    proxy_read_timeout 1d;
-    proxy_http_version 1.1;
-    proxy_buffering off;
-    proxy_request_buffering off;
-    proxy_socket_keepalive on;
-    proxy_set_header Upgrade \$http_upgrade;
-    proxy_set_header Connection "upgrade";
-    proxy_set_header Host \$host;
-    proxy_set_header X-Real-IP \$remote_addr;
-    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    if (\$content_type ~* "GRPC") { grpc_pass grpc://127.0.0.1:\$fwdport\$is_args\$args; break; }
-    proxy_pass http://127.0.0.1:\$fwdport\$is_args\$args;
-    break;
-  }
   # Enable locations (Adguard, Node exporter, Shell in a box)
   include /etc/nginx/locations/*.conf;
 }
 EOF
+}
+
+location_panel() {
+  cat > /etc/nginx/locations/panel.conf <<EOF
+# PANEL
+location /${WEB_BASE_PATH} {
+  if (\$hack = 1) {return 404;}
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header Range \$http_range;
+  proxy_set_header If-Range \$http_if_range;
+  proxy_pass http://127.0.0.1:36075/${WEB_BASE_PATH};
+  break;
+}
+EOF
+}
+
+location_sub() {
+  cat > /etc/nginx/locations/sub.conf <<EOF
+# SUB
+location /${SUB_PATH} {
+  if (\$hack = 1) {return 404;}
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:36074/${SUB_PATH};
+  break;
+}
+EOF
+}
+
+location_sub_json() {
+  cat > /etc/nginx/locations/sub_json.conf <<EOF
+# SUB JSON
+location /${SUB_JSON_PATH} {
+  if (\$hack = 1) {return 404;}
+  proxy_redirect off;
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  proxy_pass http://127.0.0.1:36074/${SUB_JSON_PATH};
+  break;
+}
+EOF
+}
+
+location_xhttp() {
+  cat > /etc/nginx/locations/xhttp.conf <<EOF
+# XHTTP
+location /${CDNXHTTP} {
+  grpc_pass grpc://unix:/dev/shm/uds2023.sock;
+  grpc_buffer_size         16k;
+  grpc_socket_keepalive    on;
+  grpc_read_timeout        1h;
+  grpc_send_timeout        1h;
+  grpc_set_header Connection         "";
+  grpc_set_header X-Forwarded-For    \$proxy_add_x_forwarded_for;
+  grpc_set_header X-Forwarded-Proto  \$scheme;
+  grpc_set_header X-Forwarded-Port   \$server_port;
+  grpc_set_header Host               \$host;
+  grpc_set_header X-Forwarded-Host   \$host;
+}
+EOF
+}
+
+location_cdn() {
+  cat > /etc/nginx/locations/grpc_ws.conf <<EOF
+# GRPC WEBSOCKET HTTPUpgrade
+location ~ ^/(?<fwdport>\d+)/(?<fwdpath>.*)\$ {
+  if (\$hack = 1) {return 404;}
+  client_max_body_size 0;
+  client_body_timeout 1d;
+  grpc_read_timeout 1d;
+  grpc_socket_keepalive on;
+  proxy_read_timeout 1d;
+  proxy_http_version 1.1;
+  proxy_buffering off;
+  proxy_request_buffering off;
+  proxy_socket_keepalive on;
+  proxy_set_header Upgrade \$http_upgrade;
+  proxy_set_header Connection "upgrade";
+  proxy_set_header Host \$host;
+  proxy_set_header X-Real-IP \$remote_addr;
+  proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+  if (\$content_type ~* "GRPC") { grpc_pass grpc://127.0.0.1:\$fwdport\$is_args\$args; break; }
+  proxy_pass http://127.0.0.1:\$fwdport\$is_args\$args;
+  break;
+}
+EOF
+}
+
+###################################
+### NGINX
+###################################
+nginx_setup() {
+  info " $(text 45) "
+
+  mkdir -p /etc/nginx/stream-enabled/
+  mkdir -p /etc/nginx/conf.d/
+  mkdir -p /etc/nginx/locations/
+  rm -rf /etc/nginx/conf.d/default.conf
+  touch /etc/nginx/.htpasswd
+  htpasswd -nb "$USERNAME" "$PASSWORD" > /etc/nginx/.htpasswd
+  openssl dhparam -out /etc/nginx/dhparam.pem 2048
+
+  case "$SYSTEM" in
+    Debian|Ubuntu)
+      USERNGINX="www-data"
+      ;;
+
+    CentOS|Fedora)
+      USERNGINX="nginx"
+      ;;
+  esac
+
+  nginx_conf
+  stream_conf
+  local_conf
+  location_panel
+  location_sub
+  location_sub_json
+  location_xhttp
+  location_cdn
+  
+  systemctl daemon-reload
+  systemctl restart nginx
+  nginx -s reload
+
+  tilda "$(text 10)"
 }
 
 ###################################
@@ -1755,40 +1818,6 @@ random_site() {
   fi
 
   cd ~
-}
-
-###################################
-### NGINX
-###################################
-nginx_setup() {
-  info " $(text 45) "
-
-  mkdir -p /etc/nginx/stream-enabled/
-  mkdir -p /etc/nginx/conf.d/
-  rm -rf /etc/nginx/conf.d/default.conf
-  touch /etc/nginx/.htpasswd
-  htpasswd -nb "$USERNAME" "$PASSWORD" > /etc/nginx/.htpasswd
-  openssl dhparam -out /etc/nginx/dhparam.pem 2048
-
-  case "$SYSTEM" in
-    Debian|Ubuntu)
-      USERNGINX="www-data"
-      ;;
-
-    CentOS|Fedora)
-      USERNGINX="nginx"
-      ;;
-  esac
-
-  nginx_conf
-  stream_conf
-  local_conf
-  
-  systemctl daemon-reload
-  systemctl restart nginx
-  nginx -s reload
-
-  tilda "$(text 10)"
 }
 
 ###################################
@@ -2267,8 +2296,6 @@ EOF
 ### INSTALL WEB SUB PAGE
 ###################################
 install_web(){
-  custom_sub_json
-
   DEST_DIR_SUB_PAGE="/var/www/subpage"
   DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
   sudo mkdir -p "$DEST_DIR_SUB_PAGE"
@@ -2298,11 +2325,22 @@ install_singbox_converter(){
 ### INSTALL CUSTOM JSON
 ###################################
 install_custom_json(){
+  echo "install custom json"
+  select_from_db
+  WEB_SUB_PATH=$(eval ${generate[path]})
+  SUB2_SINGBOX_PATH=$(eval ${generate[path]})
+
+  while [[ -z "$DOMAIN" ]]; do
+    reading " $(text 13) " DOMAIN  # Запрашиваем домен
+    DOMAIN=$(clean_url "$DOMAIN")  # Очищаем домен
+  done
+
   custom_sub_json
   install_singbox_converter
   install_web
   CRON_RULE3="@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
   ( crontab -l | grep -Fxq "$CRON_RULE3" ) || ( crontab -l 2>/dev/null; echo "$CRON_RULE3" ) | crontab -
+  echo "excellent"
 }
 
 ###################################
