@@ -1605,14 +1605,14 @@ server {
   listen                               80;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
-    return 301                         https://${DOMAIN}\$request_uri;
+    return 301                         https://\$host\$request_uri;
   }
 }
 server {
   listen                               9090 default_server;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
-    return 301                         https://${DOMAIN}\$request_uri;
+    return 301                         https://\$host\$request_uri;
   }
 }
 server {
