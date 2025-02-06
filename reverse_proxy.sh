@@ -2321,6 +2321,12 @@ install_singbox_converter(){
   su -c "/usr/bin/sub2sing-box server & disown" root
 }
 
+update_subjsonuri_db() {
+  sqlite3 $DEST_DB <<EOF
+UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri%';
+EOF
+}
+
 ###################################
 ### INSTALL CUSTOM JSON
 ###################################
@@ -2339,6 +2345,11 @@ install_custom_json(){
   custom_sub_json
   install_singbox_converter
   install_web
+  
+  x-stop
+  update_subjsonuri_db
+  x-start
+
   CRON_RULE3="@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
   ( crontab -l | grep -Fxq "$CRON_RULE3" ) || ( crontab -l 2>/dev/null; echo "$CRON_RULE3" ) | crontab -
   echo "excellent"
