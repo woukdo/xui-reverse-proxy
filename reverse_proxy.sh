@@ -2387,15 +2387,15 @@ settings_custom_json(){
   info " $(text 98) "
   mkdir -p /etc/nginx/locations/
 
-  select_from_db
-  WEB_SUB_PATH=$(eval ${generate[path]})
-  SUB2_SINGBOX_PATH=$(eval ${generate[path]})
-  SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
-
   while [[ -z "$DOMAIN" ]]; do
     reading " $(text 13) " DOMAIN  # Запрашиваем домен
     DOMAIN=$(clean_url "$DOMAIN")  # Очищаем домен
   done
+
+  select_from_db
+  WEB_SUB_PATH=$(eval ${generate[path]})
+  SUB2_SINGBOX_PATH=$(eval ${generate[path]})
+  SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
 
   custom_sub_json
   install_singbox_converter
