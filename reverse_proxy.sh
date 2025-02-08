@@ -2297,7 +2297,7 @@ install_panel() {
   SUB_URI=https://${DOMAIN}/${SUB_PATH}/
   SUB_JSON_URI=https://${DOMAIN}/${SUB_JSON_PATH}/
 
-  echo -e "n" | bash <(curl -Ls "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION
+  echo -e "n" | bash <(curl -sS "https://raw.githubusercontent.com/mhsanaei/3x-ui/$VERSION/install.sh") $VERSION >/dev/null 2>&1
   if ! systemctl is-active fail2ban.service; then
     echo -e "20\n1" | x-ui
   fi
@@ -2362,7 +2362,7 @@ install_web(){
 ### INSTALL SINGBOX CONVERTER
 ###################################
 install_singbox_converter(){
-  wget -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
+  wget -q -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
   tar -xvzf /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9-beta.2_linux_amd64/sub2sing-box
   mv /root/sub2sing-box /usr/bin/
   chmod +x /usr/bin/sub2sing-box
