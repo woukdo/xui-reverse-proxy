@@ -5,7 +5,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2x'
+VERSION_MANAGER='dev 1.4.2y'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
@@ -855,8 +855,6 @@ data_entry() {
   check_cf_token
   tilda "$(text 10)"
   choise_dns
-  tilda "$(text 10)"
-  reading " $(text 19) " REALITY
   generate_path_cdn
 
   if [[ ${args[generate]} == "true" ]]; then
@@ -1509,18 +1507,14 @@ stream_conf() {
   cat > /etc/nginx/stream-enabled/stream.conf <<EOF
 map \$ssl_preread_server_name \$backend {
   ${DOMAIN}                            web;
-  ${REALITY}                           reality;
   ${SUB_DOMAIN}                        xtls;
   default                              block;
 }
 upstream web {
   server 127.0.0.1:7443;
 }
-upstream reality {
-  server 127.0.0.1:8443;
-}
 upstream xtls {
-  server 127.0.0.1:9443;
+  server 127.0.0.1:8443;
 }
 upstream block {
   server 127.0.0.1:36076;
@@ -1529,7 +1523,6 @@ server {
   listen 443                           reuseport;
   ssl_preread                          on;
   proxy_protocol                       on;
-  set_real_ip_from unix:;
   proxy_pass                           \$backend;
 }
 EOF
@@ -1958,62 +1951,6 @@ EOF
 }
 
 ###################################
-### Settings reality
-###################################
-settings_reality() {
-  read PRIVATE_KEY1 PUBLIC_KEY1 <<< "$(generate_keys)"
-  STREAM_SETTINGS_REALITY=$(cat <<EOF
-{
-  "network": "tcp",
-  "security": "reality",
-  "externalProxy": [
-  {
-    "forceTls": "same",
-    "dest": "${SUB_DOMAIN}",
-    "port": 443,
-    "remark": ""
-  }
-  ],
-  "realitySettings": {
-  "show": false,
-  "xver": 0,
-  "dest": "${REALITY}:443",
-  "serverNames": [
-    "${REALITY}"
-  ],
-  "privateKey": "${PRIVATE_KEY1}",
-  "minClient": "",
-  "maxClient": "",
-  "maxTimediff": 0,
-  "shortIds": [
-    "c7c487",
-    "cf",
-    "248c16289e",
-    "ae60608a67d1a367",
-    "21221b811591",
-    "648bc6ab5ba1bc",
-    "73d1",
-    "3028618d"
-  ],
-  "settings": {
-    "publicKey": "${PUBLIC_KEY1}",
-    "fingerprint": "chrome",
-    "serverName": "",
-    "spiderX": "/"
-  }
-  },
-  "tcpSettings": {
-  "acceptProxyProtocol": true,
-  "header": {
-    "type": "none"
-  }
-  }
-}
-EOF
-  )
-}
-
-###################################
 ### Settings xtls
 ###################################
 settings_xtls() {
@@ -2086,6 +2023,20 @@ EOF
   )
 }
 
+###################################
+### Json routing rules
+###################################
+json_rules() {
+  # [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+  SUB_JSON_RULES=$(cat <<EOF
+[{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+EOF
+)
+}
+
+###################################
+### Xray template json
+###################################
 xray_template() {
   if [[ ${args[warp]} == "true" ]]; then
     RULES="warp"
@@ -2196,21 +2147,21 @@ xray_template() {
         "domain": [
           "geosite:google"
         ],
-        "outboundTag": "IPv4"
+        "outboundTag": "${RULES}"
       },
       {
         "type": "field",
         "domain": [
           "domain:gemini.google.com"
         ],
-        "outboundTag": "IPv4"
+        "outboundTag": "${RULES}"
       },
       {
         "type": "field",
         "domain": [
           "keyword:xn--"
         ],
-        "outboundTag": "IPv4"
+        "outboundTag": "${RULES}"
       },
       {
         "type": "field",
@@ -2218,14 +2169,14 @@ xray_template() {
           "geosite:intel",
           "category-ru"
         ],
-        "outboundTag": "IPv4"
+        "outboundTag": "${RULES}"
       },
       {
         "type": "field",
         "ip": [
           "geoip:ru"
         ],
-        "outboundTag": "IPv4"
+        "outboundTag": "${RULES}"
       },
       {
         "type": "field",
@@ -2233,7 +2184,7 @@ xray_template() {
           "regexp:.*\\\\.ru$",
           "regexp:.*\\\\.su$"
         ],
-        "outboundTag": "IPv4"
+        "outboundTag": "${RULES}"
       }
     ]
   },
@@ -2262,7 +2213,6 @@ UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XHTTP' WHERE LOWER(remar
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_HTTPU' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_WS' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_STEAL' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_REALITY' WHERE LOWER(remark) LIKE '%reality%';
 UPDATE inbounds SET stream_settings = '$STREAM_SETTINGS_XTLS' WHERE LOWER(remark) LIKE '%xtls%';
 EOF
 }
@@ -2277,7 +2227,6 @@ UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xhttp%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%httpu%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%ws%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%steal%';
-UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%reality%';
 UPDATE inbounds SET sniffing = '$SNIFFING' WHERE LOWER(remark) LIKE '%xtls%';
 EOF
 }
@@ -2297,14 +2246,14 @@ EOF
 }
 
 ###################################
-### Json routing rules
+### Setting bot
 ###################################
-json_rules() {
-  # [{"type":"field","outboundTag":"direct","domain":["keyword:xn--","keyword:yandex","keyword:avito","keyword:2gis","keyword:gismeteo","keyword:livejournal"]},{"type":"field","outboundTag":"direct","domain":["domain:ru","domain:su","domain:kg","domain:by","domain:kz"]},{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:category-gov-ru","geosite:yandex","geosite:vk","geosite:whatsapp","geosite:apple","geosite:mailru","geosite:github","geosite:gitlab","geosite:duckduckgo","geosite:google","geosite:wikimedia","geosite:mozilla"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
-  SUB_JSON_RULES=$(cat <<EOF
-[{"type":"field","outboundTag":"direct","domain":["geosite:category-ru","geosite:apple","geosite:google"]},{"type":"field","outboundTag":"direct","ip":["geoip:private","geoip:ru"]}]
+update_settings_tgbot_db() {
+  sqlite3 $DEST_DB <<EOF
+UPDATE settings SET value = 'true' WHERE LOWER(key) LIKE '%tgbotenable%';
+UPDATE settings SET value = '${ADMIN_ID}' WHERE LOWER(key) LIKE '%tgbottoken%';
+UPDATE settings SET value = '${BOT_TOKEN}' WHERE LOWER(key) LIKE '%tgbotchatid%';
 EOF
-)
 }
 
 ###################################
@@ -2335,6 +2284,9 @@ change_db() {
   update_stream_settings_db
   update_sniffing_settings_db
   update_settings_db
+  if [[ ${args[tgbot]} == "true" ]]; then
+    update_settings_tgbot_db
+  fi
   update_json_rules_db
 }
 
@@ -2573,11 +2525,11 @@ ssh_setup() {
 ###################################
 ### Installing bot
 ###################################
-install_bot() {
-  info " $(text 57) "
-  bash <(curl -Ls https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/reverse_proxy_bot.sh) "$BOT_TOKEN" "$ADMIN_ID" "$DOMAIN"
-  tilda "$(text 10)"
-}
+#install_bot() {
+#  info " $(text 57) "
+#  bash <(curl -Ls https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/reverse_proxy_bot.sh) "$BOT_TOKEN" "$ADMIN_ID" "$DOMAIN"
+#  tilda "$(text 10)"
+#}
 
 ###################################
 ### Information output
@@ -2846,7 +2798,6 @@ migration(){
 
   DOMAIN=""
   SUB_DOMAIN=""
-  REALITY=""
 
   echo
   reading " $(text 13) " TEMP_DOMAIN_L
@@ -2854,9 +2805,6 @@ migration(){
   echo
   reading " $(text 81) " TEMP_DOMAIN_L
   SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
-  echo
-  reading " $(text 19) " TEMP_REALITY_L
-  REALITY=$(clean_url "$TEMP_REALITY_L")
   echo
 
   nginx_setup
