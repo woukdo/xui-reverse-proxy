@@ -2477,6 +2477,8 @@ EOF
 ###################################
 rotation_and_archiving() {
   info " $(text 23) "
+  ${PACKAGE_UPDATE[int]}
+  ${PACKAGE_INSTALL[int]} p7zip-full
   backup_dir
   rotation_backup
   tilda "$(text 10)"
