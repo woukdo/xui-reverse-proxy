@@ -1312,7 +1312,7 @@ warp() {
 
   warp-cli tunnel stats
   if curl -x socks5h://localhost:40000 https://2ip.io; then
-    "WARP is connected successfully."
+    echo "WARP is connected successfully."
   else
     warning " $(text 20) "
   fi
