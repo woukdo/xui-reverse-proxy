@@ -313,8 +313,8 @@ show_help() {
 ### Reverse_proxy manager
 ###################################
 update_reverse_proxy() {
-  echo
   info "Script update and integration."
+
   CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
   warning "Script version: $CURRENT_VERSION"
   UPDATE_SCRIPT="${DIR_REVERSE_PROXY}reverse_proxy"
@@ -322,7 +322,7 @@ update_reverse_proxy() {
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
   add_cron_rule "0 0 * * * reverse_proxy --update"
-  
+
   tilda "\n|-----------------------------------------------------------------------------|\n"
 }
 
@@ -444,15 +444,16 @@ declare -A arg_map=(
 parse_args() {
   local opts
   opts=$(getopt -o hu:d:a:r:b:i:w:c:m:l:n:p:f:s:t:g:x:o --long utils:,dns:,addu:,autoupd:,bbr:,ipv6:,warp:,cert:,mon:,shell:,nginx:,panel:,custom:,firewall:,ssh:,tgbot:,generate:,skip-check:,subdomain:,update,depers,help -- "$@")
-  
+
   if [[ $? -ne 0 ]]; then
     return 1
   fi
-  
+
   eval set -- "$opts"
   while true; do
     case $1 in
       --update)
+        echo
         update_reverse_proxy
         exit 0
         ;;
@@ -841,21 +842,21 @@ generate_path_cdn(){
 ###################################
 data_entry() {
   tilda "$(text 10)"
-  
+
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
-  
+
   tilda "$(text 10)"
-  
+
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
-  
+
   tilda "$(text 10)"
-  
+
   choise_dns
-  
+
   generate_path_cdn
 
   if [[ ${args[generate]} == "true" ]]; then
@@ -1744,7 +1745,7 @@ nginx_setup() {
   location_sub_json
   location_xhttp
   location_cdn
-  
+
   systemctl daemon-reload
   systemctl restart nginx
   nginx -s reload
@@ -2385,7 +2386,7 @@ EOF
 settings_custom_json(){
   info " $(text 98) "
   mkdir -p /etc/nginx/locations/
-  
+
   select_from_db
   WEB_SUB_PATH=$(eval ${generate[path]})
   SUB2_SINGBOX_PATH=$(eval ${generate[path]})
@@ -2399,11 +2400,11 @@ settings_custom_json(){
   custom_sub_json
   install_singbox_converter
   settings_web
-  
+
   update_subjsonuri_db
   if ! grep -Fq "include /etc/nginx/locations/*.conf;" /etc/nginx/conf.d/local.conf; then
     sed -i '$ s/}/\n  # Enable locations\n  include \/etc\/nginx\/locations\/\*.conf;\n}/' /etc/nginx/conf.d/local.conf
-  fi  
+  fi
   nginx -s reload
 
   add_cron_rule "@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
@@ -2565,7 +2566,7 @@ data_output() {
   if [[ ${args[shell]} == "true" ]]; then
     out_data " $(text 22) " "https://${DOMAIN}/${SHELLBOX}/"
     echo
-  fi  
+  fi
   out_data " $(text 62) " "ssh -p 22 ${USERNAME}@${IP4}"
   echo
   out_data " $(text 63) " "$USERNAME"
@@ -2884,7 +2885,7 @@ main() {
     info " $(text 92) "                      # Disable IPv6
     info " $(text 93) "                      # Enable IPv6
     info " $(text 94) "                      # Directory size
-    info " $(text 95) "                      # Custom json    
+    info " $(text 95) "                      # Custom json
     echo
     info " $(text 84) "                      # Exit
     tilda "|-----------------------------------------------------------------------------|"
