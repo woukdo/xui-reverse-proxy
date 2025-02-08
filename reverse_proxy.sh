@@ -844,16 +844,23 @@ generate_path_cdn(){
 ###################################
 data_entry() {
   tilda "$(text 10)"
+  
   reading " $(text 11) " USERNAME
   echo
   reading " $(text 12) " PASSWORD
+  
   tilda "$(text 10)"
   
   [[ ${args[addu]} == "true" ]] && add_user
 
   check_cf_token
+  
   tilda "$(text 10)"
+  
   choise_dns
+  
+  tilda "$(text 10)"
+  
   generate_path_cdn
 
   if [[ ${args[generate]} == "true" ]]; then
@@ -861,14 +868,12 @@ data_entry() {
     SUB_PATH=$(eval ${generate[path]})
     SUB_JSON_PATH=$(eval ${generate[path]})
   else
-    echo
     validate_path WEB_BASE_PATH
     echo
     validate_path SUB_PATH
     echo
     validate_path SUB_JSON_PATH
   fi
-
   if [[ ${args[mon]} == "true" ]]; then
     if [[ ${args[generate]} == "true" ]]; then
       METRICS=$(eval ${generate[path]})
@@ -877,7 +882,6 @@ data_entry() {
       validate_path METRICS
     fi
   fi
-
   if [[ ${args[shell]} == "true" ]]; then
     if [[ ${args[generate]} == "true" ]]; then
       SHELLBOX=$(eval ${generate[path]})
@@ -917,7 +921,6 @@ data_entry() {
           fi
         fi
       done
-      tilda "$(text 10)"
     else
       warning " $(text 9) " # Настройка пропущена
       SSH_OK=false
@@ -929,8 +932,8 @@ data_entry() {
     reading " $(text 35) " ADMIN_ID
     echo
     reading " $(text 34) " BOT_TOKEN
-    tilda "$(text 10)"
   fi
+  tilda "$(text 10)"
 }
 
 ###################################
