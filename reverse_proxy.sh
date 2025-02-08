@@ -2421,7 +2421,7 @@ dirarch() {
   DIR_PATH=\$1
   BACKUP_DIR=\$2
   if [[ -d "\$DIR_PATH" ]]; then
-    DIRNAME=$(basename "\$DIR_PATH")
+    DIRNAME=\$(basename "\$DIR_PATH")
     CURRENT_DATE=\$(date +"%y-%m-%d")
     mkdir -p "\$BACKUP_DIR"
     ARCHIVE_NAME="\$BACKUP_DIR/\${DIRNAME}_\${CURRENT_DATE}.7z"
