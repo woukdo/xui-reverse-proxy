@@ -2794,6 +2794,7 @@ EOF
 ###################################
 migration(){
   info " $(text 96) "
+  rotation_and_archiving
   SOURCE_DB="/etc/x-ui/source.db"
 
   select_from_db
