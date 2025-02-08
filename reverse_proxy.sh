@@ -2448,13 +2448,15 @@ days_to_keep=6
 
 arc_file_patterns[0]="*.7z"
 
-backup_dir[0]="${DIR_REVERSE_PROXY}backup/nginx"
-backup_dir[1]="${DIR_REVERSE_PROXY}backup/x-ui"
-backup_dir[2]="${DIR_REVERSE_PROXY}backup/letsencrypt"
+backup_dir=(
+  "${DIR_REVERSE_PROXY}backup/nginx"
+  "${DIR_REVERSE_PROXY}backup/x-ui"
+  "${DIR_REVERSE_PROXY}backup/letsencrypt"
+)
 
-for directory in ${backup_dir[@]}; do
-  for pattern in ${arc_file_patterns[@]}; do
-    find $directory -type f -name $pattern -mtime +$days_to_keep -exec rm -rf {} \;
+for directory in \${backup_dir[@]}; do
+  for pattern in \${arc_file_patterns[@]}; do
+    find \$directory -type f -name \$pattern -mtime +\$days_to_keep -exec rm -rf {} \;
   done
 done
 EOF
