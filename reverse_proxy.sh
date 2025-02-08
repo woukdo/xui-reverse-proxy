@@ -2426,7 +2426,9 @@ dirarch() {
     mkdir -p "\$BACKUP_DIR"
     ARCHIVE_NAME="\$BACKUP_DIR/\${DIRNAME}_\${CURRENT_DATE}.7z"
 
-    7za a -mx9 "\$ARCHIVE_NAME" "\$DIR_PATH/*" -w"\$DIR_PATH" || echo "Ошибка при архивировании директории $DIR_PATH"
+    PARENT_DIR=$(dirname "\$DIR_PATH")
+    cd "\$PARENT_DIR" || exit
+    7za a -mx9 "\$ARCHIVE_NAME" "\$DIRNAME" || echo "Ошибка при архивировании директории $DIR_PATH"
   else
     echo "Ошибка: \$DIR_PATH не является директорией"
   fi
