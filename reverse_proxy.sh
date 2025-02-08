@@ -313,11 +313,17 @@ show_help() {
 ### Reverse_proxy manager
 ###################################
 update_reverse_proxy() {
+  echo
+  info "Script update and integration."
+  CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
+  warning "Script version: $CURRENT_VERSION"
   UPDATE_SCRIPT="${DIR_REVERSE_PROXY}reverse_proxy"
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
   add_cron_rule "0 0 * * * reverse_proxy --update"
+  
+  tilda "\n|-----------------------------------------------------------------------------|\n"
 }
 
 ###################################
@@ -447,12 +453,7 @@ parse_args() {
   while true; do
     case $1 in
       --update)
-        CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
-        echo
-        info "Script update and integration."
-        warning "Script version: $CURRENT_VERSION"
         update_reverse_proxy
-        tilda "\n|-----------------------------------------------------------------------------|\n"
         exit 0
         ;;
       --depers)
