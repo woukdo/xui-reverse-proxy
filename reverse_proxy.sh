@@ -9,6 +9,7 @@ VERSION_MANAGER='dev 1.4.2w'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/database/x-ui.db"
 
@@ -313,7 +314,7 @@ show_help() {
 ###################################
 update_reverse_proxy() {
   # Путь к файлу обновления
-  UPDATE_SCRIPT="/usr/local/reverse_proxy/reverse_proxy"
+  UPDATE_SCRIPT="${DIR_REVERSE_PROXY}reverse_proxy"
 
   # Скрипт обновления
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
@@ -323,8 +324,7 @@ update_reverse_proxy() {
   # Сделать файл исполнимым
   chmod +x "$UPDATE_SCRIPT"
   # Добавление задачи в crontab для выполнения каждый день в полночь
-  CRON_RULE2="0 0 * * * reverse_proxy --update"
-  ( crontab -l | grep -Fxq "$CRON_RULE2" ) || ( crontab -l; echo "$CRON_RULE2" ) | crontab -
+  add_cron_rule "0 0 * * * reverse_proxy --update"
 }
 
 ###################################
@@ -498,8 +498,8 @@ parse_args() {
 ### Logging
 ###################################
 log_entry() {
-  mkdir -p /usr/local/reverse_proxy/
-  LOGFILE="/usr/local/reverse_proxy/reverse_proxy.log"
+  mkdir -p ${DIR_REVERSE_PROXY}
+  LOGFILE="${DIR_REVERSE_PROXY}reverse_proxy.log"
   exec > >(tee -a "$LOGFILE") 2>&1
 }
 
@@ -632,6 +632,14 @@ check_ip() {
       echo "Не удалось получить внешний IP."
       return 1
     fi
+}
+
+###################################
+### Cron rules
+###################################
+add_cron_rule() {
+  local rule="$1"
+  ( crontab -l | grep -Fxq "$rule" ) || ( crontab -l 2>/dev/null; echo "$rule" ) | crontab -
 }
 
 ###################################
@@ -1262,7 +1270,7 @@ swapfile() {
   swapon /swapfile
   swapon --show
 
-  cat > /usr/local/reverse_proxy/restart_warp <<EOF
+  cat > ${DIR_REVERSE_PROXY}restart_warp.sh <<EOF
 #!/bin/bash
 # Получаем количество занятого пространства в swap (в мегабайтах)
 SWAP_USED=$(free -m | grep Swap | awk '{print $3}')
@@ -1274,8 +1282,8 @@ if [ "$SWAP_USED" -gt 200 ]; then
     echo "$(date '+%Y-%m-%d %H:%M:%S') - warp-svc.service перезапущен из-за превышения swap" >> /root/warp_restart_time
 fi
 EOF
-  chmod +x /usr/local/reverse_proxy/restart_warp
-  { crontab -l; echo "* * * * * /usr/local/reverse_proxy/restart_warp"; } | crontab -
+  chmod +x ${DIR_REVERSE_PROXY}restart_warp.sh
+  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh"
 }
 
 ###################################
@@ -1348,8 +1356,7 @@ EOF
     fi
   done
 
-  CRON_RULE1="0 5 1 */2 * certbot -q renew"
-  ( crontab -l | grep -Fxq "$CRON_RULE1" ) || ( crontab -l; echo "$CRON_RULE1" ) | crontab -
+  add_cron_rule "0 5 1 */2 * certbot -q renew"
   tilda "$(text 10)"
 }
 
@@ -1577,7 +1584,7 @@ server {
   error_page 400 402 403 500 501 502 503 504 =404 /404;
   proxy_intercept_errors on;
 
-  # Enable locations (Adguard, Node exporter, Shell in a box)
+  # Enable locations
   include /etc/nginx/locations/*.conf;
 }
 EOF
@@ -1721,9 +1728,9 @@ nginx_setup() {
 ###################################
 random_site() {
   info " $(text 79) "
-  mkdir -p /var/www/html/ /usr/local/reverse_proxy/
+  mkdir -p /var/www/html/ ${DIR_REVERSE_PROXY}
 
-  cd /usr/local/reverse_proxy/ || echo "Не удалось перейти в /usr/local/reverse_proxy/"
+  cd ${DIR_REVERSE_PROXY}
 
   if [[ ! -d "simple-web-templates-main" ]]; then
       while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/simple-web-templates/archive/refs/heads/main.zip"; do
@@ -2423,6 +2430,8 @@ EOF
 ###################################
 install_custom_json(){
   echo "install custom json"
+  mkdir -p /etc/nginx/locations/
+  
   select_from_db
   WEB_SUB_PATH=$(eval ${generate[path]})
   SUB2_SINGBOX_PATH=$(eval ${generate[path]})
@@ -2438,11 +2447,74 @@ install_custom_json(){
   install_web
   
   update_subjsonuri_db
+  if ! grep -Fq "include /etc/nginx/locations/*.conf;" /etc/nginx/conf.d/local.conf; then
+    sed -i '$ s/}/\n  # Enable locations\n  include \/etc\/nginx\/locations\/\*.conf;\n}/' /etc/nginx/conf.d/local.conf
+  fi  
   nginx -s reload
 
-  CRON_RULE3="@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
-  ( crontab -l | grep -Fxq "$CRON_RULE3" ) || ( crontab -l 2>/dev/null; echo "$CRON_RULE3" ) | crontab -
+  add_cron_rule "@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
   echo "custom sub allready"
+}
+
+###################################
+### BACKUP DIRECTORIES
+###################################
+backup_dir() {
+  cat > ${DIR_REVERSE_PROXY}backup_dir.sh <<EOF
+#!/bin/bash
+
+dirarch() {
+  DIR_PATH=$1
+  BACKUP_DIR=$2
+  if [[ -d "$DIR_PATH" ]]; then
+    DIRNAME=$(basename "$DIR_PATH")
+    CURRENT_DATE=$(date +"%y-%m-%d")
+    mkdir -p "$BACKUP_DIR"
+    ARCHIVE_NAME="$BACKUP_DIR/${DIRNAME}_${CURRENT_DATE}.7z"
+    
+    7za a -mx9 "$ARCHIVE_NAME" "$DIR_PATH" || echo "Ошибка при архивировании директории $DIR_PATH"
+  else
+    echo "Ошибка: $DIR_PATH не является директорией"
+  fi
+}
+
+dirarch "/etc/nginx" "${DIR_REVERSE_PROXY}backup/nginx"
+dirarch "/etc/x-ui" "${DIR_REVERSE_PROXY}backup/x-ui"
+dirarch "/etc/letsencrypt" "${DIR_REVERSE_PROXY}backup/letsencrypt"
+EOF
+}
+
+###################################
+### ROTATE BACKUPS
+###################################
+rotation_backup() {
+  cat > ${DIR_REVERSE_PROXY}rotation_backup.sh <<EOF
+#!/bin/bash
+
+days_to_keep=6
+
+arc_file_patterns[0]="*.7z"
+
+backup_dir[0]="${DIR_REVERSE_PROXY}backup/nginx"
+backup_dir[1]="${DIR_REVERSE_PROXY}backup/x-ui"
+backup_dir[2]="${DIR_REVERSE_PROXY}backup/letsencrypt"
+
+for directory in ${backup_dir[@]}; do
+  for pattern in ${arc_file_patterns[@]}; do
+    find $directory -type f -name $pattern -mtime +$days_to_keep -exec rm -rf {} \;
+  done
+done
+EOF
+}
+
+###################################
+### BACKUP & ROTATION SCHEDULER
+###################################
+rotation_and_archiving() {
+  backup_dir
+  rotation_backup
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
 }
 
 ###################################
@@ -2879,6 +2951,7 @@ main() {
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
         [[ ${args[custom]} == "true" ]] && install_custom_json
+        rotation_and_archiving
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
         [[ ${args[tgbot]} == "true" ]] && install_bot
