@@ -98,8 +98,8 @@ E[21]="Access link to node exporter:"
 R[21]="Доступ по ссылке к node exporter:"
 E[22]="Access link to shell in a box:"
 R[22]="Доступ по ссылке к shell in a box:"
-E[23]=""
-R[23]=""
+E[23]="Creating a backup and rotation."
+R[23]="Создание резевной копии и ротация."
 E[24]="Enter Node Exporter path:"
 R[24]="Введите путь к Node Exporter:"
 E[25]="Enter Adguard-home path:"
@@ -854,8 +854,6 @@ data_entry() {
   tilda "$(text 10)"
   
   choise_dns
-  
-  tilda "$(text 10)"
   
   generate_path_cdn
 
@@ -2475,8 +2473,10 @@ EOF
 ### BACKUP & ROTATION SCHEDULER
 ###################################
 rotation_and_archiving() {
+  info " $(text 23) "
   backup_dir
   rotation_backup
+  tilda "$(text 10)"
 }
 
 ###################################
