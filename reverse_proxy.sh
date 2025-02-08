@@ -925,6 +925,7 @@ data_entry() {
   fi
 
   if [[ ${args[tgbot]} == "true" ]]; then
+    tilda "$(text 10)"
     reading " $(text 35) " ADMIN_ID
     echo
     reading " $(text 34) " BOT_TOKEN
