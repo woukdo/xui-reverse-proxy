@@ -98,8 +98,8 @@ E[21]="Access link to node exporter:"
 R[21]="Доступ по ссылке к node exporter:"
 E[22]="Access link to shell in a box:"
 R[22]="Доступ по ссылке к shell in a box:"
-E[23]=""
-R[23]=""
+E[23]="Script update and integration."
+R[23]="Обновление и интеграция скрипта."
 E[24]="Enter Node Exporter path:"
 R[24]="Введите путь к Node Exporter:"
 E[25]="Enter Adguard-home path:"
@@ -248,7 +248,8 @@ E[96]="Client migration initiation (experimental feature)."
 R[96]="Начало миграции клиентов (экспериментальная функция)."
 E[97]="Client migration is complete."
 R[97]="Миграция клиентов завершена."
-
+E[98]="Settings custom JSON subscription."
+R[98]="Настройки пользовательской JSON-подписки."
 
 ###################################
 ### Help output
@@ -312,18 +313,13 @@ show_help() {
 ### Reverse_proxy manager
 ###################################
 update_reverse_proxy() {
-  # Путь к файлу обновления
+  info " $(text 46) "
   UPDATE_SCRIPT="${DIR_REVERSE_PROXY}reverse_proxy"
-
-  # Скрипт обновления
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
-  chmod +x $UPDATE_SCRIPT
-
-  # Сделать файл исполнимым
   chmod +x "$UPDATE_SCRIPT"
-  # Добавление задачи в crontab для выполнения каждый день в полночь
   add_cron_rule "0 0 * * * reverse_proxy --update"
+  tilda "$(text 10)"
 }
 
 ###################################
@@ -1430,6 +1426,43 @@ EOF
 }
 
 ###################################
+### Selecting a random site
+###################################
+random_site() {
+  info " $(text 79) "
+  mkdir -p /var/www/html/ ${DIR_REVERSE_PROXY}
+
+  cd ${DIR_REVERSE_PROXY}
+
+  if [[ ! -d "simple-web-templates-main" ]]; then
+      while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/simple-web-templates/archive/refs/heads/main.zip"; do
+        warning " $(text 38) "
+        sleep 3
+      done
+      unzip -q main.zip &>/dev/null && rm -f main.zip
+  fi
+
+  cd simple-web-templates-main || echo "Не удалось перейти в папку с шаблонами"
+
+  rm -rf assets ".gitattributes" "README.md" "_config.yml"
+
+  RandomHTML=$(ls -d */ | shuf -n1)  # Обновил для выбора случайного подкаталога
+  info " $(text 80) ${RandomHTML}"
+
+  # Если шаблон существует, копируем его в /var/www/html
+  if [[ -d "${RandomHTML}" && -d "/var/www/html/" ]]; then
+      echo "Копируем шаблон в /var/www/html/..."
+      rm -rf /var/www/html/*  # Очищаем старую папку
+      cp -a "${RandomHTML}/." /var/www/html/ || echo "Ошибка при копировании шаблона"
+  else
+      echo "Ошибка при извлечении шаблона!"
+  fi
+
+  cd ~
+  tilda "$(text 10)"
+}
+
+###################################
 ### http conf
 ###################################
 nginx_conf() {
@@ -1717,42 +1750,6 @@ nginx_setup() {
   nginx -s reload
 
   tilda "$(text 10)"
-}
-
-###################################
-### Selecting a random site
-###################################
-random_site() {
-  info " $(text 79) "
-  mkdir -p /var/www/html/ ${DIR_REVERSE_PROXY}
-
-  cd ${DIR_REVERSE_PROXY}
-
-  if [[ ! -d "simple-web-templates-main" ]]; then
-      while ! wget -q --progress=dot:mega --timeout=30 --tries=10 --retry-connrefused "https://github.com/cortez24rus/simple-web-templates/archive/refs/heads/main.zip"; do
-        warning " $(text 38) "
-        sleep 3
-      done
-      unzip -q main.zip &>/dev/null && rm -f main.zip
-  fi
-
-  cd simple-web-templates-main || echo "Не удалось перейти в папку с шаблонами"
-
-  rm -rf assets ".gitattributes" "README.md" "_config.yml"
-
-  RandomHTML=$(ls -d */ | shuf -n1)  # Обновил для выбора случайного подкаталога
-  info " $(text 80) ${RandomHTML}"
-
-  # Если шаблон существует, копируем его в /var/www/html
-  if [[ -d "${RandomHTML}" && -d "/var/www/html/" ]]; then
-      echo "Копируем шаблон в /var/www/html/..."
-      rm -rf /var/www/html/*  # Очищаем старую папку
-      cp -a "${RandomHTML}/." /var/www/html/ || echo "Ошибка при копировании шаблона"
-  else
-      echo "Ошибка при извлечении шаблона!"
-  fi
-
-  cd ~
 }
 
 ###################################
@@ -2319,7 +2316,7 @@ install_panel() {
 }
 
 ###################################
-### CUSTOM SUBSCRIPTION JSON
+### Custom subscription json
 ###################################
 custom_sub_json(){
   cat > /etc/nginx/locations/webpagesub.conf <<EOF
@@ -2345,9 +2342,9 @@ EOF
 }
 
 ###################################
-### INSTALL WEB SUB PAGE
+### Settings web sub page
 ###################################
-install_web(){
+settings_web(){
   DEST_DIR_SUB_PAGE="/var/www/subpage"
   DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
   sudo mkdir -p "$DEST_DIR_SUB_PAGE"
@@ -2362,7 +2359,7 @@ install_web(){
 }
 
 ###################################
-### INSTALL SINGBOX CONVERTER
+### Install sing-box converter
 ###################################
 install_singbox_converter(){
   wget -q -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
@@ -2373,6 +2370,9 @@ install_singbox_converter(){
   su -c "/usr/bin/sub2sing-box server & disown" root
 }
 
+###################################
+### Update subscription json uri database
+###################################
 update_subjsonuri_db() {
   sqlite3 $DEST_DB <<EOF
 UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri%';
@@ -2380,10 +2380,10 @@ EOF
 }
 
 ###################################
-### INSTALL CUSTOM JSON
+### Settings custom json
 ###################################
-install_custom_json(){
-  echo "Custom json"
+settings_custom_json(){
+  info " $(text 98) "
   mkdir -p /etc/nginx/locations/
   
   select_from_db
@@ -2398,7 +2398,7 @@ install_custom_json(){
 
   custom_sub_json
   install_singbox_converter
-  install_web
+  settings_web
   
   update_subjsonuri_db
   if ! grep -Fq "include /etc/nginx/locations/*.conf;" /etc/nginx/conf.d/local.conf; then
@@ -2542,6 +2542,7 @@ ssh_setup() {
 ###################################
 data_output() {
   info " $(text 58) "
+  echo
   printf '0\n' | x-ui | grep --color=never -i ':'
   echo
   out_data " $(text 59) " "https://${DOMAIN}/${WEB_BASE_PATH}/"
@@ -2904,7 +2905,7 @@ main() {
         random_site
         [[ ${args[nginx]} == "true" ]] && nginx_setup
         [[ ${args[panel]} == "true" ]] && install_panel
-        [[ ${args[custom]} == "true" ]] && install_custom_json
+        [[ ${args[custom]} == "true" ]] && settings_custom_json
         rotation_and_archiving
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
@@ -2932,7 +2933,7 @@ main() {
         directory_size
         ;;
       9)
-        install_custom_json
+        settings_custom_json
         ;;
       0)
         clear
