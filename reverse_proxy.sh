@@ -1271,13 +1271,13 @@ swapfile() {
   cat > ${DIR_REVERSE_PROXY}restart_warp.sh <<EOF
 #!/bin/bash
 # Получаем количество занятого пространства в swap (в мегабайтах)
-SWAP_USED=$(free -m | grep Swap | awk '{print $3}')
+SWAP_USED=\$(free -m | grep Swap | awk '{print \$3}')
 # Проверяем, больше ли оно 300 Мб
-if [ "$SWAP_USED" -gt 200 ]; then
+if [ "\$SWAP_USED" -gt 200 ]; then
     # Перезапускаем warp-svc.service
     systemctl restart warp-svc.service
     # Записываем дату и время в лог-файл
-    echo "$(date '+%Y-%m-%d %H:%M:%S') - warp-svc.service перезапущен из-за превышения swap" >> /root/warp_restart_time
+    echo "\$(date '+%Y-%m-%d %H:%M:%S') - warp-svc.service перезапущен из-за превышения swap" >> ${DIR_REVERSE_PROXY}warp_restart_time
 fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}restart_warp.sh
@@ -2380,7 +2380,7 @@ EOF
 ### INSTALL CUSTOM JSON
 ###################################
 install_custom_json(){
-  echo "install custom json"
+  echo "Custom json"
   mkdir -p /etc/nginx/locations/
   
   select_from_db
@@ -2404,7 +2404,7 @@ install_custom_json(){
   nginx -s reload
 
   add_cron_rule "@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
-  echo "custom sub allready"
+  tilda "$(text 10)"
 }
 
 ###################################
