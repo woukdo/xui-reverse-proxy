@@ -98,8 +98,8 @@ E[21]="Access link to node exporter:"
 R[21]="Доступ по ссылке к node exporter:"
 E[22]="Access link to shell in a box:"
 R[22]="Доступ по ссылке к shell in a box:"
-E[23]="Script update and integration."
-R[23]="Обновление и интеграция скрипта."
+E[23]=""
+R[23]=""
 E[24]="Enter Node Exporter path:"
 R[24]="Введите путь к Node Exporter:"
 E[25]="Enter Adguard-home path:"
@@ -313,13 +313,11 @@ show_help() {
 ### Reverse_proxy manager
 ###################################
 update_reverse_proxy() {
-  info " $(text 46) "
   UPDATE_SCRIPT="${DIR_REVERSE_PROXY}reverse_proxy"
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
   add_cron_rule "0 0 * * * reverse_proxy --update"
-  tilda "$(text 10)"
 }
 
 ###################################
@@ -450,9 +448,11 @@ parse_args() {
     case $1 in
       --update)
         CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
-        warning "Script update version: $CURRENT_VERSION"
         echo
+        info "Script update and integration."
+        warning "Script update version: $CURRENT_VERSION"
         update_reverse_proxy
+        tilda "\n|-----------------------------------------------------------------------------|\n"
         exit 0
         ;;
       --depers)
@@ -591,6 +591,23 @@ check_root() {
 }
 
 ###################################
+### Obtaining your external IP address
+###################################
+check_ip() {
+  IP4_REGEX="^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
+  IP4=$(ip route get 8.8.8.8 2>/dev/null | grep -Po -- 'src \K\S*')
+
+  if [[ ! $IP4 =~ $IP4_REGEX ]]; then
+      IP4=$(curl -s --max-time 5 ipinfo.io/ip 2>/dev/null)
+  fi
+
+  if [[ ! $IP4 =~ $IP4_REGEX ]]; then
+    echo "Не удалось получить внешний IP."
+    return 1
+  fi
+}
+
+###################################
 ### Banner
 ###################################
 banner_xray() {
@@ -610,23 +627,6 @@ warning_banner() {
   echo
   info " $(text 6) "
   warning " apt-get update && apt-get full-upgrade -y && reboot "
-}
-
-###################################
-### Obtaining your external IP address
-###################################
-check_ip() {
-    IP4_REGEX="^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$"
-    IP4=$(ip route get 8.8.8.8 2>/dev/null | grep -Po -- 'src \K\S*')
-
-    if [[ ! $IP4 =~ $IP4_REGEX ]]; then
-        IP4=$(curl -s --max-time 5 ipinfo.io/ip 2>/dev/null)
-    fi
-
-    if [[ ! $IP4 =~ $IP4_REGEX ]]; then
-      echo "Не удалось получить внешний IP."
-      return 1
-    fi
 }
 
 ###################################
@@ -654,27 +654,27 @@ get_test_response() {
 ### Function to clean the URL (removes the protocol, port, and path)
 ###################################
 clean_url() {
-    local INPUT_URL_L="$1"  # Входной URL, который нужно очистить от префикса, порта и пути.
-    # Убираем префикс https:// или http:// и порт/путь
-    local CLEANED_URL_L=$(echo "$INPUT_URL_L" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
-    echo "$CLEANED_URL_L"  # Возвращаем очищенный URL (без префикса, порта и пути).
+  local INPUT_URL_L="$1"  # Входной URL, который нужно очистить от префикса, порта и пути.
+  # Убираем префикс https:// или http:// и порт/путь
+  local CLEANED_URL_L=$(echo "$INPUT_URL_L" | sed -E 's/^https?:\/\///' | sed -E 's/(:[0-9]+)?(\/[a-zA-Z0-9_\-\/]+)?$//')
+  echo "$CLEANED_URL_L"  # Возвращаем очищенный URL (без префикса, порта и пути).
 }
 
 ###################################
 ### Function to crop the domain to the last two parts
 ###################################
 crop_domain() {
-    local DOMAIN_L=$1  # Получаем домен как аргумент
-    IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
+  local DOMAIN_L=$1  # Получаем домен как аргумент
+  IFS='.' read -r -a parts <<< "$DOMAIN_L"  # Разбиваем домен на части по точкам.
 
-    # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
-    if [ ${#parts[@]} -gt 2 ]; then
-      DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
-    else
-      DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
-    fi
+  # Если в домене больше двух частей (например, для субдоменов), обрезаем до последних двух.
+  if [ ${#parts[@]} -gt 2 ]; then
+    DOMAIN_L="${parts[${#parts[@]}-2]}.${parts[${#parts[@]}-1]}"  # Берем последние две части домена.
+  else
+    DOMAIN_L="${parts[0]}.${parts[1]}"  # Если домен второго уровня, оставляем только его.
+  fi
 
-    echo "$DOMAIN_L"  # Возвращаем результат через echo.
+  echo "$DOMAIN_L"  # Возвращаем результат через echo.
 }
 
 ###################################
