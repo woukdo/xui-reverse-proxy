@@ -862,6 +862,7 @@ data_entry() {
     SUB_PATH=$(eval ${generate[path]})
     SUB_JSON_PATH=$(eval ${generate[path]})
   else
+    echo
     validate_path WEB_BASE_PATH
     echo
     validate_path SUB_PATH
