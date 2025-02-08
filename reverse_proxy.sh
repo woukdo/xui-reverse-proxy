@@ -450,7 +450,7 @@ parse_args() {
         CURRENT_VERSION=$(wget -qO- $SCRIPT_URL | grep -E "^\s*VERSION_MANAGER=" | cut -d'=' -f2)
         echo
         info "Script update and integration."
-        warning "Script update version: $CURRENT_VERSION"
+        warning "Script version: $CURRENT_VERSION"
         update_reverse_proxy
         tilda "\n|-----------------------------------------------------------------------------|\n"
         exit 0
