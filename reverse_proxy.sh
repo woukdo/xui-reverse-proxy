@@ -2426,7 +2426,7 @@ dirarch() {
     mkdir -p "\$BACKUP_DIR"
     ARCHIVE_NAME="\$BACKUP_DIR/\${DIRNAME}_\${CURRENT_DATE}.7z"
 
-    7za a -mx9 "\$ARCHIVE_NAME" "\$DIR_PATH" || echo "Ошибка при архивировании директории $DIR_PATH"
+    7za a -mx9 "\$ARCHIVE_NAME" "\$DIR_PATH/*" -w"\$DIR_PATH" || echo "Ошибка при архивировании директории $DIR_PATH"
   else
     echo "Ошибка: \$DIR_PATH не является директорией"
   fi
@@ -2436,8 +2436,8 @@ dirarch "/etc/nginx" "${DIR_REVERSE_PROXY}backup/nginx"
 dirarch "/etc/x-ui" "${DIR_REVERSE_PROXY}backup/x-ui"
 dirarch "/etc/letsencrypt" "${DIR_REVERSE_PROXY}backup/letsencrypt"
 EOF
-  chmod +X ${DIR_REVERSE_PROXY}backup_dir.sh
-  "${DIR_REVERSE_PROXY}backup_dir.sh"
+  chmod +x ${DIR_REVERSE_PROXY}backup_dir.sh
+  bash "${DIR_REVERSE_PROXY}backup_dir.sh"
   add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
 }
 
@@ -2465,7 +2465,7 @@ for directory in \${backup_dir[@]}; do
 done
 EOF
   chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
-  "${DIR_REVERSE_PROXY}rotation_backup.sh"
+  bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
   add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
 }
 
