@@ -2419,7 +2419,7 @@ dirarch() {
   BACKUP_DIR=\$2
   if [[ -d "\$DIR_PATH" ]]; then
     DIRNAME=$(basename "\$DIR_PATH")
-    CURRENT_DATE=$(date +"%y-%m-%d")
+    CURRENT_DATE=\$(date +"%y-%m-%d")
     mkdir -p "\$BACKUP_DIR"
     ARCHIVE_NAME="\$BACKUP_DIR/\${DIRNAME}_\${CURRENT_DATE}.7z"
 
@@ -2433,7 +2433,7 @@ dirarch "/etc/nginx" "${DIR_REVERSE_PROXY}backup/nginx"
 dirarch "/etc/x-ui" "${DIR_REVERSE_PROXY}backup/x-ui"
 dirarch "/etc/letsencrypt" "${DIR_REVERSE_PROXY}backup/letsencrypt"
 EOF
-  chmod +X backup_dir.sh
+  chmod +X ${DIR_REVERSE_PROXY}backup_dir.sh
   add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
 }
 
@@ -2460,7 +2460,7 @@ for directory in \${backup_dir[@]}; do
   done
 done
 EOF
-  chmod +X rotation_backup.sh
+  chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
   add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
 }
 
