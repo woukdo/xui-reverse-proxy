@@ -2415,17 +2415,17 @@ backup_dir() {
 #!/bin/bash
 
 dirarch() {
-  DIR_PATH=$1
-  BACKUP_DIR=$2
-  if [[ -d "$DIR_PATH" ]]; then
-    DIRNAME=$(basename "$DIR_PATH")
+  DIR_PATH=\$1
+  BACKUP_DIR=\$2
+  if [[ -d "\$DIR_PATH" ]]; then
+    DIRNAME=$(basename "\$DIR_PATH")
     CURRENT_DATE=$(date +"%y-%m-%d")
-    mkdir -p "$BACKUP_DIR"
-    ARCHIVE_NAME="$BACKUP_DIR/${DIRNAME}_${CURRENT_DATE}.7z"
-    
-    7za a -mx9 "$ARCHIVE_NAME" "$DIR_PATH" || echo "Ошибка при архивировании директории $DIR_PATH"
+    mkdir -p "\$BACKUP_DIR"
+    ARCHIVE_NAME="\$BACKUP_DIR/\${DIRNAME}_\${CURRENT_DATE}.7z"
+
+    7za a -mx9 "\$ARCHIVE_NAME" "\$DIR_PATH" || echo "Ошибка при архивировании директории $DIR_PATH"
   else
-    echo "Ошибка: $DIR_PATH не является директорией"
+    echo "Ошибка: \$DIR_PATH не является директорией"
   fi
 }
 
