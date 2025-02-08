@@ -2274,7 +2274,6 @@ change_db() {
   settings_httpu
   settings_ws
   settings_steal
-  settings_reality
   settings_xtls
   sniffing_inbounds
   json_rules
@@ -2902,7 +2901,6 @@ main() {
         rotation_and_archiving
         [[ ${args[firewall]} == "true" ]] && enabling_security
         [[ ${args[ssh]} == "true" ]] && ssh_setup
-        [[ ${args[tgbot]} == "true" ]] && install_bot
         data_output
         ;;
       2)
