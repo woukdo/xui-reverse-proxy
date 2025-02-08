@@ -4,7 +4,7 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='dev 1.4.2y'
+VERSION_MANAGER='dev 1.4.2z'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
@@ -2798,6 +2798,7 @@ migration(){
   info " $(text 96) "
   SOURCE_DB="/etc/x-ui/source.db"
 
+  rotation_and_archiving
   select_from_db
   generate_path_cdn
 
