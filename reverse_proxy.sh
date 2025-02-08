@@ -2452,7 +2452,7 @@ rotation_backup() {
 
 days_to_keep=6
 
-arc_file_patterns[0]="*.7z"
+arc_file_patterns=("*.7z")
 
 backup_dir=(
   "${DIR_REVERSE_PROXY}backup/nginx"
@@ -2460,9 +2460,9 @@ backup_dir=(
   "${DIR_REVERSE_PROXY}backup/letsencrypt"
 )
 
-for directory in \${backup_dir[@]}; do
-  for pattern in \${arc_file_patterns[@]}; do
-    find \$directory -type f -name \$pattern -mtime +\$days_to_keep -exec rm -rf {} \;
+for directory in "\${backup_dir[@]}"; do
+  for pattern in "\${arc_file_patterns[@]}"; do
+    find "\$directory" -type f -name "\$pattern" -mtime +\$days_to_keep -exec rm -rf {} \;
   done
 done
 EOF
