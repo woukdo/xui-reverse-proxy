@@ -2437,6 +2437,7 @@ dirarch "/etc/x-ui" "${DIR_REVERSE_PROXY}backup/x-ui"
 dirarch "/etc/letsencrypt" "${DIR_REVERSE_PROXY}backup/letsencrypt"
 EOF
   chmod +X ${DIR_REVERSE_PROXY}backup_dir.sh
+  "${DIR_REVERSE_PROXY}backup_dir.sh"
   add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
 }
 
@@ -2464,6 +2465,7 @@ for directory in \${backup_dir[@]}; do
 done
 EOF
   chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
+  "${DIR_REVERSE_PROXY}rotation_backup.sh"
   add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
 }
 
