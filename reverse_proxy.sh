@@ -2494,8 +2494,8 @@ enabling_security() {
   case "$SYSTEM" in
     Debian|Ubuntu)
       ufw --force reset
-      ufw allow 22/tcp
-      ufw allow 443/tcp
+      ufw limit 22/tcp comment 'SSH'
+      ufw allow 443/tcp comment 'WEB'
       ufw insert 1 deny from "$BLOCK_ZONE_IP"
       ufw --force enable
       ;;
