@@ -2841,8 +2841,8 @@ unzip_backup() {
     exit 1
   fi
 
-  hint " $(text 101) \n\n"
   echo
+  hint " $(text 101) \n"
   mapfile -t backups < <(ls "$BACKUP_DIR"/backup_*.7z 2>/dev/null)
 
   if [[ ${#backups[@]} -eq 0 ]]; then
@@ -2851,7 +2851,7 @@ unzip_backup() {
   fi
 
   for i in "${!backups[@]}"; do
-    echo "$((i + 1))) $(basename "${backups[i]}")"
+    echo " $((i + 1))) $(basename "${backups[i]}")"
   done
 
   echo
