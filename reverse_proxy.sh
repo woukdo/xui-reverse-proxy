@@ -260,6 +260,8 @@ E[102]="Enter the number of the archive to restore:"
 R[102]="Введите номер архива для восстановления:"
 E[103]="Restoration is complete."
 R[103]="Восстановление завершено."
+E[104]="Restoration is complete."
+R[104]="Выбран архив:"
 
 ###################################
 ### Help output
@@ -2844,29 +2846,26 @@ unzip_backup() {
   echo
   hint " $(text 101) "
   mapfile -t backups < <(ls "$BACKUP_DIR"/backup_*.7z 2>/dev/null)
-
   if [[ ${#backups[@]} -eq 0 ]]; then
     echo "Нет доступных резервных копий."
     exit 1
   fi
-
   for i in "${!backups[@]}"; do
     echo " $((i + 1))) $(basename "${backups[i]}")"
   done
 
   echo
   reading " $(text 102) " CHOICE_BACKUP
-
   if [[ ! "$CHOICE_BACKUP" =~ ^[0-9]+$ ]] || (( CHOICE_BACKUP < 1 || CHOICE_BACKUP > ${#backups[@]} )); then
     echo "Ошибка: Неверный ввод."
     exit 1
   fi
 
   SELECTED_ARCHIVE="${backups[CHOICE_BACKUP - 1]}"
-  echo "Выбран архив: $(basename "$SELECTED_ARCHIVE")"
+  info " $(text 104) $(basename "$SELECTED_ARCHIVE")"
+  #echo "Выбран архив: $(basename "$SELECTED_ARCHIVE")"
 
   mkdir -p "$RESTORE_DIR"
-
   7za x "$SELECTED_ARCHIVE" -o"$RESTORE_DIR" -y > /dev/null 2>&1 || { echo "Ошибка при разархивировании!"; exit 1; }
 }
 
