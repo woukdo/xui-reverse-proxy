@@ -2418,26 +2418,25 @@ backup_dir() {
   cat > ${DIR_REVERSE_PROXY}backup_dir.sh <<EOF
 #!/bin/bash
 
-dirarch() {
-  DIR_PATH=\$1
-  BACKUP_DIR=\$2
-  if [[ -d "\$DIR_PATH" ]]; then
-    DIRNAME=\$(basename "\$DIR_PATH")
-    CURRENT_DATE=\$(date +"%y-%m-%d")
-    mkdir -p "\$BACKUP_DIR"
-    ARCHIVE_NAME="\$BACKUP_DIR/\${DIRNAME}_\${CURRENT_DATE}.7z"
+# Путь к директории резервного копирования
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+BACKUP_DIR="\${DIR_REVERSE_PROXY}backup"
+CURRENT_DATE=\$(date +"%y-%m-%d")
+ARCHIVE_NAME="\${BACKUP_DIR}/backup_\${CURRENT_DATE}.7z"
 
-    PARENT_DIR=\$(dirname "\$DIR_PATH")
-    cd "\$PARENT_DIR" || exit
-    7za a -mx9 "\$ARCHIVE_NAME" "\$DIRNAME" || echo "Ошибка при архивировании директории $DIR_PATH"
-  else
-    echo "Ошибка: \$DIR_PATH не является директорией"
-  fi
-}
+# Создаем директорию для резервных копий, если её нет
+mkdir -p "\$BACKUP_DIR"
 
-dirarch "/etc/nginx" "${DIR_REVERSE_PROXY}backup/nginx"
-dirarch "/etc/x-ui" "${DIR_REVERSE_PROXY}backup/x-ui"
-dirarch "/etc/letsencrypt" "${DIR_REVERSE_PROXY}backup/letsencrypt"
+# Архивируем все три директории в один архив
+7za a -mx9 "\$ARCHIVE_NAME" "/etc/nginx" "/etc/x-ui" "/etc/letsencrypt" || echo "Ошибка при создании архива"
+
+# Проверка успешного создания архива
+if [[ -f "\$ARCHIVE_NAME" ]]; then
+  echo "Архив успешно создан: \$ARCHIVE_NAME"
+else
+  echo "Ошибка при создании архива"
+fi
+
 EOF
   chmod +x ${DIR_REVERSE_PROXY}backup_dir.sh
   bash "${DIR_REVERSE_PROXY}backup_dir.sh"
@@ -2451,21 +2450,15 @@ rotation_backup() {
   cat > ${DIR_REVERSE_PROXY}rotation_backup.sh <<EOF
 #!/bin/bash
 
-days_to_keep=6
+# Путь к директории резервного копирования
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+BACKUP_DIR="${DIR_REVERSE_PROXY}backup"
 
-arc_file_patterns=("*.7z")
+# Количество дней хранения архивов
+days_to_keep=7
 
-backup_dir=(
-  "${DIR_REVERSE_PROXY}backup/nginx"
-  "${DIR_REVERSE_PROXY}backup/x-ui"
-  "${DIR_REVERSE_PROXY}backup/letsencrypt"
-)
-
-for directory in "\${backup_dir[@]}"; do
-  for pattern in "\${arc_file_patterns[@]}"; do
-    find "\$directory" -type f -name "\$pattern" -mtime +\$days_to_keep -exec rm -rf {} \;
-  done
-done
+# Удаление архивов старше 7 дней
+find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm -f {} \;
 EOF
   chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
   bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
