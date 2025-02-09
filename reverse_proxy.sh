@@ -52,7 +52,7 @@ text_eval()  { eval echo "\$(eval echo "\${${L}[$*]}")"; }
 ###################################
 ### Languages
 ###################################
-E[0]="Language:\n  1. English (default) \n  2. Русский"
+E[0]="Language:\n\n  1. English (default) \n  2. Русский"
 R[0]="Язык:\n  1. English (по умолчанию) \n  2. Русский"
 E[1]="Choose an action:"
 R[1]="Выбери действие:"
