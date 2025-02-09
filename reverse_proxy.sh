@@ -2455,7 +2455,7 @@ DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
 BACKUP_DIR="${DIR_REVERSE_PROXY}backup"
 
 # Количество дней хранения архивов
-days_to_keep=7
+days_to_keep=6
 
 # Удаление архивов старше 7 дней
 find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm -f {} \;
