@@ -228,28 +228,30 @@ E[86]="Reverse proxy manager $VERSION_MANAGER"
 R[86]="Reverse proxy manager $VERSION_MANAGER"
 E[87]="1. Standard installation"
 R[87]="1. Стандартная установка"
-E[88]="2. Migration to a new version with client retention."
-R[88]="2. Миграция на новую версию с сохранением клиентов."
-E[89]="3. Change the domain name for the proxy."
-R[89]="3. Изменить доменное имя для прокси."
-E[90]="4. Forced reissue of certificates."
-R[90]="4. Принудительный перевыпуск сертификатов."
-E[91]="5. Copy someone else's website to your server."
-R[91]="5. Скопировать чужой сайт на ваш сервер."
-E[92]="6. Disable IPv6."
-R[92]="6. Отключение IPv6."
-E[93]="7. Enable IPv6."
-R[93]="7. Включение IPv6."
-E[94]="8. Find out the size of the directory."
-R[94]="8. Узнать размер директории."
-E[95]="9. Integrate custom JSON subscription."
-R[95]="9. Интеграция кастомной JSON подписки."
-E[96]="Client migration initiation (experimental feature)."
-R[96]="Начало миграции клиентов (экспериментальная функция)."
-E[97]="Client migration is complete."
-R[97]="Миграция клиентов завершена."
-E[98]="Settings custom JSON subscription."
-R[98]="Настройки пользовательской JSON-подписки."
+E[88]="2. Restore from a rescue copy."
+R[88]="2. Восстановление с резевной копии."
+E[89]="3. Migration to a new version with client retention."
+R[89]="3. Миграция на новую версию с сохранением клиентов."
+E[90]="4. Change the domain name for the proxy."
+R[90]="4. Изменить доменное имя для прокси."
+E[91]="5. Forced reissue of certificates."
+R[91]="5. Принудительный перевыпуск сертификатов."
+E[92]="6. Integrate custom JSON subscription."
+R[92]="6. Интеграция кастомной JSON подписки."
+E[93]="7. Copy someone else's website to your server."
+R[93]="7. Скопировать чужой сайт на ваш сервер."
+E[94]="8. Disable IPv6."
+R[94]="8. Отключение IPv6."
+E[95]="9. Enable IPv6."
+R[95]="9. Включение IPv6."
+E[96]="10. Find out the size of the directory."
+R[96]="10. Узнать размер директории."
+E[97]="Client migration initiation (experimental feature)."
+R[97]="Начало миграции клиентов (экспериментальная функция)."
+E[98]="Client migration is complete."
+R[98]="Миграция клиентов завершена."
+E[99]="Settings custom JSON subscription."
+R[99]="Настройки пользовательской JSON-подписки."
 
 ###################################
 ### Help output
@@ -2384,7 +2386,7 @@ EOF
 ### Settings custom json
 ###################################
 settings_custom_json(){
-  info " $(text 98) "
+  info " $(text 99) "
   mkdir -p /etc/nginx/locations/
 
   while [[ -z "$DOMAIN" ]]; do
@@ -2529,15 +2531,6 @@ ssh_setup() {
     tilda "$(text 10)"
   fi
 }
-
-###################################
-### Installing bot
-###################################
-#install_bot() {
-#  info " $(text 57) "
-#  bash <(curl -Ls https://github.com/cortez24rus/xui-reverse-proxy/raw/refs/heads/main/reverse_proxy_bot.sh) "$BOT_TOKEN" "$ADMIN_ID" "$DOMAIN"
-#  tilda "$(text 10)"
-#}
 
 ###################################
 ### Information output
@@ -2793,7 +2786,7 @@ EOF
 ### Migration to a new version
 ###################################
 migration(){
-  info " $(text 96) "
+  info " $(text 97) "
   SOURCE_DB="/etc/x-ui/source.db"
 
   rotation_and_archiving
@@ -2826,38 +2819,20 @@ migration(){
   inbounds_settings_migration_db
   x-ui start
 
-#  output=$(/usr/local/x-ui/bin/xray*)
-#  echo "$output"
-#  if echo "$output" | grep -q "Failed to start: main: failed to load config files"; then
-#    x-ui stop
-#    mv -f "$SOURCE_DB" "$DEST_DB"
-#    x-ui restart
-#  fi
-#
-#  if ! systemctl is-active --quiet nginx.service; then
-#    mv -f /etc/source.nginx /etc/nginx
-#    systemctl daemon-reload
-#    systemctl restart nginx
-#  fi
-
-  info " $(text 97) "
+  info " $(text 98) "
 }
 
 ###################################
 ### Unzips the selected backup
 ###################################
 unzip_backup() {
-  # Путь к директории резервного копирования
-  BACKUP_DIR="/usr/local/reverse_proxy/backup"
-  RESTORE_DIR="/tmp/restore"  # Директория, куда будут извлекаться файлы (можно изменить)
+  BACKUP_DIR="${DIR_REVERSE_PROXY}backup"
 
-  # Проверяем, существует ли директория
   if [[ ! -d "$BACKUP_DIR" ]]; then
     echo "Ошибка: Директория $BACKUP_DIR не существует."
     exit 1
   fi
 
-  # Выводим список архивов
   echo
   echo "Список доступных резервных копий:"
   echo
@@ -2872,7 +2847,6 @@ unzip_backup() {
     echo "$((i + 1))) $(basename "${backups[i]}")"
   done
 
-  # Пользователь выбирает архив
   echo
   read -rp "Введите номер архива для восстановления: " choice
 
@@ -2884,7 +2858,6 @@ unzip_backup() {
   SELECTED_ARCHIVE="${backups[choice - 1]}"
   echo "Выбран архив: $(basename "$SELECTED_ARCHIVE")"
 
-  # Создаем папку для разархивирования
   mkdir -p "$RESTORE_DIR"
 
   7za x "$SELECTED_ARCHIVE" -o"$RESTORE_DIR" -y > /dev/null 2>&1 || { echo "Ошибка при разархивировании!"; exit 1; }
@@ -2898,6 +2871,7 @@ unzip_backup() {
 ###################################
 backup_migration() {
   x-ui stop
+  
   rm -rf /etc/x-ui/
   rm -rf /etc/nginx/
 #  rm -rf /etc/letsencrypt/
@@ -2914,6 +2888,7 @@ backup_migration() {
 ### Restores the backup by first unzipping and then migrating
 ###################################
 restore_backup() {
+  RESTORE_DIR="/tmp/restore"
   unzip_backup
   backup_migration
 }
@@ -2947,15 +2922,18 @@ main() {
     tilda "|-----------------------------------------------------------------------------|"
     info " $(text 86) "                      # MENU
     tilda "|-----------------------------------------------------------------------------|"
-    info " $(text 87) "                      # Install
-    info " $(text 88) "                      # Migration
-    info " $(text 89) "                      # Change domain
-    info " $(text 90) "                      # Renew cert
-    info " $(text 91) "                      # Steal web site
-    info " $(text 92) "                      # Disable IPv6
-    info " $(text 93) "                      # Enable IPv6
-    info " $(text 94) "                      # Directory size
-    info " $(text 95) "                      # Custom json
+    info " $(text 87) "                      # 1. Install
+    echo
+    info " $(text 88) "                      # 2. Restore backup
+    info " $(text 89) "                      # 3. Migration
+    info " $(text 90) "                      # 4. Change domain
+    info " $(text 91) "                      # 5. Renew cert
+    echo
+    info " $(text 92) "                      # 6. Custom json
+    info " $(text 93) "                      # 7. Steal web site
+    info " $(text 94) "                      # 8. Disable IPv6
+    info " $(text 95) "                      # 9. Enable IPv6
+    info " $(text 96) "                      # 10. Directory size
     echo
     info " $(text 84) "                      # Exit
     tilda "|-----------------------------------------------------------------------------|"
@@ -2990,31 +2968,31 @@ main() {
         data_output
         ;;
       2)
-        migration
+        restore_backup
         ;;
       3)
-        change_domain
+        migration
         ;;
       4)
-        renew_cert
+        change_domain
         ;;
       5)
-        download_website
+        renew_cert
         ;;
       6)
-        disable_ipv6
-        ;;
-      7)
-        enable_ipv6
-        ;;
-      8)
-        directory_size
-        ;;
-      9)
         settings_custom_json
         ;;
+      7)
+        download_website
+        ;;
+      8)
+        enable_ipv6
+        ;;
+      9)
+        disable_ipv6
+        ;;
       10)
-        restore_backup
+        directory_size
         ;;
       0)
         clear
