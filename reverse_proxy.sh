@@ -229,7 +229,7 @@ R[86]="Reverse proxy manager $VERSION_MANAGER"
 E[87]="1. Standard installation"
 R[87]="1. Стандартная установка"
 E[88]="2. Restore from a rescue copy."
-R[88]="2. Восстановление с резевной копии."
+R[88]="2. Восстановление из резевной копии."
 E[89]="3. Migration to a new version with client retention."
 R[89]="3. Миграция на новую версию с сохранением клиентов."
 E[90]="4. Change the domain name for the proxy."
@@ -252,6 +252,14 @@ E[98]="Client migration is complete."
 R[98]="Миграция клиентов завершена."
 E[99]="Settings custom JSON subscription."
 R[99]="Настройки пользовательской JSON-подписки."
+E[100]="Restore from backup."
+R[100]="Восстановление из резервной копии."
+E[101]="Backups:"
+R[101]="Резервные копии:"
+E[102]="Enter the number of the archive to restore:"
+R[102]="Введите номер архива для восстановления:"
+E[103]="Restoration is complete."
+R[103]="Восстановление завершено."
 
 ###################################
 ### Help output
@@ -2833,8 +2841,7 @@ unzip_backup() {
     exit 1
   fi
 
-  echo
-  echo "Список доступных резервных копий:"
+  hint " $(text 101) \n\n"
   echo
   mapfile -t backups < <(ls "$BACKUP_DIR"/backup_*.7z 2>/dev/null)
 
@@ -2848,22 +2855,20 @@ unzip_backup() {
   done
 
   echo
-  read -rp "Введите номер архива для восстановления: " choice
+  reading " $(text 102) " CHOICE_BACKUP
+  read -rp "Введите номер архива для восстановления: " CHOICE_BACKUP
 
-  if [[ ! "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#backups[@]} )); then
+  if [[ ! "$CHOICE_BACKUP" =~ ^[0-9]+$ ]] || (( CHOICE_BACKUP < 1 || CHOICE_BACKUP > ${#backups[@]} )); then
     echo "Ошибка: Неверный ввод."
     exit 1
   fi
 
-  SELECTED_ARCHIVE="${backups[choice - 1]}"
+  SELECTED_ARCHIVE="${backups[CHOICE_BACKUP - 1]}"
   echo "Выбран архив: $(basename "$SELECTED_ARCHIVE")"
 
   mkdir -p "$RESTORE_DIR"
 
   7za x "$SELECTED_ARCHIVE" -o"$RESTORE_DIR" -y > /dev/null 2>&1 || { echo "Ошибка при разархивировании!"; exit 1; }
-  echo
-  echo "Архив успешно разархивирован в $RESTORE_DIR"
-  echo
 }
 
 ###################################
@@ -2888,9 +2893,11 @@ backup_migration() {
 ### Restores the backup by first unzipping and then migrating
 ###################################
 restore_backup() {
+  info " $(text 100) "
   RESTORE_DIR="/tmp/restore"
   unzip_backup
   backup_migration
+  info " $(text 103) "
 }
 
 ###################################
