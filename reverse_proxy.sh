@@ -52,7 +52,7 @@ text_eval()  { eval echo "\$(eval echo "\${${L}[$*]}")"; }
 ###################################
 ### Languages
 ###################################
-E[0]="Language:\n\n  1. English (default) \n  2. Русский"
+E[0]="Language:\n  1. English (default) \n  2. Русский"
 R[0]="Язык:\n  1. English (по умолчанию) \n  2. Русский"
 E[1]="Choose an action:"
 R[1]="Выбери действие:"
@@ -2842,7 +2842,7 @@ unzip_backup() {
   fi
 
   echo
-  hint " $(text 101) \n"
+  hint " $(text 101) "
   mapfile -t backups < <(ls "$BACKUP_DIR"/backup_*.7z 2>/dev/null)
 
   if [[ ${#backups[@]} -eq 0 ]]; then
