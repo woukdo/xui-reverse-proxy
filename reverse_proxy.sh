@@ -2856,7 +2856,6 @@ unzip_backup() {
 
   echo
   reading " $(text 102) " CHOICE_BACKUP
-  read -rp "Введите номер архива для восстановления: " CHOICE_BACKUP
 
   if [[ ! "$CHOICE_BACKUP" =~ ^[0-9]+$ ]] || (( CHOICE_BACKUP < 1 || CHOICE_BACKUP > ${#backups[@]} )); then
     echo "Ошибка: Неверный ввод."
