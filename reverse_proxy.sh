@@ -2874,18 +2874,20 @@ unzip_backup() {
 ### Migrates backup files to the system directories
 ###################################
 backup_migration() {
+  echo
   x-ui stop
   
   rm -rf /etc/x-ui/
   rm -rf /etc/nginx/
-#  rm -rf /etc/letsencrypt/
+  rm -rf /etc/letsencrypt/
 
   mv /tmp/restore/x-ui/ /etc/
   mv /tmp/restore/nginx/ /etc/
-#  mv /tmp/restore/letsencrypt/ /etc/
+  mv /tmp/restore/letsencrypt/ /etc/
 
   systemctl restart nginx
   x-ui restart
+  echo
 }
 
 ###################################
