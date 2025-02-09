@@ -2844,6 +2844,81 @@ migration(){
 }
 
 ###################################
+### Unzips the selected backup
+###################################
+unzip_backup() {
+  # Путь к директории резервного копирования
+  BACKUP_DIR="/usr/local/reverse_proxy/backup"
+  RESTORE_DIR="/tmp/restore"  # Директория, куда будут извлекаться файлы (можно изменить)
+
+  # Проверяем, существует ли директория
+  if [[ ! -d "$BACKUP_DIR" ]]; then
+    echo "Ошибка: Директория $BACKUP_DIR не существует."
+    exit 1
+  fi
+
+  # Выводим список архивов
+  echo
+  echo "Список доступных резервных копий:"
+  echo
+  mapfile -t backups < <(ls "$BACKUP_DIR"/backup_*.7z 2>/dev/null)
+
+  if [[ ${#backups[@]} -eq 0 ]]; then
+    echo "Нет доступных резервных копий."
+    exit 1
+  fi
+
+  for i in "${!backups[@]}"; do
+    echo "$((i + 1))) $(basename "${backups[i]}")"
+  done
+
+  # Пользователь выбирает архив
+  echo
+  read -rp "Введите номер архива для восстановления: " choice
+
+  if [[ ! "$choice" =~ ^[0-9]+$ ]] || (( choice < 1 || choice > ${#backups[@]} )); then
+    echo "Ошибка: Неверный ввод."
+    exit 1
+  fi
+
+  SELECTED_ARCHIVE="${backups[choice - 1]}"
+  echo "Выбран архив: $(basename "$SELECTED_ARCHIVE")"
+
+  # Создаем папку для разархивирования
+  mkdir -p "$RESTORE_DIR"
+
+  7za x "$SELECTED_ARCHIVE" -o"$RESTORE_DIR" -y > /dev/null 2>&1 || { echo "Ошибка при разархивировании!"; exit 1; }
+  echo
+  echo "Архив успешно разархивирован в $RESTORE_DIR"
+  echo
+}
+
+###################################
+### Migrates backup files to the system directories
+###################################
+backup_migration() {
+  x-ui stop
+  rm -rf /etc/x-ui/
+  rm -rf /etc/nginx/
+#  rm -rf /etc/letsencrypt/
+
+  mv /tmp/restore/x-ui/ /etc/
+  mv /tmp/restore/nginx/ /etc/
+#  mv /tmp/restore/letsencrypt/ /etc/
+
+  systemctl restart nginx
+  x-ui restart
+}
+
+###################################
+### Restores the backup by first unzipping and then migrating
+###################################
+restore_backup() {
+  unzip_backup
+  backup_migration
+}
+
+###################################
 ### Removing all escape sequences
 ###################################
 log_clear() {
@@ -2937,6 +3012,9 @@ main() {
         ;;
       9)
         settings_custom_json
+        ;;
+      10)
+        restore_backup
         ;;
       0)
         clear
