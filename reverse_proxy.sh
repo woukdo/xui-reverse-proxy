@@ -262,6 +262,10 @@ E[103]="Restoration is complete."
 R[103]="Восстановление завершено."
 E[104]="Restoration is complete."
 R[104]="Выбран архив:"
+E[105]="11. Traffic statistics."
+R[105]="11. Статистика трафика."
+E[106]="Traffic statistics:\n  1. By years \n  2. By months \n  3. By days \n  4. By hours"
+R[106]="Статистика трафика:\n  1. По годам \n  2. По месяцам \n  3. По дням \n  4. По часам"
 
 ###################################
 ### Help output
@@ -522,11 +526,11 @@ select_language() {
 
   # Устанавливаем язык в зависимости от выбора
   case "$LANGUAGE" in
-  1) L=E ;;   # Если выбран английский
-  2) L=R ;;   # Если выбран русский
-#  3) L=C ;;   # Если выбран китайский
-#  4) L=F ;;   # Если выбран персидский
-  *) L=E ;;   # По умолчанию — английский
+    1) L=E ;;   # Если выбран английский
+    2) L=R ;;   # Если выбран русский
+#    3) L=C ;;   # Если выбран китайский
+#    4) L=F ;;   # Если выбран персидский
+    *) L=E ;;   # По умолчанию — английский
   esac
 }
 
@@ -2903,38 +2907,30 @@ restore_backup() {
 ### Displays traffic statistics
 ###################################
 traffic_stats() {
-  ${PACKAGE_UPDATE[int]}
-  ${PACKAGE_INSTALL[int]} vnstat
+  ${PACKAGE_UPDATE[int]} >/dev/null 2>&1
+  ${PACKAGE_INSTALL[int]} vnstat >/dev/null 2>&1
 
-  echo "1) Статистика по годам"
-  echo "2) Статистика по месяцам"
-  echo "3) Статистика по дням"
-  echo "3) Статистика по часам"
-  echo
-  read -rp "Выберите опцию: " CHOICE_STATS
+  hint " $(text 106) \n"  # Показывает информацию о доступных языках
+  reading " $(text 1) " CHOICE_STATS  # Запрашивает выбор языка
 
   case $CHOICE_STATS in
     1)
-      echo "Статистика по годам:"
       vnstat -m  # Показать статистику по месяцам
       ;;
     2)
-      echo "Статистика по месяцам:"
       vnstat -m  # Показать статистику по месяцам
       ;;
     3)
-      echo "Статистика по дням:"
       vnstat -d  # Показать статистику по дням
       ;;
     4)
-      echo "Статистика по часам:"
       vnstat -d  # Показать статистику по дням
       ;;
     *)
-      echo "Неверный выбор."
-      traffic_stats  # Перезапуск выбора
+      vnstat -m
       ;;
   esac
+  echo
 }
 
 ###################################
@@ -2978,7 +2974,7 @@ main() {
     info " $(text 94) "                      # 8. Disable IPv6
     info " $(text 95) "                      # 9. Enable IPv6
     info " $(text 96) "                      # 10. Directory size
-    info " $(text 97) "                      # 11. Traffic statistics
+    info " $(text 105) "                     # 11. Traffic statistics
     echo
     info " $(text 84) "                      # Exit
     tilda "|-----------------------------------------------------------------------------|"
