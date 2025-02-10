@@ -3009,6 +3009,9 @@ main() {
         data_output
         ;;
       2)
+        if [ ! -d "/usr/local/reverse_proxy/backup" ]; then
+          rotation_and_archiving
+        fi
         restore_backup
         ;;
       3)
