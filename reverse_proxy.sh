@@ -2915,16 +2915,16 @@ traffic_stats() {
 
   case $CHOICE_STATS in
     1)
-      vnstat -m  # Показать статистику по месяцам
+      vnstat -m
       ;;
     2)
-      vnstat -m  # Показать статистику по месяцам
+      vnstat -m
       ;;
     3)
-      vnstat -d  # Показать статистику по дням
+      vnstat -d
       ;;
     4)
-      vnstat -d  # Показать статистику по дням
+      vnstat -h
       ;;
     *)
       vnstat -m
