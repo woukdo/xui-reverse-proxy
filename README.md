@@ -50,7 +50,7 @@ SERVER 2
 ### Includes:
   
 1. Xray server configuration with X-UI:
-   - Subscription and JSON subscription to automatically update configurations.
+   - Support for automatic configuration updates through subscription and JSON subscription with the ability to convert to formats for popular applications.
    - You must enable MUX (multiplexing TCP connections) in each client application
      - VLESS-gRPC-TLS
      - VLESS-XHTTP-TLS
@@ -74,6 +74,9 @@ SERVER 2
 5. Optional extras:
    - Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
    - Setting up Shell In A Box for secure, web-based SSH access to the server.
+   - Updated SSH welcome message (motd) with useful system information, service status, and available updates.
+   - VNStat integration for traffic monitoring, with the ability to get statistics by time.
+
 
 -----
 
