@@ -79,7 +79,7 @@ SERVER 2
 
 -----
 
-## Reverse Proxy Manager
+## Reverse Proxy Manager:
 
 1. Standard Installation
 2. Restore from Backup
@@ -92,7 +92,6 @@ SERVER 2
 9. Enable IPv6
 10. Check Directory Size
 11. Traffic Statistics
-
 0. Exit Script
 
 -----
