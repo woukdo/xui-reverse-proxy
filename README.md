@@ -3,7 +3,7 @@
 
 -----
 
-## Server using NGINX reverse proxy
+### Server using NGINX reverse proxy
 This script is designed for quick and easy setup of a reverse proxy server using NGINX. In this setup, all incoming requests are processed by NGINX, and the server functions as a reverse proxy server only if the request contains the correct path (URI). This enhances security and improves access control management.
 
 > [!IMPORTANT]
@@ -22,7 +22,7 @@ This script is designed for quick and easy setup of a reverse proxy server using
 
 -----
 
-## Setting up cloudflare
+### Setting up cloudflare
 1. Upgrade the system and reboot the server.
 2. Configure Cloudflare:
    - Bind your domain to Cloudflare.
@@ -47,7 +47,7 @@ SERVER 2
 
 -----
 
-## Includes:
+### Includes:
   
 1. Xray server configuration with X-UI:
    - Support for automatic configuration updates through subscription and JSON subscription with the ability to convert to formats for popular applications.
@@ -78,6 +78,8 @@ SERVER 2
    - VNStat integration for traffic monitoring, with the ability to get statistics by time.
 
 -----
+
+### REVERSE_PROXY_MANAGER:
 
 <p align="center"><a href="#"><img src="./media/reverse_proxy_manager.png" alt="Image"></a></p>
 
