@@ -4,7 +4,6 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-
 VERSION_MANAGER='1.4.3'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
@@ -2262,6 +2261,7 @@ UPDATE settings SET value = '${SUB_JSON_URI}' WHERE LOWER(key) LIKE '%subjsonuri
 UPDATE settings SET value = '${XRAY_TEMPLATE_CONFIG}' WHERE LOWER(key) LIKE '%xraytemplateconfig%';
 EOF
 }
+
 ###################################
 ### Setting bot
 ###################################
