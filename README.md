@@ -49,7 +49,7 @@ SERVER 2
 
 ### Includes:
   
-1. Xray server configuration with 3X-UI:
+1. Xray server configuration with X-UI:
    - Subscription and JSON subscription to automatically update configurations.
    - You must enable MUX (multiplexing TCP connections) in each client application
      - VLESS-gRPC-TLS
@@ -81,10 +81,10 @@ SERVER 2
 ```
 Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
          [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
-         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>] 
-         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]
-         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]
-         [-h|--help]
+         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]
+         [-p|--panel <true|false>] [--custom <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>]
+         [-t|--tgbot <true|false>] [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>]
+         [--update] [-h|--help]"
 
   -u, --utils <true|false>       Additional utilities                           (default: true)
   -d, --dns <true|false>         DNS encryption                                 (default: true)
@@ -92,12 +92,13 @@ Usage: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--add
   -r, --autoupd <true|false>     Automatic updates                              (default: true)
   -b, --bbr <true|false>         BBR (TCP Congestion Control)                   (default: true)
   -i, --ipv6 <true|false>        Disable IPv6 support                           (default: true)
-  -w, --warp <true|false>        Warp                                           (default: true)
+  -w, --warp <true|false>        Warp                                           (default: false)
   -c, --cert <true|false>        Certificate issuance for domain                (default: true)
   -m, --mon <true|false>         Monitoring services (node_exporter)            (default: false)
   -l, --shell <true|false>       Shell In A Box installation                    (default: false)
   -n, --nginx <true|false>       NGINX installation                             (default: true)
   -p, --panel <true|false>       Panel installation for user management         (default: true)
+      --custom <true|false>      Custom JSON subscription                       (default: true)
   -f, --firewall <true|false>    Firewall configuration                         (default: true)
   -s, --ssh <true|false>         SSH access                                     (default: true)
   -t, --tgbot <true|false>       Telegram bot integration                       (default: false)

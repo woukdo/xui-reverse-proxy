@@ -9,8 +9,8 @@ VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
-SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/reverse_proxy.sh"
-DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/dev/database/x-ui.db"
+SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh"
+DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/database/x-ui.db"
 
 ###################################
 ### Initialization and Declarations
@@ -1011,8 +1011,8 @@ installation_of_utilities() {
   info " $(text 36) "
   case "$SYSTEM" in
     Debian|Ubuntu)
-      DEPS_PACK_CHECK=("jq" "ufw" "zip" "wget" "gpg" "nano" "cron" "sqlite3" "certbot" "openssl" "netstat" "htpasswd" "update-ca-certificates" "add-apt-repository" "unattended-upgrades" "certbot-dns-cloudflare")
-      DEPS_PACK_INSTALL=("jq" "ufw" "zip" "wget" "gnupg2" "nano" "cron" "sqlite3" "certbot" "openssl" "net-tools" "apache2-utils" "ca-certificates" "software-properties-common" "unattended-upgrades" "python3-certbot-dns-cloudflare")
+      DEPS_PACK_CHECK=("jq" "ufw" "zip" "wget" "gpg" "nano" "cron" "sqlite3" "certbot" "vnstat" "openssl" "netstat" "htpasswd" "update-ca-certificates" "add-apt-repository" "unattended-upgrades" "certbot-dns-cloudflare")
+      DEPS_PACK_INSTALL=("jq" "ufw" "zip" "wget" "gnupg2" "nano" "cron" "sqlite3" "certbot" "vnstat" "openssl" "net-tools" "apache2-utils" "ca-certificates" "software-properties-common" "unattended-upgrades" "python3-certbot-dns-cloudflare")
 
       for g in "${!DEPS_PACK_CHECK[@]}"; do
         [ ! -x "$(type -p ${DEPS_PACK_CHECK[g]})" ] && [[ ! "${DEPS_PACK[@]}" =~ "${DEPS_PACK_INSTALL[g]}" ]] && DEPS_PACK+=(${DEPS_PACK_INSTALL[g]})
@@ -2851,7 +2851,7 @@ unzip_backup() {
     exit 1
   fi
   for i in "${!backups[@]}"; do
-    echo " $((i + 1))) $(basename "${backups[i]}")"
+    hint " $((i + 1))) $(basename "${backups[i]}")"
   done
 
   echo
@@ -2863,7 +2863,6 @@ unzip_backup() {
 
   SELECTED_ARCHIVE="${backups[CHOICE_BACKUP - 1]}"
   info " $(text 104) $(basename "$SELECTED_ARCHIVE")"
-  #echo "Выбран архив: $(basename "$SELECTED_ARCHIVE")"
 
   mkdir -p "$RESTORE_DIR"
   7za x "$SELECTED_ARCHIVE" -o"$RESTORE_DIR" -y > /dev/null 2>&1 || { echo "Ошибка при разархивировании!"; exit 1; }
@@ -2898,6 +2897,44 @@ restore_backup() {
   unzip_backup
   backup_migration
   info " $(text 103) "
+}
+
+###################################
+### Displays traffic statistics
+###################################
+traffic_stats() {
+  ${PACKAGE_UPDATE[int]}
+  ${PACKAGE_INSTALL[int]} vnstat
+
+  echo "1) Статистика по годам"
+  echo "2) Статистика по месяцам"
+  echo "3) Статистика по дням"
+  echo "3) Статистика по часам"
+  echo
+  read -rp "Выберите опцию: " CHOICE_STATS
+
+  case $CHOICE_STATS in
+    1)
+      echo "Статистика по годам:"
+      vnstat -m  # Показать статистику по месяцам
+      ;;
+    2)
+      echo "Статистика по месяцам:"
+      vnstat -m  # Показать статистику по месяцам
+      ;;
+    3)
+      echo "Статистика по дням:"
+      vnstat -d  # Показать статистику по дням
+      ;;
+    4)
+      echo "Статистика по часам:"
+      vnstat -d  # Показать статистику по дням
+      ;;
+    *)
+      echo "Неверный выбор."
+      traffic_stats  # Перезапуск выбора
+      ;;
+  esac
 }
 
 ###################################
@@ -2941,6 +2978,7 @@ main() {
     info " $(text 94) "                      # 8. Disable IPv6
     info " $(text 95) "                      # 9. Enable IPv6
     info " $(text 96) "                      # 10. Directory size
+    info " $(text 97) "                      # 11. Traffic statistics
     echo
     info " $(text 84) "                      # Exit
     tilda "|-----------------------------------------------------------------------------|"
@@ -3000,6 +3038,9 @@ main() {
         ;;
       10)
         directory_size
+        ;;
+      11)
+        traffic_stats
         ;;
       0)
         clear
