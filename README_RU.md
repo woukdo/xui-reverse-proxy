@@ -1,5 +1,5 @@
 # REVERSE_PROXY ([English](/README.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" />
-<p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image"></a></p>
+<p align="center"><a href="#"><img src="./media/xui.png" alt="Image"></a></p>
 
 -----
 
@@ -44,6 +44,10 @@
    - Перейдите в раздел SSL/TLS > Overview и выберите Full для параметра Configure.
    - Установите Minimum TLS Version на TLS 1.3.
    - Включите TLS 1.3 (true) в разделе Edge Certificates.
+
+-----
+
+<p align="center"><a href="#"><img src="./media/reverse_proxy_manager_RU.png" alt="Image"></a></p>
 
 -----
 

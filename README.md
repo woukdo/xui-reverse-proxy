@@ -1,5 +1,5 @@
 # REVERSE_PROXY ([Russian](/README_RU.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" /> 
-<p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image" ></a></p>
+<p align="center"><a href="#"><img src="./media/xui.png" alt="Image" ></a></p>
 
 -----
 
@@ -79,20 +79,7 @@ SERVER 2
 
 -----
 
-## Reverse Proxy Manager:
-
-1. Standard Installation
-2. Restore from Backup
-3. Migrate to New Version While Retaining Clients
-4. Change Domain Name for Proxy
-5. Force Reissue of SSL Certificates
-6. Custom JSON Subscription Integration
-7. Copy a Foreign Website to Your Server
-8. Disable IPv6
-9. Enable IPv6
-10. Check Directory Size
-11. Traffic Statistics
-0. Exit Script
+<p align="center"><a href="#"><img src="./media/reverse_proxy_manager.png" alt="Image"></a></p>
 
 -----
 
