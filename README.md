@@ -1,9 +1,9 @@
 # REVERSE_PROXY ([Russian](/README_RU.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" /> 
-<p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image" ></a></p>
+<p align="center"><a href="#"><img src="./media/xui.png" alt="Image" ></a></p>
 
 -----
 
-### Proxy using VLESS-TCP-XTLS-Vision and VLESS-TCP-REALITY (Steal oneself) behind reverse-proxy NGINX
+### Server using NGINX reverse proxy
 This script is designed for quick and easy setup of a reverse proxy server using NGINX. In this setup, all incoming requests are processed by NGINX, and the server functions as a reverse proxy server only if the request contains the correct path (URI). This enhances security and improves access control management.
 
 > [!IMPORTANT]
@@ -28,10 +28,17 @@ This script is designed for quick and easy setup of a reverse proxy server using
    - Bind your domain to Cloudflare.
    - Add the following DNS records:
 
+SERVER 1
 | Type  | Name             | Content          | Proxy status  |
 | ----- | ---------------- | ---------------- | ------------- |
-| A     | your_domain_name | your_server_ip   | DNS only      |
-| CNAME | www              | your_domain_name | DNS only      |
+| A     | example.com      | your_server_ip   | DNS only      |
+| CNAME | www              | example.com      | DNS only      |
+
+SERVER 2
+| Type  | Name             | Content          | Proxy status  |
+| ----- | ---------------- | ---------------- | ------------- |
+| A     | nl.example.com   | your_server_ip   | DNS only      |
+| CNAME | www.nl           | nl.example.com   | DNS only      |
    
 3. SSL/TLS settings in Cloudflare:
    - Go to SSL/TLS > Overview and select Full for the Configure option.
@@ -42,20 +49,39 @@ This script is designed for quick and easy setup of a reverse proxy server using
 
 ### Includes:
   
-1. Xray server configuration with 3X-UI:
-   - VLESS-TCP-XTLS-Vision и VLESS-TCP-REALITY (Steal oneself).
-   - Connection of subscription and JSON subscription for automatic configuration updates.
+1. Xray server configuration with X-UI:
+   - Support for automatic configuration updates through subscription and JSON subscription with the ability to convert to formats for popular applications.
+   - You must enable MUX (multiplexing TCP connections) in each client application
+     - VLESS-gRPC-TLS
+     - VLESS-XHTTP-TLS
+     - VLESS-HTTPUpgrade-TLS
+     - VLESS-Websocket-TLS
+   - The user “flow”: “xtls-rprx-vision” must be enabled
+     - VLESS-TCP-REALITY
+     - VLESS-TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
+     - VLESS-TCP-TLS
 2. Configuring NGINX reverse proxy on port 443.
-3. providing security:
+3. Providing security:
    - Automatic system updates via unattended-upgrades.
-4. Configuring Cloudflare SSL certificates with automatic updates to secure connections.
-5. Configuring WARP to protect traffic.
-6. Enabling BBR - improving the performance of TCP connections.
-7. Configuring UFW (Uncomplicated Firewall) for access control.
-8. Configuring SSH, to provide the minimum required security.
-9. Disabling IPv6 to prevent possible vulnerabilities.
-10. Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
-11. Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
+   - Configuring Cloudflare SSL certificates with automatic updates to secure connections.
+   - Configuring WARP to protect traffic.
+   - Configuring UFW (Uncomplicated Firewall) for access control.
+   - Configuring SSH, to provide the minimum required security.
+   - Disabling IPv6 to prevent possible vulnerabilities.
+   - Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
+   - Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
+4. Enabling BBR - improving the performance of TCP connections.
+5. Optional extras:
+   - Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
+   - Setting up Shell In A Box for secure, web-based SSH access to the server.
+   - Updated SSH welcome message (motd) with useful system information, service status, and available updates.
+   - VNStat integration for traffic monitoring, with the ability to get statistics by time.
+
+-----
+
+### REVERSE_PROXY_MANAGER:
+
+<p align="center"><a href="#"><img src="./media/reverse_proxy_manager.png" alt="Image"></a></p>
 
 -----
 
@@ -63,10 +89,10 @@ This script is designed for quick and easy setup of a reverse proxy server using
 ```
 Usage: reverse-proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
          [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
-         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>] 
-         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]
-         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]
-         [-h|--help]
+         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]
+         [-p|--panel <true|false>] [--custom <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>]
+         [-t|--tgbot <true|false>] [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>]
+         [--update] [-h|--help]"
 
   -u, --utils <true|false>       Additional utilities                           (default: true)
   -d, --dns <true|false>         DNS encryption                                 (default: true)
@@ -74,12 +100,13 @@ Usage: reverse-proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--add
   -r, --autoupd <true|false>     Automatic updates                              (default: true)
   -b, --bbr <true|false>         BBR (TCP Congestion Control)                   (default: true)
   -i, --ipv6 <true|false>        Disable IPv6 support                           (default: true)
-  -w, --warp <true|false>        Warp                                           (default: true)
+  -w, --warp <true|false>        Warp                                           (default: false)
   -c, --cert <true|false>        Certificate issuance for domain                (default: true)
   -m, --mon <true|false>         Monitoring services (node_exporter)            (default: false)
   -l, --shell <true|false>       Shell In A Box installation                    (default: false)
   -n, --nginx <true|false>       NGINX installation                             (default: true)
   -p, --panel <true|false>       Panel installation for user management         (default: true)
+      --custom <true|false>      Custom JSON subscription                       (default: true)
   -f, --firewall <true|false>    Firewall configuration                         (default: true)
   -s, --ssh <true|false>         SSH access                                     (default: true)
   -t, --tgbot <true|false>       Telegram bot integration                       (default: false)

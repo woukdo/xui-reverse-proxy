@@ -1,9 +1,9 @@
 # REVERSE_PROXY ([English](/README.md)) <img src="https://img.shields.io/github/stars/cortez24rus/xui-reverse-proxy?style=social" />
-<p align="center"><a href="#"><img src="./media/3X-UI.png" alt="Image"></a></p>
+<p align="center"><a href="#"><img src="./media/xui.png" alt="Image"></a></p>
 
 -----
 
-### Прокси с использованием  VLESS-TCP-XTLS-Vision и VLESS-TCP-REALITY (Steal oneself) за реверс-прокси NGINX
+### Сервер с использованием реверс-прокси NGINX
 Этот скрипт предназначен для быстрой и простой настройки обратного прокси-сервера с использованием NGINX. В данном варианте все входящие запросы обрабатываются NGINX, а сервер работает как обратный прокси-сервер только при условии, что запрос содержит правильный путь (URI). Это повышает безопасность и улучшает управление доступом.
 
 > [!IMPORTANT]
@@ -28,10 +28,17 @@
    - Привяжите ваш домен к Cloudflare.
    - Добавьте следующие DNS записи:
 
+Сервер #1
 | Type  | Name             | Content          | Proxy status  |
 | ----- | ---------------- | ---------------- | ------------- |
-| A     | your_domain_name | your_server_ip   | DNS only      |
-| CNAME | www              | your_domain_name | DNS only      |
+| A     | example.com      | your_server_ip   | DNS only      |
+| CNAME | www              | example.com      | DNS only      |
+
+Сервер #2
+| Type  | Name             | Content          | Proxy status  |
+| ----- | ---------------- | ---------------- | ------------- |
+| A     | nl.example.com   | your_server_ip   | DNS only      |
+| CNAME | www.nl           | nl.example.com   | DNS only      |
    
 3. Настройки SSL/TLS в Cloudflare:
    - Перейдите в раздел SSL/TLS > Overview и выберите Full для параметра Configure.
@@ -40,33 +47,51 @@
 
 -----
 
+### REVERSE_PROXY_MANAGER:
+
+<p align="center"><a href="#"><img src="./media/reverse_proxy_manager_RU.png" alt="Image"></a></p>
+
+-----
+
 ### Включает в себя:
   
-1. Конфигурация сервера Xray с 3X-UI:
-   - VLESS-TCP-XTLS-Vision и VLESS-TCP-REALITY (Steal oneself).
-   - Подключение подписки и JSON подписки для автоматического обновления конфигураций.
+1. Конфигурация сервера Xray с X-UI:
+   - Поддержка автоматического обновления конфигураций через подписку и JSON подписку с возможностью конвертации в форматы для популярных приложений.
+   - Необходимо включать MUX (мультиплексирование TCP соединений) в каждом клиентском приложении
+     - VLESS-gRPC-TLS
+     - VLESS-XHTTP-TLS
+     - VLESS-HTTPUpgrade-TLS
+     - VLESS-Websocket-TLS
+   - Необходимо включать у пользователя "flow": "xtls-rprx-vision"
+     - VLESS-TCP-REALITY (Steal oneself) (отключение приведет к потере доступа)
+     - VLESS-TCP-TLS
 2. Настройку обратного прокси NGINX на порт 443.
 3. Обеспечение безопасности:
    - Автоматические обновления системы через unattended-upgrades.
-4. Настройка SSL сертификатов Cloudflare с автоматическим обновлением для защиты соединений.
-5. Настройка WARP для защиты трафика.
-6. Включение BBR — улучшение производительности TCP-соединений.
-7. Настройка UFW (Uncomplicated Firewall) для управления доступом.
-8. Настройка SSH, для обеспечения минимально необходимой безопасности.
-9. Отключение IPv6 для предотвращения возможных уязвимостей.
-10. Шифрование DNS-запросов с использованием systemd-resolved (Dot) или AdGuard Home (Dot, DoH).
-11. Выбор случайного веб-сайта из массива для добавления дополнительного уровня конфиденциальности и сложности для анализа трафика.
-
+   - Настройка SSL сертификатов Cloudflare с автоматическим обновлением для защиты соединений.
+   - Настройка WARP для защиты трафика.
+   - Настройка UFW (Uncomplicated Firewall) для управления доступом.
+   - Настройка SSH, для обеспечения минимально необходимой безопасности.
+   - Отключение IPv6 для предотвращения возможных уязвимостей.
+   - Шифрование DNS-запросов с использованием systemd-resolved (Dot) или AdGuard Home (Dot, DoH).
+   - Выбор случайного веб-сайта из массива для добавления дополнительного уровня конфиденциальности и сложности для анализа трафика.
+4. Включение BBR — улучшение производительности TCP-соединений.
+5. Дополнительные опции:
+   - Настройка Shell In A Box для безопасного доступа к серверу через SSH через веб-интерфейс.
+   - Установка и настройка Node Exporter для мониторинга производительности системы с интеграцией с Prometheus и Grafana для визуализации метрик в реальном времени.
+   - Обновленное приветственное сообщение (motd) при подключении через SSH, содержащее полезную информацию о системе, состоянии сервисов и доступных обновлениях.
+   - Интеграция VNStat для мониторинга трафика, с возможностью получения статистики по времени.
 -----
 
 ### Сообщение помощи для скрипта:
 ```
-Использование: reverse-proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
+
+Использование: reverse_proxy [-u|--utils <true|false>] [-d|--dns <true|false>] [-a|--addu <true|false>]
          [-r|--autoupd <true|false>] [-b|--bbr <true|false>] [-i|--ipv6 <true|false>] [-w|--warp <true|false>]
-         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>] 
-         [-p|--panel <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>] [-t|--tgbot <true|false>]
-         [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>] [--update]
-         [-h|--help]
+         [-c|--cert <true|false>] [-m|--mon <true|false>] [-l|--shell <true|false>] [-n|--nginx <true|false>]
+         [-p|--panel <true|false>] [--custom <true|false>] [-f|--firewall <true|false>] [-s|--ssh <true|false>]
+         [-t|--tgbot <true|false>] [-g|--generate <true|false>] [-x|--skip-check <true|false>] [-o|--subdomain <true|false>]
+         [--update] [-h|--help]"
 
   -u, --utils <true|false>       Дополнительные утилиты                         (по умолчанию: true)
   -d, --dns <true|false>         Шифрование DNS                                 (по умолчанию: true)
@@ -74,12 +99,13 @@
   -r, --autoupd <true|false>     Автоматические обновления                      (по умолчанию: true)
   -b, --bbr <true|false>         BBR (управление перегрузкой TCP)               (по умолчанию: true)
   -i, --ipv6 <true|false>        Отключить поддержку IPv6                       (по умолчанию: true)
-  -w, --warp <true|false>        Warp                                           (по умолчанию: true)
+  -w, --warp <true|false>        Warp                                           (по умолчанию: false)
   -c, --cert <true|false>        Выпуск сертификатов для домена                 (по умолчанию: true)
   -m, --mon <true|false>         Сервисы мониторинга (node_exporter)            (по умолчанию: false)
   -l, --shell <true|false>       Установка Shell In A Box                       (по умолчанию: false)
   -n, --nginx <true|false>       Установка NGINX                                (по умолчанию: true)
   -p, --panel <true|false>       Установка панели для управления пользователями (по умолчанию: true)
+      --custom <true|false>      Кастомная JSON-подписка                        (по умолчанию: true)
   -f, --firewall <true|false>    Настройка файрвола                             (по умолчанию: true)
   -s, --ssh <true|false>         SSH доступ                                     (по умолчанию: true)
   -t, --tgbot <true|false>       Интеграция Telegram бота                       (по умолчанию: false)
