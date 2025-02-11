@@ -701,42 +701,42 @@ crop_domain() {
 check_cf_token() {
   # Пока не получим правильный ответ, продолжаем выполнение.
   while ! echo "$test_response" | grep -qE "\"${testdomain}\"|\"#dns_records:edit\"|\"#dns_records:read\"|\"#zone:read\""; do
-    local TEMP_DOMAIN_L_L  # Переменная для временного домена
-    DOMAIN=""  # Обнуляем переменную домена
-    SUB_DOMAIN=""  # Обнуляем переменную субдомена
+    DOMAIN=""
+    SUB_DOMAIN=""
+    local EMAIL=""
+    local CFTOKEN=""
 
     # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
-      reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
-      DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+      reading " $(text 13) " DOMAIN
+      DOMAIN=$(clean_url "$DOMAIN")
       echo
-      reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем субдомен
-      SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+      reading " $(text 81) " SUB_DOMAIN
+      SUB_DOMAIN=$(clean_url "$SUB_DOMAIN")
     else
-      # Если subdomain не задан, продолжаем работать с доменом.
-      while [[ -z "$TEMP_DOMAIN_L" ]]; do
-        reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
-        TEMP_DOMAIN_L=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+      # Если subdomain равен false, продолжаем работать с доменом.
+      while [[ -z "$DOMAIN" ]]; do
+        reading " $(text 13) " DOMAIN
+        DOMAIN=$(clean_url "$DOMAIN")
       done
 
       # Проверяем, если домен соответствует регулярному выражению
-      if [[ "$TEMP_DOMAIN_L" =~ ${regex[domain]} ]]; then
-        DOMAIN=$(crop_domain "$TEMP_DOMAIN_L")  # Обрезаем домен до последних двух частей
-        SUB_DOMAIN="$TEMP_DOMAIN_L"  # Весь домен сохраняем в SUB_DOMAIN
+      if [[ "$DOMAIN" =~ ${regex[domain]} ]]; then
+        DOMAIN=$(crop_domain "$DOMAIN")  # Обрезаем домен до последних двух частей
+        SUB_DOMAIN="$DOMAIN"  # Весь домен сохраняем в SUB_DOMAIN
       else
-        DOMAIN="$TEMP_DOMAIN_L"  # Если домен второго уровня, сохраняем его без изменений
-        SUB_DOMAIN="www.$TEMP_DOMAIN_L"  # Для домена второго уровня добавляем www в SUB_DOMAIN
+        DOMAIN="$DOMAIN"  # Если домен второго уровня, сохраняем его без изменений
+        SUB_DOMAIN="www.$DOMAIN"  # Для домена второго уровня добавляем www в SUB_DOMAIN
       fi
     fi
-
+    
     echo
-
-    # Запрашиваем email пользователя
+    
     while [[ -z $EMAIL ]]; do
       reading " $(text 15) " EMAIL
       echo
     done
-    # Запрашиваем Cloudflare токен
+    
     while [[ -z $CFTOKEN ]]; do
       reading " $(text 16) " CFTOKEN
     done
@@ -1342,7 +1342,7 @@ warp() {
 ###################################
 issuance_of_certificates() {
   info " $(text 44) "
-  CF_CREDENTIALS_PATH="/root/cloudflare.credentials"
+  CF_CREDENTIALS_PATH="/etc/letsencrypt/.cloudflare.credentials"
   touch ${CF_CREDENTIALS_PATH}
   chown root:root ${CF_CREDENTIALS_PATH}
   chmod 600 ${CF_CREDENTIALS_PATH}
