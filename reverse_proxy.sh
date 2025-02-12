@@ -2495,6 +2495,7 @@ rotation_and_archiving() {
   ${PACKAGE_INSTALL[int]} p7zip-full
   backup_dir
   rotation_backup
+  journalctl --vacuum-time=7days
   tilda "$(text 10)"
 }
 
