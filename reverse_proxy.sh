@@ -2401,6 +2401,7 @@ EOF
 settings_custom_json(){
   info " $(text 99) "
   mkdir -p /etc/nginx/locations/
+  CONF_FILE="/etc/nginx/locations/webpagesub.conf"
 
   while [[ -z "$DOMAIN" ]]; do
     reading " $(text 13) " DOMAIN  # Запрашиваем домен
@@ -2408,7 +2409,11 @@ settings_custom_json(){
   done
 
   select_from_db
-  WEB_SUB_PATH=$(eval ${generate[path]})
+  if [[ -f "$CONF_FILE" ]]; then
+    WEB_SUB_PATH=$(sed -n 's|location ~ \^/\([^ ]*\).*|\1|p' "$CONF_FILE")
+  else
+    WEB_SUB_PATH=$(eval "${generate[path]}")
+  fi
   SUB2_SINGBOX_PATH=$(eval ${generate[path]})
   SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
 
