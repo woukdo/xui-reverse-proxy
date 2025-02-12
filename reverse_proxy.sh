@@ -2403,6 +2403,7 @@ settings_custom_json(){
   mkdir -p /etc/nginx/locations/
   CONF_FILE="/etc/nginx/locations/webpagesub.conf"
 
+  DOMAIN=""
   while [[ -z "$DOMAIN" ]]; do
     reading " $(text 13) " DOMAIN  # Запрашиваем домен
     DOMAIN=$(clean_url "$DOMAIN")  # Очищаем домен
