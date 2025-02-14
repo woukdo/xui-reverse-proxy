@@ -4,9 +4,10 @@
 ### Global values
 ###################################
 export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='1.4.3'
+VERSION_MANAGER='1.4.3a'
 VERSION=v2.4.11
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
+LANG_FILE="/usr/local/reverse_proxy/lang.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh"
@@ -266,6 +267,8 @@ E[105]="11. Traffic statistics."
 R[105]="11. Статистика трафика."
 E[106]="Traffic statistics:\n  1. By years \n  2. By months \n  3. By days \n  4. By hours"
 R[106]="Статистика трафика:\n  1. По годам \n  2. По месяцам \n  3. По дням \n  4. По часам"
+E[107]="12. Change language."
+R[107]="12. Изменить язык."
 
 ###################################
 ### Help output
@@ -520,18 +523,22 @@ log_entry() {
 ### Language selection
 ###################################
 select_language() {
-  L=E
-  hint " $(text 0) \n"  # Показывает информацию о доступных языках
-  reading " $(text 1) " LANGUAGE  # Запрашивает выбор языка
+  if [ ! -f "$LANG_FILE" ]; then  # Если файла нет
+    L=E
+    hint " $(text 0) \n" 
+    reading " $(text 1) " LANGUAGE
 
-  # Устанавливаем язык в зависимости от выбора
-  case "$LANGUAGE" in
-    1) L=E ;;   # Если выбран английский
-    2) L=R ;;   # Если выбран русский
-#    3) L=C ;;   # Если выбран китайский
-#    4) L=F ;;   # Если выбран персидский
-    *) L=E ;;   # По умолчанию — английский
-  esac
+    case "$LANGUAGE" in
+      1) L=E ;;   # Английский
+      2) L=R ;;   # Русский
+      *) L=E ;;   # По умолчанию — английский
+    esac
+    cat > "$LANG_FILE" << EOF
+$L
+EOF
+  else
+    L=$(cat "$LANG_FILE")  # Загружаем язык
+  fi
 }
 
 ###################################
@@ -2183,7 +2190,7 @@ xray_template() {
         "type": "field",
         "domain": [
           "geosite:intel",
-          "category-ru"
+          "geosite:category-ru"
         ],
         "outboundTag": "${RULES}"
       },
@@ -2191,14 +2198,6 @@ xray_template() {
         "type": "field",
         "ip": [
           "geoip:ru"
-        ],
-        "outboundTag": "${RULES}"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "regexp:.*\\\\.ru$",
-          "regexp:.*\\\\.su$"
         ],
         "outboundTag": "${RULES}"
       }
@@ -2921,7 +2920,7 @@ traffic_stats() {
 
   case $CHOICE_STATS in
     1)
-      vnstat -m
+      vnstat -y
       ;;
     2)
       vnstat -m
@@ -2933,7 +2932,7 @@ traffic_stats() {
       vnstat -h
       ;;
     *)
-      vnstat -m
+      vnstat -d
       ;;
   esac
   echo
@@ -2956,18 +2955,14 @@ main() {
   [[ ${args[skip-check]} == "false" ]] && check_root
   [[ ${args[skip-check]} == "false" ]] && check_ip
   check_operating_system
-  banner_xray
+  echo
   select_language
-  if [ -f ${DEFAULT_FLAGS} ]; then
-    warning " $(text 4) "
-  fi
-  sleep 2
   while true; do
     clear
     banner_xray
-    tilda "|-----------------------------------------------------------------------------|"
+    tilda "|--------------------------------------------------------------------------|"
     info " $(text 86) "                      # MENU
-    tilda "|-----------------------------------------------------------------------------|"
+    tilda "|--------------------------------------------------------------------------|"
     info " $(text 87) "                      # 1. Install
     echo
     info " $(text 88) "                      # 2. Restore backup
@@ -2979,11 +2974,13 @@ main() {
     info " $(text 93) "                      # 7. Steal web site
     info " $(text 94) "                      # 8. Disable IPv6
     info " $(text 95) "                      # 9. Enable IPv6
+    echo
     info " $(text 96) "                      # 10. Directory size
     info " $(text 105) "                     # 11. Traffic statistics
+    info " $(text 107) "                     # 12. Change language
     echo
     info " $(text 84) "                      # Exit
-    tilda "|-----------------------------------------------------------------------------|"
+    tilda "|--------------------------------------------------------------------------|"
     echo
     reading " $(text 1) " CHOICE_MENU        # Choise
     tilda "$(text 10)"
@@ -3046,6 +3043,10 @@ main() {
         ;;
       11)
         traffic_stats
+        ;;
+      12)
+        rm -rf ${DIR_REVERSE_PROXY}lang.conf
+        select_language
         ;;
       0)
         clear
