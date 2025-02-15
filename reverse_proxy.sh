@@ -341,7 +341,7 @@ update_reverse_proxy() {
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
-  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
+  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update"
   (crontab -l | grep -Fxv "0 0 * * * reverse_proxy --update") | crontab -
 
   tilda "\n|-----------------------------------------------------------------------------|\n"
