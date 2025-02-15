@@ -3,13 +3,14 @@
 ###################################
 ### Global values
 ###################################
-export DEBIAN_FRONTEND=noninteractive
 VERSION_MANAGER='1.4.3a'
 VERSION=v2.4.11
-DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
-LANG_FILE="/usr/local/reverse_proxy/lang.conf"
-DEST_DB="/etc/x-ui/x-ui.db"
+
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+LANG_FILE="/usr/local/reverse_proxy/lang.conf"
+DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
+DEST_DB="/etc/x-ui/x-ui.db"
+
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/database/x-ui.db"
 
@@ -340,7 +341,7 @@ update_reverse_proxy() {
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
-  add_cron_rule "0 0 * * * reverse_proxy --update"
+  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
 
   tilda "\n|-----------------------------------------------------------------------------|\n"
 }
