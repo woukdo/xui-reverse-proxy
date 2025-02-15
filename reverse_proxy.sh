@@ -3,12 +3,14 @@
 ###################################
 ### Global values
 ###################################
-export DEBIAN_FRONTEND=noninteractive
-VERSION_MANAGER='1.4.3'
+VERSION_MANAGER='1.4.3b'
 VERSION=v2.4.11
+
+DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+LANG_FILE="/usr/local/reverse_proxy/lang.conf"
 DEFAULT_FLAGS="/usr/local/reverse_proxy/default.conf"
 DEST_DB="/etc/x-ui/x-ui.db"
-DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
+
 SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/reverse_proxy.sh"
 DB_SCRIPT_URL="https://raw.githubusercontent.com/cortez24rus/xui-reverse-proxy/refs/heads/main/database/x-ui.db"
 
@@ -72,8 +74,8 @@ E[8]="Start the XRAY installation? Choose option [y/N]:"
 R[8]="Начать установку XRAY? Выберите опцию [y/N]:"
 E[9]="CANCEL"
 R[9]="ОТМЕНА"
-E[10]="\n|-----------------------------------------------------------------------------|\n"
-R[10]="\n|-----------------------------------------------------------------------------|\n"
+E[10]="\n|--------------------------------------------------------------------------|\n"
+R[10]="\n|--------------------------------------------------------------------------|\n"
 E[11]="Enter username:"
 R[11]="Введите имя пользователя:"
 E[12]="Enter user password:"
@@ -266,6 +268,8 @@ E[105]="11. Traffic statistics."
 R[105]="11. Статистика трафика."
 E[106]="Traffic statistics:\n  1. By years \n  2. By months \n  3. By days \n  4. By hours"
 R[106]="Статистика трафика:\n  1. По годам \n  2. По месяцам \n  3. По дням \n  4. По часам"
+E[107]="12. Change language."
+R[107]="12. Изменить язык."
 
 ###################################
 ### Help output
@@ -337,7 +341,8 @@ update_reverse_proxy() {
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
-  add_cron_rule "0 0 * * * reverse_proxy --update"
+  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
+  (crontab -l | grep -Fxv "0 0 * * * reverse_proxy --update") | crontab -
 
   tilda "\n|-----------------------------------------------------------------------------|\n"
 }
@@ -520,18 +525,22 @@ log_entry() {
 ### Language selection
 ###################################
 select_language() {
-  L=E
-  hint " $(text 0) \n"  # Показывает информацию о доступных языках
-  reading " $(text 1) " LANGUAGE  # Запрашивает выбор языка
+  if [ ! -f "$LANG_FILE" ]; then  # Если файла нет
+    L=E
+    hint " $(text 0) \n" 
+    reading " $(text 1) " LANGUAGE
 
-  # Устанавливаем язык в зависимости от выбора
-  case "$LANGUAGE" in
-    1) L=E ;;   # Если выбран английский
-    2) L=R ;;   # Если выбран русский
-#    3) L=C ;;   # Если выбран китайский
-#    4) L=F ;;   # Если выбран персидский
-    *) L=E ;;   # По умолчанию — английский
-  esac
+    case "$LANGUAGE" in
+      1) L=E ;;   # Английский
+      2) L=R ;;   # Русский
+      *) L=E ;;   # По умолчанию — английский
+    esac
+    cat > "$LANG_FILE" << EOF
+$L
+EOF
+  else
+    L=$(cat "$LANG_FILE")  # Загружаем язык
+  fi
 }
 
 ###################################
@@ -699,19 +708,20 @@ crop_domain() {
 ### Domain validation in cloudflare
 ###################################
 check_cf_token() {
-  # Пока не получим правильный ответ, продолжаем выполнение.
   while ! echo "$test_response" | grep -qE "\"${testdomain}\"|\"#dns_records:edit\"|\"#dns_records:read\"|\"#zone:read\""; do
-    local TEMP_DOMAIN_L_L  # Переменная для временного домена
-    DOMAIN=""  # Обнуляем переменную домена
-    SUB_DOMAIN=""  # Обнуляем переменную субдомена
+    local TEMP_DOMAIN_L  # Переменная для временного домена
+    DOMAIN=""
+    SUB_DOMAIN=""
+    EMAIL=""
+    CFTOKEN=""
 
     # Если флаг subdomain равен true, запрашиваем субдомен и домен.
     if [[ ${args[subdomain]} == "true" ]]; then
-      reading " $(text 13) " TEMP_DOMAIN_L  # Запрашиваем домен
-      DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем домен
+      reading " $(text 13) " TEMP_DOMAIN_L
+      DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
       echo
-      reading " $(text 81) " TEMP_DOMAIN_L  # Запрашиваем субдомен
-      SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")  # Очищаем субдомен
+      reading " $(text 81) " TEMP_DOMAIN_L
+      SUB_DOMAIN=$(clean_url "$TEMP_DOMAIN_L")
     else
       # Если subdomain не задан, продолжаем работать с доменом.
       while [[ -z "$TEMP_DOMAIN_L" ]]; do
@@ -731,12 +741,10 @@ check_cf_token() {
 
     echo
 
-    # Запрашиваем email пользователя
     while [[ -z $EMAIL ]]; do
       reading " $(text 15) " EMAIL
       echo
     done
-    # Запрашиваем Cloudflare токен
     while [[ -z $CFTOKEN ]]; do
       reading " $(text 16) " CFTOKEN
     done
@@ -1297,7 +1305,7 @@ if [ "\$SWAP_USED" -gt 200 ]; then
 fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}restart_warp.sh
-  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh"
+  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh >/dev/null 2>&1"
 }
 
 ###################################
@@ -1342,7 +1350,7 @@ warp() {
 ###################################
 issuance_of_certificates() {
   info " $(text 44) "
-  CF_CREDENTIALS_PATH="/root/cloudflare.credentials"
+  CF_CREDENTIALS_PATH="/etc/letsencrypt/.cloudflare.credentials"
   touch ${CF_CREDENTIALS_PATH}
   chown root:root ${CF_CREDENTIALS_PATH}
   chmod 600 ${CF_CREDENTIALS_PATH}
@@ -2184,7 +2192,7 @@ xray_template() {
         "type": "field",
         "domain": [
           "geosite:intel",
-          "category-ru"
+          "geosite:category-ru"
         ],
         "outboundTag": "${RULES}"
       },
@@ -2192,14 +2200,6 @@ xray_template() {
         "type": "field",
         "ip": [
           "geoip:ru"
-        ],
-        "outboundTag": "${RULES}"
-      },
-      {
-        "type": "field",
-        "domain": [
-          "regexp:.*\\\\.ru$",
-          "regexp:.*\\\\.su$"
         ],
         "outboundTag": "${RULES}"
       }
@@ -2402,14 +2402,20 @@ EOF
 settings_custom_json(){
   info " $(text 99) "
   mkdir -p /etc/nginx/locations/
+  CONF_FILE="/etc/nginx/locations/webpagesub.conf"
 
+  DOMAIN=""
   while [[ -z "$DOMAIN" ]]; do
     reading " $(text 13) " DOMAIN  # Запрашиваем домен
     DOMAIN=$(clean_url "$DOMAIN")  # Очищаем домен
   done
 
   select_from_db
-  WEB_SUB_PATH=$(eval ${generate[path]})
+  if [[ -f "$CONF_FILE" ]]; then
+    WEB_SUB_PATH=$(sed -n 's|location ~ \^/\([^ ]*\).*|\1|p' "$CONF_FILE")
+  else
+    WEB_SUB_PATH=$(eval "${generate[path]}")
+  fi
   SUB2_SINGBOX_PATH=$(eval ${generate[path]})
   SUB_JSON_URI=https://${DOMAIN}/${WEB_SUB_PATH}?name=
 
@@ -2456,7 +2462,7 @@ fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}backup_dir.sh
   bash "${DIR_REVERSE_PROXY}backup_dir.sh"
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh >/dev/null 2>&1"
 }
 
 ###################################
@@ -2478,7 +2484,7 @@ find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm 
 EOF
   chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
   bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh >/dev/null 2>&1"
 }
 
 ###################################
@@ -2490,6 +2496,7 @@ rotation_and_archiving() {
   ${PACKAGE_INSTALL[int]} p7zip-full
   backup_dir
   rotation_backup
+  journalctl --vacuum-time=7days
   tilda "$(text 10)"
 }
 
@@ -2915,19 +2922,19 @@ traffic_stats() {
 
   case $CHOICE_STATS in
     1)
-      vnstat -m  # Показать статистику по месяцам
+      vnstat -y
       ;;
     2)
-      vnstat -m  # Показать статистику по месяцам
+      vnstat -m
       ;;
     3)
-      vnstat -d  # Показать статистику по дням
+      vnstat -d
       ;;
     4)
-      vnstat -d  # Показать статистику по дням
+      vnstat -h
       ;;
     *)
-      vnstat -m
+      vnstat -d
       ;;
   esac
   echo
@@ -2950,18 +2957,14 @@ main() {
   [[ ${args[skip-check]} == "false" ]] && check_root
   [[ ${args[skip-check]} == "false" ]] && check_ip
   check_operating_system
-  banner_xray
+  echo
   select_language
-  if [ -f ${DEFAULT_FLAGS} ]; then
-    warning " $(text 4) "
-  fi
-  sleep 2
   while true; do
     clear
     banner_xray
-    tilda "|-----------------------------------------------------------------------------|"
+    tilda "|--------------------------------------------------------------------------|"
     info " $(text 86) "                      # MENU
-    tilda "|-----------------------------------------------------------------------------|"
+    tilda "|--------------------------------------------------------------------------|"
     info " $(text 87) "                      # 1. Install
     echo
     info " $(text 88) "                      # 2. Restore backup
@@ -2973,11 +2976,13 @@ main() {
     info " $(text 93) "                      # 7. Steal web site
     info " $(text 94) "                      # 8. Disable IPv6
     info " $(text 95) "                      # 9. Enable IPv6
+    echo
     info " $(text 96) "                      # 10. Directory size
     info " $(text 105) "                     # 11. Traffic statistics
+    info " $(text 107) "                     # 12. Change language
     echo
     info " $(text 84) "                      # Exit
-    tilda "|-----------------------------------------------------------------------------|"
+    tilda "|--------------------------------------------------------------------------|"
     echo
     reading " $(text 1) " CHOICE_MENU        # Choise
     tilda "$(text 10)"
@@ -3009,6 +3014,9 @@ main() {
         data_output
         ;;
       2)
+        if [ ! -d "/usr/local/reverse_proxy/backup" ]; then
+          rotation_and_archiving
+        fi
         restore_backup
         ;;
       3)
@@ -3037,6 +3045,10 @@ main() {
         ;;
       11)
         traffic_stats
+        ;;
+      12)
+        rm -rf ${DIR_REVERSE_PROXY}lang.conf
+        select_language
         ;;
       0)
         clear
