@@ -341,7 +341,7 @@ update_reverse_proxy() {
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
-  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update"
+  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
   (crontab -l | grep -Fxv "0 0 * * * reverse_proxy --update") | crontab -
 
   tilda "\n|-----------------------------------------------------------------------------|\n"
@@ -1305,7 +1305,7 @@ if [ "\$SWAP_USED" -gt 200 ]; then
 fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}restart_warp.sh
-  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh"
+  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh >/dev/null 2>&1"
 }
 
 ###################################
@@ -2462,7 +2462,7 @@ fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}backup_dir.sh
   bash "${DIR_REVERSE_PROXY}backup_dir.sh"
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh >/dev/null 2>&1"
 }
 
 ###################################
@@ -2484,7 +2484,7 @@ find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm 
 EOF
   chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
   bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh >/dev/null 2>&1"
 }
 
 ###################################
