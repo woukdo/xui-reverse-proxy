@@ -2334,10 +2334,21 @@ install_panel() {
 }
 
 ###################################
-### Custom subscription json + Clash Meta yaml
+### Custom subscription json
 ###################################
 custom_sub_json(){
   cat > /etc/nginx/locations/webpagesub.conf <<EOF
+# Web Page Subscription Path
+location ~ ^/${WEB_SUB_PATH} {
+  default_type application/json;
+  root /var/www/subpage;
+  index index.html;
+  try_files /index.html =404;
+}
+EOF
+
+custom_sub_clash(){
+  cat > /etc/nginx/locations/clash_sub.conf <<EOF
 # Clash Meta Subscription Path
 location ~ ^/${WEB_SUB_PATH}/clashmeta/(.+)$ {
   default_type text/plain;
@@ -2346,13 +2357,6 @@ location ~ ^/${WEB_SUB_PATH}/clashmeta/(.+)$ {
   set \$subid \$1;
   root /var/www/subpage;
   try_files /clash.yaml =404;
-}
-# Web Page Subscription Path
-location ~ ^/${WEB_SUB_PATH} {
-  default_type application/json;
-  root /var/www/subpage;
-  index index.html;
-  try_files /index.html =404;
 }
 EOF
 
