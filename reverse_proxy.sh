@@ -525,6 +525,7 @@ log_entry() {
 ### Language selection
 ###################################
 select_language() {
+  rm -rf ${DIR_REVERSE_PROXY}lang.conf
   if [ ! -f "$LANG_FILE" ]; then  # Если файла нет
     L=E
     hint " $(text 0) \n" 
@@ -3047,7 +3048,6 @@ main() {
         traffic_stats
         ;;
       12)
-        rm -rf ${DIR_REVERSE_PROXY}lang.conf
         select_language
         ;;
       0)
