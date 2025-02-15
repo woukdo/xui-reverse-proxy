@@ -2334,10 +2334,19 @@ install_panel() {
 }
 
 ###################################
-### Custom subscription json
+### Custom subscription json + Clash Meta yaml
 ###################################
 custom_sub_json(){
   cat > /etc/nginx/locations/webpagesub.conf <<EOF
+# Clash Meta Subscription Path
+location ~ ^/${WEB_SUB_PATH}/clashmeta/(.+)$ {
+  default_type text/plain;
+  ssi on;
+  ssi_types text/plain;
+  set \$subid \$1;
+  root /var/www/subpage;
+  try_files /clash.yaml =404;
+}
 # Web Page Subscription Path
 location ~ ^/${WEB_SUB_PATH} {
   default_type application/json;
@@ -2360,19 +2369,24 @@ EOF
 }
 
 ###################################
-### Settings web sub page
+### Settings web sub page + clash meta yaml
 ###################################
 settings_web(){
   DEST_DIR_SUB_PAGE="/var/www/subpage"
   DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
+  DEST_FILE_CLASH_SUB="$DEST_DIR_SUB_PAGE/clash.yaml"
   sudo mkdir -p "$DEST_DIR_SUB_PAGE"
 
   URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
   sudo curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
+  URL_CLASH_SUB="https://github.com/legiz-ru/x-ui-pro/raw/master/clash/clash.yaml"
+  sudo curl -L "$URL_CLASH_SUB" -o "$DEST_FILE_CLASH_SUB"
 
   sed -i "s/\${DOMAIN}/$DOMAIN/g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s/\${DOMAIN}/$DOMAIN/g" "$DEST_FILE_CLASH_SUB"
   sed -i "s#\${SUB_JSON_PATH}#$SUB_JSON_PATH#g" "$DEST_FILE_SUB_PAGE"
   sed -i "s#\${SUB_PATH}#$SUB_PATH#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_PATH}#$SUB_PATH#g" "$DEST_FILE_CLASH_SUB"
   sed -i "s|sub.legiz.ru|$DOMAIN/$SUB2_SINGBOX_PATH|g" "$DEST_FILE_SUB_PAGE"
 }
 
