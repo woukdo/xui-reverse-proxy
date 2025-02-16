@@ -3,7 +3,7 @@
 ###################################
 ### Global values
 ###################################
-VERSION_MANAGER='1.4.3c'
+VERSION_MANAGER='1.4.3d'
 VERSION=v2.4.11
 
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
@@ -2398,12 +2398,12 @@ settings_web(){
 ### Install sing-box converter
 ###################################
 install_singbox_converter(){
-  wget -q -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
-  tar -xvzf /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9-beta.2_linux_amd64/sub2sing-box
+  wget -P /root/ https://github.com/legiz-ru/sub2sing-box/releases/download/v0.0.9/sub2sing-box_0.0.9_linux_amd64.tar.gz
+  tar -xvzf /root/sub2sing-box_0.0.9_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9_linux_amd64/sub2sing-box
   mv /root/sub2sing-box /usr/bin/
   chmod +x /usr/bin/sub2sing-box
-  rm /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
-  su -c "/usr/bin/sub2sing-box server & disown" root
+  rm /root/sub2sing-box_0.0.9_linux_amd64.tar.gz
+  su -c "/usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080 & disown" root
 }
 
 ###################################
@@ -2448,7 +2448,7 @@ settings_custom_json(){
   fi
   nginx -s reload
 
-  add_cron_rule "@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
+  add_cron_rule "@reboot /usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080 > /dev/null 2>&1"
   tilda "$(text 10)"
 }
 
