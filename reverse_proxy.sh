@@ -2507,7 +2507,7 @@ days_to_keep=6
 # Удаление архивов старше 7 дней
 find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm -f {} \;
 EOF
-  chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
+  chmod +x ${DIR_REVERSE_PROXY}rotation_backup.sh
   bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
 
   crontab -l | grep -v -- "rotation_backup.sh" | crontab -
