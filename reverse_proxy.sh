@@ -341,8 +341,9 @@ update_reverse_proxy() {
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
-  add_cron_rule "0 0 * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
-  (crontab -l | grep -Fxv "0 0 * * * reverse_proxy --update") | crontab -
+
+  crontab -l | grep -v -- "--update" | crontab -
+  add_cron_rule "0 0 * * * /usr/local/reverse_proxy/reverse_proxy --update"
 
   tilda "\n|-----------------------------------------------------------------------------|\n"
 }
@@ -661,7 +662,7 @@ warning_banner() {
 ###################################
 add_cron_rule() {
   local rule="$1"
-  local logged_rule="${rule} >> /usr/local/reverse_proxy/cron_jobs.log 2>&1"
+  local logged_rule="${rule} >> ${DIR_REVERSE_PROXY}cron_jobs.log 2>&1"
 
   ( crontab -l | grep -Fxq "$logged_rule" ) || ( crontab -l 2>/dev/null; echo "$logged_rule" ) | crontab -
 }
@@ -1307,7 +1308,9 @@ if [ "\$SWAP_USED" -gt 200 ]; then
 fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}restart_warp.sh
-  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh >/dev/null 2>&1"
+
+  crontab -l | grep -v -- "restart_warp.sh" | crontab -
+  add_cron_rule "* * * * * ${DIR_REVERSE_PROXY}restart_warp.sh"
 }
 
 ###################################
@@ -2448,7 +2451,8 @@ settings_custom_json(){
   fi
   nginx -s reload
 
-  add_cron_rule "@reboot /usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080 > /dev/null 2>&1"
+  crontab -l | grep -v -- "sub2sing-box" | crontab -
+  add_cron_rule "@reboot /usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080"
   tilda "$(text 10)"
 }
 
@@ -2481,7 +2485,9 @@ fi
 EOF
   chmod +x ${DIR_REVERSE_PROXY}backup_dir.sh
   bash "${DIR_REVERSE_PROXY}backup_dir.sh"
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh >/dev/null 2>&1"
+
+  crontab -l | grep -v -- "backup_dir.sh" | crontab -
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}backup_dir.sh"
 }
 
 ###################################
@@ -2503,7 +2509,9 @@ find "\$BACKUP_DIR" -type f -name "backup_*.7z" -mtime +\$days_to_keep -exec rm 
 EOF
   chmod +X ${DIR_REVERSE_PROXY}rotation_backup.sh
   bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh >/dev/null 2>&1"
+
+  crontab -l | grep -v -- "rotation_backup.sh" | crontab -
+  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
 }
 
 ###################################
