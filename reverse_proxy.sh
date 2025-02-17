@@ -525,7 +525,6 @@ log_entry() {
 ### Language selection
 ###################################
 select_language() {
-  rm -rf ${DIR_REVERSE_PROXY}lang.conf
   if [ ! -f "$LANG_FILE" ]; then  # Если файла нет
     L=E
     hint " $(text 0) \n" 
@@ -2373,7 +2372,7 @@ EOF
 }
 
 ###################################
-### Settings web sub page + clash meta yaml
+### Settings web sub page
 ###################################
 settings_web(){
   DEST_DIR_SUB_PAGE="/var/www/subpage"
@@ -3066,6 +3065,7 @@ main() {
         traffic_stats
         ;;
       12)
+        rm -rf ${DIR_REVERSE_PROXY}lang.conf
         select_language
         ;;
       0)
