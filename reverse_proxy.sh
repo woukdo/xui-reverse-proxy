@@ -2346,7 +2346,6 @@ location ~ ^/${WEB_SUB_PATH} {
 }
 EOF
 
-custom_sub_clash(){
   cat > /etc/nginx/locations/clash_sub.conf <<EOF
 # Clash Meta Subscription Path
 location ~ ^/${WEB_SUB_PATH}/clashmeta/(.+)$ {
@@ -3083,5 +3082,3 @@ main() {
 }
 
 main "$@"
-
-
