@@ -341,7 +341,7 @@ update_reverse_proxy() {
   wget -O $UPDATE_SCRIPT $SCRIPT_URL
   ln -sf $UPDATE_SCRIPT /usr/local/bin/reverse_proxy
   chmod +x "$UPDATE_SCRIPT"
-  add_cron_rule "* * * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
+  add_cron_rule "0 0 * * * /usr/local/reverse_proxy/reverse_proxy --update >/dev/null 2>&1"
   (crontab -l | grep -Fxv "0 0 * * * reverse_proxy --update") | crontab -
 
   tilda "\n|-----------------------------------------------------------------------------|\n"
@@ -661,7 +661,9 @@ warning_banner() {
 ###################################
 add_cron_rule() {
   local rule="$1"
-  ( crontab -l | grep -Fxq "$rule" ) || ( crontab -l 2>/dev/null; echo "$rule" ) | crontab -
+  local logged_rule="${rule} >> /usr/local/reverse_proxy/cron_jobs.log 2>&1"
+
+  ( crontab -l | grep -Fxq "$logged_rule" ) || ( crontab -l 2>/dev/null; echo "$logged_rule" ) | crontab -
 }
 
 ###################################
