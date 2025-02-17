@@ -3,7 +3,7 @@
 ###################################
 ### Global values
 ###################################
-VERSION_MANAGER='1.4.3b'
+VERSION_MANAGER='1.4.3d'
 VERSION=v2.4.11
 
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
@@ -2346,6 +2346,19 @@ location ~ ^/${WEB_SUB_PATH} {
 }
 EOF
 
+custom_sub_clash(){
+  cat > /etc/nginx/locations/clash_sub.conf <<EOF
+# Clash Meta Subscription Path
+location ~ ^/${WEB_SUB_PATH}/clashmeta/(.+)$ {
+  default_type text/plain;
+  ssi on;
+  ssi_types text/plain;
+  set \$subid \$1;
+  root /var/www/subpage;
+  try_files /clash.yaml =404;
+}
+EOF
+
   cat > /etc/nginx/locations/subsingbox.conf <<EOF
 # Sub2sing-box
 location /${SUB2_SINGBOX_PATH}/ {
@@ -2364,14 +2377,19 @@ EOF
 settings_web(){
   DEST_DIR_SUB_PAGE="/var/www/subpage"
   DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
+  DEST_FILE_CLASH_SUB="$DEST_DIR_SUB_PAGE/clash.yaml"
   sudo mkdir -p "$DEST_DIR_SUB_PAGE"
 
   URL_SUB_PAGE="https://github.com/legiz-ru/x-ui-pro/raw/master/sub-3x-ui.html"
   sudo curl -L "$URL_SUB_PAGE" -o "$DEST_FILE_SUB_PAGE"
+  URL_CLASH_SUB="https://github.com/legiz-ru/x-ui-pro/raw/master/clash/clash.yaml"
+  sudo curl -L "$URL_CLASH_SUB" -o "$DEST_FILE_CLASH_SUB"
 
   sed -i "s/\${DOMAIN}/$DOMAIN/g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s/\${DOMAIN}/$DOMAIN/g" "$DEST_FILE_CLASH_SUB"
   sed -i "s#\${SUB_JSON_PATH}#$SUB_JSON_PATH#g" "$DEST_FILE_SUB_PAGE"
   sed -i "s#\${SUB_PATH}#$SUB_PATH#g" "$DEST_FILE_SUB_PAGE"
+  sed -i "s#\${SUB_PATH}#$SUB_PATH#g" "$DEST_FILE_CLASH_SUB"
   sed -i "s|sub.legiz.ru|$DOMAIN/$SUB2_SINGBOX_PATH|g" "$DEST_FILE_SUB_PAGE"
 }
 
@@ -2379,12 +2397,12 @@ settings_web(){
 ### Install sing-box converter
 ###################################
 install_singbox_converter(){
-  wget -q -P /root/ https://github.com/nitezs/sub2sing-box/releases/download/v0.0.9-beta.2/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
-  tar -xvzf /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9-beta.2_linux_amd64/sub2sing-box
+  wget -P /root/ https://github.com/legiz-ru/sub2sing-box/releases/download/v0.0.9/sub2sing-box_0.0.9_linux_amd64.tar.gz
+  tar -xvzf /root/sub2sing-box_0.0.9_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9_linux_amd64/sub2sing-box
   mv /root/sub2sing-box /usr/bin/
   chmod +x /usr/bin/sub2sing-box
-  rm /root/sub2sing-box_0.0.9-beta.2_linux_amd64.tar.gz
-  su -c "/usr/bin/sub2sing-box server & disown" root
+  rm /root/sub2sing-box_0.0.9_linux_amd64.tar.gz
+  su -c "/usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080 & disown" root
 }
 
 ###################################
@@ -2429,7 +2447,7 @@ settings_custom_json(){
   fi
   nginx -s reload
 
-  add_cron_rule "@reboot /usr/bin/sub2sing-box server > /dev/null 2>&1"
+  add_cron_rule "@reboot /usr/bin/sub2sing-box server --bind 127.0.0.1 --port 8080 > /dev/null 2>&1"
   tilda "$(text 10)"
 }
 
