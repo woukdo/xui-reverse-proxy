@@ -2397,7 +2397,7 @@ settings_web(){
 ### Install sing-box converter
 ###################################
 install_singbox_converter(){
-  wget -P /root/ https://github.com/legiz-ru/sub2sing-box/releases/download/v0.0.9/sub2sing-box_0.0.9_linux_amd64.tar.gz
+  wget -q -P /root/ https://github.com/legiz-ru/sub2sing-box/releases/download/v0.0.9/sub2sing-box_0.0.9_linux_amd64.tar.gz
   tar -xvzf /root/sub2sing-box_0.0.9_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9_linux_amd64/sub2sing-box
   mv /root/sub2sing-box /usr/bin/
   chmod +x /usr/bin/sub2sing-box
@@ -3083,3 +3083,4 @@ main() {
 }
 
 main "$@"
+
