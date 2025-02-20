@@ -3,7 +3,7 @@
 ###################################
 ### Global values
 ###################################
-VERSION_MANAGER='1.4.3d'
+VERSION_MANAGER='1.4.3с'
 VERSION=v2.4.11
 
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
@@ -2426,7 +2426,6 @@ settings_custom_json(){
   mkdir -p /etc/nginx/locations/
   CONF_FILE="/etc/nginx/locations/webpagesub.conf"
 
-  DOMAIN=""
   while [[ -z "$DOMAIN" ]]; do
     reading " $(text 13) " DOMAIN  # Запрашиваем домен
     DOMAIN=$(clean_url "$DOMAIN")  # Очищаем домен
@@ -2511,7 +2510,7 @@ EOF
   bash "${DIR_REVERSE_PROXY}rotation_backup.sh"
 
   crontab -l | grep -v -- "rotation_backup.sh" | crontab -
-  add_cron_rule "0 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
+  add_cron_rule "5 0 * * * ${DIR_REVERSE_PROXY}rotation_backup.sh"
 }
 
 ###################################
@@ -3056,6 +3055,7 @@ main() {
         renew_cert
         ;;
       6)
+        DOMAIN=""
         settings_custom_json
         ;;
       7)
