@@ -1600,25 +1600,25 @@ EOF
 local_conf() {
   cat > /etc/nginx/conf.d/local.conf <<EOF
 server {
-  listen                               80;
+  listen                               127.0.0.1:80;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
     return 301                         https://\$host\$request_uri;
   }
 }
 server {
-  listen                               9090 default_server;
+  listen                               127.0.0.1:9090 default_server;
   server_name                          ${DOMAIN} *.${DOMAIN};
   location / {
     return 301                         https://\$host\$request_uri;
   }
 }
 server {
-  listen                               36076 ssl proxy_protocol;
+  listen                               127.0.0.1:36076 ssl proxy_protocol;
   ssl_reject_handshake                 on;
 }
 server {
-  listen                               36077 ssl proxy_protocol;
+  listen                               127.0.0.1:36077 ssl proxy_protocol;
   http2                                on;
   http3                                on;
   server_name                          ${DOMAIN} *.${DOMAIN};
