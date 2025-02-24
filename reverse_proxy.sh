@@ -3,7 +3,7 @@
 ###################################
 ### Global values
 ###################################
-VERSION_MANAGER='1.4.3e'
+VERSION_MANAGER='1.4.3f'
 VERSION=v2.4.11
 
 DIR_REVERSE_PROXY="/usr/local/reverse_proxy/"
@@ -857,7 +857,7 @@ choise_dns () {
 ###################################
 ### Generating paths for cdn
 ###################################
-generate_path_cdn(){
+generate_path_cdn
   CDNGRPC=$(eval ${generate[path]})
   CDNXHTTP=$(eval ${generate[path]})
   CDNHTTPU=$(eval ${generate[path]})
@@ -2340,7 +2340,7 @@ install_panel() {
 ###################################
 ### Custom subscription json
 ###################################
-custom_sub_json(){
+custom_sub_json
   cat > /etc/nginx/locations/webpagesub.conf <<EOF
 # Web Page Subscription Path
 location ~ ^/${WEB_SUB_PATH} {
@@ -2378,7 +2378,7 @@ EOF
 ###################################
 ### Settings web sub page
 ###################################
-settings_web(){
+settings_web
   DEST_DIR_SUB_PAGE="/var/www/subpage"
   DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
   DEST_FILE_CLASH_SUB="$DEST_DIR_SUB_PAGE/clash.yaml"
@@ -2400,7 +2400,7 @@ settings_web(){
 ###################################
 ### Install sing-box converter
 ###################################
-install_singbox_converter(){
+install_singbox_converter() {
   wget -q -P /root/ https://github.com/legiz-ru/sub2sing-box/releases/download/v0.0.9/sub2sing-box_0.0.9_linux_amd64.tar.gz
   tar -xvzf /root/sub2sing-box_0.0.9_linux_amd64.tar.gz -C /root/ --strip-components=1 sub2sing-box_0.0.9_linux_amd64/sub2sing-box
   mv /root/sub2sing-box /usr/bin/
@@ -2421,7 +2421,7 @@ EOF
 ###################################
 ### Settings custom json
 ###################################
-settings_custom_json(){
+settings_custom_json() {
   info " $(text 99) "
   mkdir -p /etc/nginx/locations/
   CONF_FILE="/etc/nginx/locations/webpagesub.conf"
@@ -2658,22 +2658,6 @@ download_website() {
 }
 
 ###################################
-### Create a backup of certificates
-###################################
-create_cert_backup() {
-  local DOMAIN=$1
-  local ACTION=$2 # Тип действия: "cp" или "mv"
-  local TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-  local BACKUP_DIR="/etc/letsencrypt/backups/${DOMAIN}_${TIMESTAMP}"
-
-  mkdir -p "${BACKUP_DIR}"
-
-  $ACTION /etc/letsencrypt/live ${BACKUP_DIR}
-  $ACTION /etc/letsencrypt/archive ${BACKUP_DIR}
-  $ACTION /etc/letsencrypt/renewal ${BACKUP_DIR}
-}
-
-###################################
 ### Database change in domain
 ###################################
 database_change_domain() {
@@ -2698,7 +2682,6 @@ EOF
 change_domain() {
   select_from_db
   check_cf_token
-  create_cert_backup "$OLD_DOMAIN" "mv"
   issuance_of_certificates
 
   database_change_domain
@@ -2729,7 +2712,6 @@ renew_cert() {
     check_cf_token
     issuance_of_certificates
   else
-    create_cert_backup "$NGINX_DOMAIN" "cp"
     certbot renew --force-renewal
     if [ $? -ne 0 ]; then
       return 1
@@ -2764,7 +2746,7 @@ directory_size() {
 ###################################
 ### Query from database
 ###################################
-select_from_db(){
+select_from_db() {
   result1=$(sqlite3 "$DEST_DB" "SELECT username, password FROM users WHERE id = 1;")
   USERNAME=$(echo "$result1" | cut -d '|' -f 1)  # Первая часть (username)
   PASSWORD=$(echo "$result1" | cut -d '|' -f 2)  # Вторая часть (password)
@@ -2778,7 +2760,7 @@ select_from_db(){
 ###################################
 ### Client traffic migration
 ###################################
-client_traffics_migration_db(){
+client_traffics_migration_db() {
   sqlite3 "$DEST_DB" <<EOF
 ATTACH '$SOURCE_DB' AS source_db;
 INSERT OR REPLACE INTO client_traffics SELECT * FROM source_db.client_traffics;
@@ -2789,7 +2771,7 @@ EOF
 ###################################
 ### Settings migration
 ###################################
-settings_migration_db(){
+settings_migration_db() {
   sqlite3 "$DEST_DB" <<EOF
 ATTACH '$SOURCE_DB' AS source_db;
 INSERT OR REPLACE INTO settings SELECT * FROM source_db.settings;
@@ -2800,7 +2782,7 @@ EOF
 ###################################
 ### Inbounds settings migration
 ###################################
-inbounds_settings_migration_db(){
+inbounds_settings_migration_db() {
   sqlite3 "$DEST_DB" <<EOF
 ATTACH DATABASE '$SOURCE_DB' AS source_db;
 
@@ -2832,7 +2814,7 @@ EOF
 ###################################
 ### Migration to a new version
 ###################################
-migration(){
+migration
   info " $(text 97) "
   SOURCE_DB="/etc/x-ui/source.db"
 
