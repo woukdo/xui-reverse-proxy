@@ -857,7 +857,7 @@ choise_dns () {
 ###################################
 ### Generating paths for cdn
 ###################################
-generate_path_cdn
+generate_path_cdn() {
   CDNGRPC=$(eval ${generate[path]})
   CDNXHTTP=$(eval ${generate[path]})
   CDNHTTPU=$(eval ${generate[path]})
