@@ -2340,7 +2340,7 @@ install_panel() {
 ###################################
 ### Custom subscription json
 ###################################
-custom_sub_json
+custom_sub_json() {
   cat > /etc/nginx/locations/webpagesub.conf <<EOF
 # Web Page Subscription Path
 location ~ ^/${WEB_SUB_PATH} {
@@ -2378,7 +2378,7 @@ EOF
 ###################################
 ### Settings web sub page
 ###################################
-settings_web
+settings_web() {
   DEST_DIR_SUB_PAGE="/var/www/subpage"
   DEST_FILE_SUB_PAGE="$DEST_DIR_SUB_PAGE/index.html"
   DEST_FILE_CLASH_SUB="$DEST_DIR_SUB_PAGE/clash.yaml"
@@ -2814,7 +2814,7 @@ EOF
 ###################################
 ### Migration to a new version
 ###################################
-migration
+migration() {
   info " $(text 97) "
   SOURCE_DB="/etc/x-ui/source.db"
 
