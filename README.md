@@ -59,7 +59,7 @@ SERVER 2
    - The user “flow”: “xtls-rprx-vision” must be enabled
      - TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
      - TCP-TLS
-   - Important: It is recommended to choose one suitable connection type and use only that one (otherwise, you may attract the censor's attention). You can disable all incoming connections except the one marked as STEAL. Disabling STEAL will result in losing access to the web interface, as this connection type is used for proxy management access.
+   - Important: it is recommended to choose one suitable connection type and use it for optimal performance. You can disable all incoming connections except the one marked as STEAL. Disabling STEAL will result in losing access to the web interface, as this connection type is used for proxy management access.
 2. Configuring NGINX reverse proxy on port 443.
 3. Providing security:
    - Automatic system updates via unattended-upgrades.
