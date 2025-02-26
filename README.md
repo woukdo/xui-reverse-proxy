@@ -49,16 +49,16 @@ SERVER 2
 
 ### Includes:
   
-1. Xray server configuration with X-UI:
+1. Proxy server configuration:
    - Support for automatic configuration updates through subscription and JSON subscription with the ability to convert to formats for popular applications.
    - You must enable MUX (multiplexing TCP connections) in each client application
-     - VLESS-gRPC-TLS
-     - VLESS-XHTTP-TLS
-     - VLESS-HTTPUpgrade-TLS
-     - VLESS-Websocket-TLS
+     - gRPC-TLS
+     - XHTTP-TLS
+     - HTTPUpgrade-TLS
+     - Websocket-TLS
    - The user “flow”: “xtls-rprx-vision” must be enabled
-     - VLESS-TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
-     - VLESS-TCP-TLS
+     - TCP-REALITY (Steal oneself) (disconnection will result in loss of access)
+     - TCP-TLS
    - Important: It is recommended to choose one suitable connection type and use only that one (otherwise, you may attract the censor's attention). You can disable all incoming connections except the one marked as STEAL. Disabling STEAL will result in losing access to the web interface, as this connection type is used for proxy management access.
 2. Configuring NGINX reverse proxy on port 443.
 3. Providing security:
@@ -69,7 +69,7 @@ SERVER 2
    - Configuring SSH, to provide the minimum required security.
    - Disabling IPv6 to prevent possible vulnerabilities.
    - Encrypting DNS queries using systemd-resolved (DoT) or AdGuard Home (Dot, DoH).
-   - Selecting a random website from an array to add an extra layer of privacy and complexity for traffic analysis.
+   - Selecting a random website template from an array.
 4. Enabling BBR - improving the performance of TCP connections.
 5. Optional extras:
    - Installing and configuring Node Exporter for system performance monitoring and integrating with Prometheus and Grafana for real-time metrics visualization.
@@ -134,7 +134,7 @@ The script will then prompt you for the necessary configuration information:
 <p align="center"><a href="#"><img src="./media/xui_rp_install.png" alt="Image"></a></p>
 
 ### Note: 
-- Once the configuration is complete, the script will display all the necessary links and login information for the XUI administration panel.
+- Once the configuration is complete, the script will display all the necessary links and login information for the administration panel.
 - All configurations can be modified as needed due to the flexibility of the settings.
 
 -----
