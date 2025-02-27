@@ -362,24 +362,24 @@ read_defaults_from_file() {
   else
     # Если файл не найден, используем значения по умолчанию
     defaults[utils]=true
-    defaults[dns]=true
-    defaults[addu]=true
+    defaults[dns]=false
+    defaults[addu]=false
     defaults[autoupd]=true
     defaults[bbr]=true
     defaults[ipv6]=true
     defaults[warp]=false
     defaults[cert]=true
-    defaults[mon]=false
+    defaults[mon]=true
     defaults[shell]=false
     defaults[nginx]=true
     defaults[panel]=true
     defaults[custom]=true
-    defaults[firewall]=true
-    defaults[ssh]=true
-    defaults[tgbot]=false
+    defaults[firewall]=false
+    defaults[ssh]=false
+    defaults[tgbot]=true
     defaults[generate]=true
     defaults[skip-check]=false
-    defaults[subdomain]=false
+    defaults[subdomain]=true
   fi
 }
 
